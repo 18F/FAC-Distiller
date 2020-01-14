@@ -1,0 +1,24 @@
+__pycache__
+*.pyc
+
+.venv
+
+db.sqlite3
+geckodriver.log
+
+# Ignore iPython/Jupyter notebook artifacts.
+**/*.ipynb
+**/.ipynb**
+
+.DS_Store
+
+*/backups
+*.bak
+
+# Editor settings
+*.sublime-project
+*.sublime-workstape
+.vscode
+
+.env
+db/

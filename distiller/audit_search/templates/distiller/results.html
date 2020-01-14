@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <h1>Single audits for your attention</h1>
+  <section class="usa-section">
+    <div class="usa-width-one-third">
+      <h2>Overview of results:</h2>
+    </div>
+    <div class="usa-width-two-thirds">
+      <p class="usa-font-lead">
+        {{ agency_name }} is the <strong>cognizant</strong> agency for
+        {{ results.cognizant_sum }} of these single audits.
+      </p>
+      <p class="usa-font-lead">
+        Of those, <strong>{{ results.findings }}</strong> had current findings.
+      </p>
+      <a href="../download-single-audits" class="usa-button usa-button-big">Download complete results (PDFs)</a>
+
+    </div>
+  </section>
+
+  {% block error_message %}{% endblock %}
+
+{% endblock %}

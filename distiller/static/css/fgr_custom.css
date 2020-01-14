@@ -1,0 +1,149 @@
+/* Finding Resolution Page */
+
+#app_header {
+  border-bottom: 3px solid #E8EEF5;
+}
+#app_title {
+  color: #0071BC;
+}
+#logged_in_username {
+  align-self: center;
+}
+#finding_summary_header {
+  background-color: #E8EEF5;
+}
+#grantee_name {
+  align-self: center;
+}
+#finding_title {
+  background-color: #122E51;
+  font-size: 20px;
+}
+#all_findings_text {
+  line-height: 20px;
+}
+.section_title {
+  background-color: #122E51;
+}
+.comment_summary {
+  background-color: #E8E4E4;
+}
+textarea.big_textarea {
+  height: 140px;
+}
+textarea {
+  resize: none;
+}
+.sidebar_section {
+  border-top: 3px solid #0071BB;
+}
+.sidebar_section_title {
+  border-bottom: 1px solid #0071BB;
+}
+.cursor_pointer {
+  cursor: pointer;
+}
+.remove_participant_row {
+  cursor: pointer;
+}
+.remove_participant_row:hover {
+  background-color: #E8EEF5;
+}
+
+/* Findings Overview Page */
+
+#overview_nav {
+  background-color: #E8EEF5;
+  width: 100%;
+}
+
+#overview_nav .overview_nav_button {
+  background-color: #E8EEF5;
+  border-top: 8px solid #E8EEF5;
+
+  /* Vertical centering for tab text with flexbox */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media only screen and (min-width: 480px) {
+  #overview_nav {
+    height: 80px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  #overview_nav .overview_nav_button {
+    padding: 10px 0;
+  }
+}
+
+#overview_nav .overview_nav_button.selected {
+  background-color: white;
+}
+
+/* Findings Overview table overrides*/
+
+#findings_overview_table {
+  border: 1px solid #E8E4E4;
+}
+
+#findings_overview_table thead tr th {
+  text-align: left;
+  font-weight: normal;
+}
+
+#findings_overview_table thead {
+  background-color: #F1F1F1;
+}
+
+#findings_overview_table tr {
+  border-bottom: 1px solid #E8E4E4;
+}
+
+#findings_overview_table th, #findings_overview_table td {
+  padding: 8px 16px;
+}
+
+@media screen and (max-width: 480px) /*mobile-lg*/ {
+  #findings_overview_table th, #findings_overview_table td {
+    padding: 8px 4px;
+  }
+
+  #findings_overview_table {
+    margin: 0 8px;
+  }
+}
+
+/* User labels */
+
+.user_label_oval {
+  border: 1px solid;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  text-align: center;
+
+  /* Horizontal centering within cell */
+  margin: auto;
+
+  /* Vertical centering for inner text with flexbox */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user_label_orange {
+  border-color: #E78102;
+}
+
+.user_label_purple {
+  border-color: #046B99;
+}
+
+.new_activity_badge {
+  background-color: #FDB81E; /* gold */
+  text-align: center;
+  font-weight: bold;
+}

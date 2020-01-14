@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - .:/distiller
+    links:
+      - db
+    working_dir: /distiller
+    environment:
+      - DATABASE_URL=postgres://postgres@db/distiller
+      - DJANGO_SETTINGS_MODULE=distiller.settings.development
+    stdin_open: true
+    tty: true
+    ports:
+      - "8000:8000"
+    command: "python manage.py runserver 0.0.0.0:8000"
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: distiller

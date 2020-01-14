@@ -1,0 +1,21 @@
+/*
+Sources:
+
+- https://accessibility.18f.gov/hidden-content/; see ".sr-only"
+- https://allyjs.io/tutorials/hiding-elements.html; see "2017 edition of .visuallyhidden"
+*/
+.visually_hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+
+  white-space: nowrap;
+
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}

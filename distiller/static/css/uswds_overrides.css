@@ -1,0 +1,39 @@
+/* USWDS defaults overrides */
+
+.lightblue-cool.usa-button {
+  background-color: #E8EEF5;
+  color: #005288;
+  border: 4px solid #FBFCFE;
+  border-radius: 5px;
+}
+
+.lightblue-cool.usa-button:hover {
+  background-color: #0071BB;
+  color: white;
+  border: 4px solid #0071BB;
+  border-radius: 5px;
+}
+
+.lightblue-cool-tag {
+  background-color: #E8EEF5;
+  color: #454545; /* Matches USWDS .text-gray-70. */
+}
+
+.lighter-gray.usa-button {
+  background-color: #E8E4E4;
+  color: black;
+}
+
+.white-border.usa-button {
+  border: 4px solid white;
+}
+
+.usa-button.no_margin_button {
+  margin: 0 !important;
+}
+
+.usa-accordion__heading button {
+  text-transform: uppercase;
+  background-color: #E8EEF5;
+  font-weight: normal;
+}

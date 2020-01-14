@@ -1,0 +1,7 @@
+node_modules
+
+*.bak
+*.ipynb
+
+distiller/single_audit_data_dump/pdfs
+distiller/come-back-to-these

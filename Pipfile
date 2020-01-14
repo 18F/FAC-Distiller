@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+selenium = "*"
+django = ">=2.2.5"
+psycopg2-binary = "*"
+django-localflavor = "*"
+pandas = "*"
+whitenoise = "*"
+dj-database-url = "*"
+
+[requires]
+python_version = "3.7"
