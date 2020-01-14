@@ -50,6 +50,16 @@ pipenv install --dev
 
 NOTE: Python 3.7 is required.
 
+### Local settings
+
+Optionally, create a local settings file in `distiller/settings/local.py`:
+
+```python
+from .development import *
+
+CHROME_DRIVER_LOCATION = os.path.join(BASE_DIR, 'chromedriver')
+```
+
 ### Database server
 
 To start a database server, run one of these commands:

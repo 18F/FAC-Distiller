@@ -1,10 +1,12 @@
+"""
+Production settings for FAC Distiller.
+"""
+
 from .base import *
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-# DEBUG is currently only turned on in dev settings, but better safe than sorry.
-DEBUG = True  # Revisit whether runserver is incompatible with collectstatic
-
+DEBUG = False
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

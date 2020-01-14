@@ -1,3 +1,7 @@
+"""
+Base settings for FAC Distiller project.
+"""
+
 import os
 from pathlib import Path
 
@@ -106,7 +110,7 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://postgres:postgres@db/distiller')
+    'default': dj_database_url.config(default='postgres://postgres:postgres@127.0.0.1/distiller')
 }
 
 CHROME_DRIVER_LOCATION = os.path.join('/usr/local/bin/chromedriver')
