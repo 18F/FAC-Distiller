@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'localflavor',
     'distiller.audit_search.apps.AuditSearchConfig',
+    'distiller.data.apps.DataConfig',
 ]
 
 MIDDLEWARE = [

@@ -38,6 +38,8 @@ Email the team at federal-grant-reporting@gsa.gov or [File an issue](https://git
 
 To develop against a Docker-based Postgres DB and a local virtual environment, follow these steps.
 
+### Dependencies
+
 1. Install [Docker][https://www.docker.com/]. If you're on OS X, install Docker for Mac. If you're on Windows, install Docker for Windows.
 
 2. Install Python dependencies into a Pipenv-managed virtual environment
@@ -48,7 +50,9 @@ pipenv install --dev
 
 NOTE: Python 3.7 is required.
 
-3. Start a database server
+### Database server
+
+To start a database server, run one of these commands:
 
 ```shell
 # Run in the foreground
@@ -57,39 +61,40 @@ docker-compose up db
 docker-compose up -d db
 ```
 
-NOTES:
+#### Initialize database
 
-`docker-compose build` builds the containers by pulling down a number of libraries which take a few minutes to download and install but you only do this once.
-
-`docker-compose run app python manage.py migrate` runs a Django command to create the database and the tables and columns.
-
-`docker-compose run app python manage.py createsuperuser` creates an account to access admin panel.
-
-4. Initialize the database
-
-
-# Run database migrations:
+Create database tables:
 
 ```shell
 docker-compose run app python manage.py migrate
 ```
 
-Create a Django admin user:
+Create a Django admin user to access the admin interface:
 
 ```shell
 docker-compose run app python manage.py createsuperuser
 ```
 
-5. Start a development webserver
+#### Start a development webserver
 
 ```shell
 pipenv run manage.py runserver
 ```
 
-5. Visit [http://localhost:8000/][] directly to access the site.
+Visit [http://localhost:8000/](http://localhost:8000/) directly to access the site.
 
-You can access the admin panel at `/admin` by logging in with the super user credentials you created in the step above.
+You can access the admin panel at [http://localhost:8000/admin](http://localhost:8000/admin)
+ by logging in with the super user credentials you created in the step above.
 
+## Running ETLs
+
+This application relies on external data sources. To populate the database with required data, run these ETL jobs.
+
+### Assistance listings from beta.sam.gov
+
+```shell
+pipenv run python manage.py load_assistance_listings
+```
 
 ## Contributing
 

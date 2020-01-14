@@ -13,6 +13,7 @@ django-localflavor = "*"
 pandas = "*"
 whitenoise = "*"
 dj-database-url = "*"
+smart-open = "*"
 
 [requires]
 python_version = "3.7"
