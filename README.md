@@ -106,6 +106,14 @@ This application relies on external data sources. To populate the database with 
 pipenv run python manage.py load_assistance_listings
 ```
 
+## Running tests
+
+To run the test suite with `pytest`:
+
+```shell
+pipenv run pytest
+```
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.
