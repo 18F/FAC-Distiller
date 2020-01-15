@@ -17,7 +17,7 @@ geckodriver.log
 
 # Editor settings
 *.sublime-project
-*.sublime-workstape
+*.sublime-workspace
 .vscode
 
 .env
