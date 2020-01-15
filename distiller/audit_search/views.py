@@ -410,7 +410,7 @@ def download_files_from_fac(agency_prefix=None, subagency_extension=None):
     return HttpResponse("Your download has completed.", content_type="text/plain")
 
 
-def prompt_for_agency_name(request):
+def search_by_agency(request):
     # Form submissions are with POST, but filtering on parent agency is handled
     # with GET.
     form = AgencySelectionForm(request.POST or request.GET)
