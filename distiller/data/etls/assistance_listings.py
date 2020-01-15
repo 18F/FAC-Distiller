@@ -13,6 +13,7 @@ from django.db import transaction
 
 from .. import models
 
+
 # data.gov CSV file to import. For context, see:
 # https://beta.sam.gov/data-services?domain=Assistance%20Listings%2Fdatagov
 SOURCE_URL = 'https://s3.amazonaws.com/falextracts/Assistance%20Listings/datagov/AssistanceListings_DataGov_PUBLIC_CURRENT.csv'  # noqa
@@ -76,6 +77,25 @@ SANITIZERS = {
 }
 
 
+def _sanitize_row(row):
+    return {
+        model_field_name: SANITIZERS[model_field_name](row[csv_column_name])
+        if model_field_name in SANITIZERS else row[csv_column_name]
+        for csv_column_name, model_field_name in COLUMN_MAPPING.items()
+    }
+
+
+def _yield_rows(csv_file):
+    reader = csv.DictReader(csv_file)
+    for row in reader:
+        yield _sanitize_row(row)
+
+
+def _yield_assistance_listings(csv_file):
+    for row in _yield_rows(csv_file):
+        yield models.AssistanceListing(**row)
+
+
 @transaction.atomic
 def refresh():
     """
@@ -88,18 +108,12 @@ def refresh():
     # failure.
     models.AssistanceListing.objects.all().delete()
 
-    assistance_listings = []
-
-    # Use `smart_open` to stream CSV data from the source location.
+    # Import rows from S3
+    # `bulk_create` doesn't stream results to the database, but does a single
+    # INSERT. As a result, it may be useful to chunk the CSV rows into multiple
+    # INSERTs, for memory usage reasons. Here, we load the entire table at
+    # once, which should be fine as it is only about 20mb.
     with smart_open.open(SOURCE_URL, encoding='latin-1') as csv_file:
-        reader = csv.DictReader(csv_file)
-        for row in reader:
-            assistance_listing = models.AssistanceListing()
-            for csv_column_name, model_field_name in COLUMN_MAPPING.items():
-                value = row[csv_column_name]
-                if model_field_name in SANITIZERS:
-                    value = SANITIZERS[model_field_name](value)
-                setattr(assistance_listing, model_field_name, value)
-            assistance_listings.append(assistance_listing)
-
-    models.AssistanceListing.objects.bulk_create(assistance_listings)
+        models.AssistanceListing.objects.bulk_create(
+            _yield_assistance_listings(csv_file)
+        )

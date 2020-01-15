@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
   <div class="usa-section grid-row">
@@ -7,9 +8,12 @@
       <h1>Select your agency:</h1>
     </div>
     <div class="grid-col-6">
-      <form action="{% url 'audit_search:download_single_audit_files' %}" method="get" class="usa-form">
+      <form method="get" class="usa-form">
         {% csrf_token %}
-        {{ form }}
+        {{ form.agency|add_label_class:"usa-label" }}
+        {% render_field form.agency class+="usa-select" %}
+        {{ form.sub_agency|add_label_class:"usa-label" }}
+        {% render_field form.sub_agency class+="usa-select" %}
         <input type="submit" value="Submit" class="usa-button">
       </form>
     </div>
@@ -17,5 +21,11 @@
   </div>
 
   {% block error_message %}{% endblock %}
+
+  <script>
+    document.querySelector("select[name=agency]").addEventListener('change', function () {
+      window.location = (window.pathname || '') + '?agency=' + this.value;
+    }, false);;
+  </script>
 
 {% endblock %}

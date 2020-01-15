@@ -21,5 +21,6 @@ geckodriver.log
 .vscode
 
 .env
+.pytest_cache/
 db/
 distiller/settings/local.py

@@ -16,6 +16,7 @@ pandas = "*"
 whitenoise = "*"
 dj-database-url = "*"
 smart-open = "*"
+django-widget-tweaks = "*"
 
 [requires]
 python_version = "3.7"

@@ -27,7 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+
     'localflavor',
+    'widget_tweaks',
+
     'distiller.audit_search.apps.AuditSearchConfig',
     'distiller.data.apps.DataConfig',
 ]

@@ -2,7 +2,16 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 
 
+class AssistanceListingManager(models.Manager):
+    def subagencies_for_prefix(self, prefix):
+        return self.filter(
+            program_number__startswith=prefix
+        ).order_by('program_title')
+
+
 class AssistanceListing(models.Model):
+    objects = AssistanceListingManager()
+
     program_title = models.TextField(help_text='Program Title')
     program_number = models.CharField(
         max_length=6,
