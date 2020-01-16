@@ -34,6 +34,21 @@ FTA_SUBAGENCY_CODE = '5'
 FAC_URL = 'https://harvester.census.gov/facdissem/SearchA133.aspx'
 
 
+def search_by_agency(request):
+    # Form submissions are with POST, but filtering on parent agency is handled
+    # with GET.
+    form = AgencySelectionForm(request.POST or request.GET)
+
+    # If form is valid, return results.
+    if request.method == 'POST' and form.is_valid():
+        return download_files_from_fac(
+            agency_prefix=form.cleaned_data['agency'],
+            subagency_extension=form.cleaned_data['sub_agency'],
+        )
+
+    return render(request, 'distiller/index.html', {'form': form})
+
+
 def _calculate_start_date(time_difference=90, end_date=date.today()):
     """
     Calculate the date that's a certain number of days earlier than a given end
@@ -408,21 +423,6 @@ def download_files_from_fac(agency_prefix=None, subagency_extension=None):
 
     # @todo: Improve the contents of this HttpResponse.
     return HttpResponse("Your download has completed.", content_type="text/plain")
-
-
-def search_by_agency(request):
-    # Form submissions are with POST, but filtering on parent agency is handled
-    # with GET.
-    form = AgencySelectionForm(request.POST or request.GET)
-
-    # If form is valid, return results.
-    if request.method == 'POST' and form.is_valid():
-        return download_files_from_fac(
-            agency_prefix=form.cleaned_data['agency'],
-            subagency_extension=form.cleaned_data['sub_agency'],
-        )
-
-    return render(request, 'distiller/index.html', {'form': form})
 
 
 def _get_findings(agency_df):

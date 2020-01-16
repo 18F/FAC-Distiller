@@ -8,7 +8,7 @@
       <h1>Select your agency:</h1>
     </div>
     <div class="grid-col-6">
-      <form method="get" class="usa-form">
+      <form method="post" class="usa-form">
         {% csrf_token %}
         {{ form.agency|add_label_class:"usa-label" }}
         {% render_field form.agency class+="usa-select" %}

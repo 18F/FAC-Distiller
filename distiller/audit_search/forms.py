@@ -97,8 +97,8 @@ AGENCY_CHOICES = (
 )
 
 AGENCIES_BY_PREFIX = defaultdict(list)
-for choice in AGENCY_CHOICES:
-    AGENCIES_BY_PREFIX[choice[0]].append(choice[1])
+for prefix, agency_name in AGENCY_CHOICES:
+    AGENCIES_BY_PREFIX[prefix].append(agency_name)
 
 
 class AgencySelectionForm(forms.Form):
@@ -109,11 +109,18 @@ class AgencySelectionForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         # Support filtering on subagency, default to first choice
-        agency = self['agency'].value()
+        agency = self['agency'].value() or AGENCY_CHOICES[0][0]
         self.fields['sub_agency'].choices = [
-            (agency, 'All sub-agencies')
+            (None, '')  # all programs under this agency
         ] + [
             sub_agency
             for sub_agency in AssistanceListing.objects.subagencies_for_prefix(
                 agency).values_list('program_number', 'program_title')
         ]
+
+        # If the only choice is "all", make this field disabled.
+        if len(self.fields['sub_agency'].choices) == 1:
+            self.fields['sub_agency'].widget.attrs['disabled'] = True
+
+    def clean_sub_agency(self):
+        return self.cleaned_data['sub_agency'] or None
