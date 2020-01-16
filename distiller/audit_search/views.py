@@ -14,9 +14,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from .forms import (
-    AgencySelectionForm, _get_agency_name_from_prefix, _is_valid_agency_prefix
-)
+from .forms import AGENCIES_BY_PREFIX, AgencySelectionForm
 
 
 # @todo: Update this to actually download the file from the FAC. We'll get there.
@@ -34,6 +32,21 @@ FTA_SUBAGENCY_CODE = '5'
 # @todo: Improve the naming here and make it more possible for it to be
 #        extendable to different kinds of URLs.
 FAC_URL = 'https://harvester.census.gov/facdissem/SearchA133.aspx'
+
+
+def search_by_agency(request):
+    # Form submissions are with POST, but filtering on parent agency is handled
+    # with GET.
+    form = AgencySelectionForm(request.POST or request.GET)
+
+    # If form is valid, return results.
+    if request.method == 'POST' and form.is_valid():
+        return download_files_from_fac(
+            agency_prefix=form.cleaned_data['agency'],
+            subagency_extension=form.cleaned_data['sub_agency'],
+        )
+
+    return render(request, 'distiller/index.html', {'form': form})
 
 
 def _calculate_start_date(time_difference=90, end_date=date.today()):
@@ -412,22 +425,6 @@ def download_files_from_fac(agency_prefix=None, subagency_extension=None):
     return HttpResponse("Your download has completed.", content_type="text/plain")
 
 
-def prompt_for_agency_name(request):
-    if request.method == 'POST':
-        form = AgencySelectionForm(request.POST)
-
-        if form.is_valid():
-            #cd = form.cleaned_data
-            #agency_prefix = cd['agency']
-            # @todo: Run the calculations here instead?
-            pass
-
-    else:
-        form = AgencySelectionForm()
-
-    return render(request, 'distiller/index.html', {'form': form})
-
-
 def _get_findings(agency_df):
     """
     Args:
@@ -506,7 +503,7 @@ def _derive_agency_highlights(agency_prefix, filename='gen18.txt'):
 
     highlights = {  # or "overview"
         'agency_prefix': agency_prefix,
-        'agency_name': _get_agency_name_from_prefix(agency_prefix),
+        'agency_names': AGENCIES_BY_PREFIX,
         'filename': filename,
         'results': {
             'cognizant_sum': len(agency_df.index),
@@ -520,11 +517,8 @@ def _derive_agency_highlights(agency_prefix, filename='gen18.txt'):
 
 def show_agency_level_summary(request):
     agency_prefix = request.POST['agency']
-    try:
-        _is_valid_agency_prefix(agency_prefix)
-        highlights = _derive_agency_highlights(agency_prefix)
+    if agency_prefix not in AGENCIES_BY_PREFIX:
+        raise ValueError("That doesn't seem to be a valid federal agency prefix.")
 
-        return render(request, 'distiller/results.html', highlights)
-
-    except:
-        ValueError("That doesn't seem to be a valid federal agency prefix.")
+    highlights = _derive_agency_highlights(agency_prefix)
+    return render(request, 'distiller/results.html', highlights)

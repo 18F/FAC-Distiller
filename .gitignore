@@ -17,8 +17,10 @@ geckodriver.log
 
 # Editor settings
 *.sublime-project
-*.sublime-workstape
+*.sublime-workspace
 .vscode
 
 .env
+.pytest_cache/
 db/
+distiller/settings/local.py
