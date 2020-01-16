@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+  <div class="usa-section grid-row">
+    <h1>Audit Details</h1>
+    <div class="grid-col-12">
+      Audit #{{ audit.audit_id }}
+    </div>
+  </div>
+  {% block error_message %}{% endblock %}
+
+{% endblock %}

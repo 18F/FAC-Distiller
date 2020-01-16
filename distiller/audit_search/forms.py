@@ -104,6 +104,9 @@ for prefix, agency_name in AGENCY_CHOICES:
 class AgencySelectionForm(forms.Form):
     agency = forms.ChoiceField(choices=AGENCY_CHOICES)
     sub_agency = forms.ChoiceField(required=False)
+    start_date = forms.DateField(required=False)
+    end_date = forms.DateField(required=False)
+    page = forms.IntegerField(initial=1, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+  <div class="usa-section grid-row">
+    <div class="grid-col-1"></div>
+    <div class="grid-col-4">
+      <h1>Single audit search</h1>
+    </div>
+    <div class="grid-col-6">
+      <form class="usa-form">
+        {{ form.agency|add_label_class:"usa-label" }}
+        {% render_field form.agency class+="usa-select" %}
+        {{ form.sub_agency|add_label_class:"usa-label" }}
+        {% render_field form.sub_agency class+="usa-select" %}
+        {{ form.start_date|add_label_class:"usa-label" }}
+        {% render_field form.start_date type="date" %}
+        {{ form.end_date|add_label_class:"usa-label" }}
+        {% render_field form.end_date type="date" %}
+        {{ form.page.as_hidden }}
+        <input type="submit" value="Submit" class="usa-button">
+      </form>
+    </div>
+    <div class="grid-col-1"></div>
+  </div>
+  <div class="usa-section grid-row">
+    <div class="grid-col-12"></div>
+      <table class="usa-table usa-table--borderless">
+        <caption>Search Results</caption>
+        <thead>
+          <tr>
+            <th scope="col">Audit Number</th>
+            <th scope="col">Grantee Name</th>
+            <th scope="col">Findings</th>
+            <th scope="col">Cognizant Agency</th>
+            <th scope="col">Corrective Action Text</th>
+            <th scope="col">Repeat Findings</th>
+            <th scope="col" colspan="2">Download Links</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for result in audit_search.results %}
+            <tr>
+              <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.audit_num %}">{{ result.audit_num }}</a></td>
+              <td>{{ result.grantee_name }}</td>
+              <td>
+                <ul>
+                  {% for finding in result.findings %}
+                    <li>{{ finding.text }}</li>
+                  {% endfor %}
+                </ul>
+              </td>
+              <td>{{ result.cognizant_agency }}</td>
+              <td>{{ result.corrective_action_text }}</td>
+              <td>{{ result.repeat_findings }}</td>
+              <td><a href="{{ result.form_url }}">Form</a></td>
+              <td><a href="{{ result.report_url }}">Report</a></td>
+            </tr>
+          {% endfor %}
+          <tfoot>
+            <tr>
+              <td colspan="8">
+                <a href="?page=1" aria-label="Previous Page">Previous</a>
+                <a href="?page=1">1</a>
+                <a href="?page=2">2</a>
+                <a href="?page=2" aria-label="Next Page">Next</a>
+              </td>
+            </tr>
+          </tfoot>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% block error_message %}{% endblock %}
+
+  <script>
+    document.querySelector("select[name=agency]").addEventListener('change', function () {
+      window.location = (window.pathname || '') + '?agency=' + this.value;
+    }, false);;
+  </script>
+
+{% endblock %}
