@@ -6,6 +6,11 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Dict, List
 
+from django.core.paginator import Paginator
+from django.db.models import Q
+
+from . import models
+
 
 @dataclass
 class AuditSearch:
@@ -35,37 +40,49 @@ def filter_audits(
     Return audit search results
     """
 
-    # Since we don't have this in the database yet, return mock data
-    return AuditSearch(
-        page=page,
-        page_count=page,
-        paginate_by=paginate_by,
-        cfda_num=cfda_num,
-        start_date=start_date,
-        end_date=end_date,
-        results=[{
-            'audit_num': '012345',
-            'grantee_name': 'Grantee One',
-            'findings': [{
-                'text': 'Finding text for 012345 #1'
-            }, {
-                'text': 'Finding text for 012345 #1'
-            }],
-            'cognizant_agency': None,
-            # Corrective action plan text (CAP)
-            'corrective_action_text': 'Corrective action plan text (CAP)',
-            'repeat_findings': False,
-            'form_url': 'http://data.gov/form1.xlsx',
-            'report_url': 'http://data.gov/report1.pdf',
-        }, {
-            'audit_num': '543210',
-            'grantee_name': 'Grantee Two',
-            'findings': [],
-            'cognizant_agency': None,
-            # Corrective action plan text (CAP)
-            'corrective_action_text': 'Corrective action plan text (CAP)',
-            'repeat_findings': False,
-            'form_url': 'http://data.gov/form2.xlsx',
-            'report_url': 'http://data.gov/report2.pdf',
-        }]
-    )
+    q_obj = Q()
+    if start_date:
+        q_obj &= Q(fac_accepted_date__gte=start_date)
+    if end_date:
+        q_obj &= Q(fac_accepted_date__lte=end_date)
+    # if cfda_num:
+    #     q_obj &= Q(cfda_num__startswith=cfda_num)
+
+    audits = models.General.objects.filter(q_obj).order_by('fac_accepted_date')
+
+    return Paginator(audits, paginate_by).get_page(page or 1)
+
+    # # Since we don't have this in the database yet, return mock data
+    # return AuditSearch(
+    #     page=page,
+    #     page_count=page,
+    #     paginate_by=paginate_by,
+    #     cfda_num=cfda_num,
+    #     start_date=start_date,
+    #     end_date=end_date,
+    #     results=[{
+    #         'audit_num': '012345',
+    #         'grantee_name': 'Grantee One',
+    #         'findings': [{
+    #             'text': 'Finding text for 012345 #1'
+    #         }, {
+    #             'text': 'Finding text for 012345 #1'
+    #         }],
+    #         'cognizant_agency': None,
+    #         # Corrective action plan text (CAP)
+    #         'corrective_action_text': 'Corrective action plan text (CAP)',
+    #         'repeat_findings': False,
+    #         'form_url': 'http://data.gov/form1.xlsx',
+    #         'report_url': 'http://data.gov/report1.pdf',
+    #     }, {
+    #         'audit_num': '543210',
+    #         'grantee_name': 'Grantee Two',
+    #         'findings': [],
+    #         'cognizant_agency': None,
+    #         # Corrective action plan text (CAP)
+    #         'corrective_action_text': 'Corrective action plan text (CAP)',
+    #         'repeat_findings': False,
+    #         'form_url': 'http://data.gov/form2.xlsx',
+    #         'report_url': 'http://data.gov/report2.pdf',
+    #     }]
+    # )

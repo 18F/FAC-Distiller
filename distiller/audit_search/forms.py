@@ -22,6 +22,7 @@ from distiller.data.models import AssistanceListing
 # Since agencies may share a prefix, don't store this as a dictionary.
 #
 AGENCY_CHOICES = (
+    ('', ''),
     ('01', 'African Development Foundation'),
     ('23', 'Appalachian Regional Commission'),
     ('88', 'Architectural & Transporation Barriers Compliance Board'),
@@ -98,7 +99,8 @@ AGENCY_CHOICES = (
 
 AGENCIES_BY_PREFIX = defaultdict(list)
 for prefix, agency_name in AGENCY_CHOICES:
-    AGENCIES_BY_PREFIX[prefix].append(agency_name)
+    if prefix:
+        AGENCIES_BY_PREFIX[prefix].append(agency_name)
 
 
 class AgencySelectionForm(forms.Form):

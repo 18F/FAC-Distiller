@@ -16,9 +16,9 @@ from .forms import AGENCIES_BY_PREFIX, AgencySelectionForm
 def single_audit_search(request):
     form = AgencySelectionForm(request.GET)
 
-    audit_search = None
+    results_page = None
     if form.is_valid():
-        audit_search = access.filter_audits(
+        results_page = access.filter_audits(
             cfda_num=form.cleaned_data['sub_agency'],
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
@@ -27,7 +27,7 @@ def single_audit_search(request):
 
     return render(request, 'audit_search/search.html', {
         'form': form,
-        'audit_search': audit_search
+        'page': results_page
     })
 
 

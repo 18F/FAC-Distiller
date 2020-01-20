@@ -1,48 +1,67 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load add_get_parameter %}
 
 {% block content %}
-  <div class="usa-section grid-row">
-    <div class="grid-col-1"></div>
-    <div class="grid-col-4">
-      <h1>Single audit search</h1>
-    </div>
-    <div class="grid-col-6">
-      <form class="usa-form">
-        {{ form.agency|add_label_class:"usa-label" }}
-        {% render_field form.agency class+="usa-select" %}
-        {{ form.sub_agency|add_label_class:"usa-label" }}
-        {% render_field form.sub_agency class+="usa-select" %}
-        {{ form.start_date|add_label_class:"usa-label" }}
-        {% render_field form.start_date type="date" %}
-        {{ form.end_date|add_label_class:"usa-label" }}
-        {% render_field form.end_date type="date" %}
-        {{ form.page.as_hidden }}
-        <input type="submit" value="Submit" class="usa-button">
-      </form>
-    </div>
-    <div class="grid-col-1"></div>
+  <div class="usa-section">
+    <form class="usa-form usa-form--large">
+      <fieldset class="usa-fieldset">
+        <legend class="usa-legend">Single audit search</legend>
+        <div class="grid-row grid-gap">
+          <div class="tablet:grid-col-8">
+            {{ form.agency|add_label_class:"usa-label" }}
+            {% render_field form.agency class+="usa-select" %}
+            {{ form.sub_agency|add_label_class:"usa-label" }}
+            {% render_field form.sub_agency class+="usa-select" %}
+          </div>
+          <div class="tablet:grid-col-4">
+            {{ form.start_date|add_label_class:"usa-label" }}
+            {% render_field form.start_date type="date" %}
+            {{ form.end_date|add_label_class:"usa-label" }}
+            {% render_field form.end_date type="date" %}
+            {{ form.page.as_hidden }}
+          </div>
+        </div>
+        <div class="grid-row">
+          <input type="submit" value="Submit" class="usa-button">
+        </div>
+      </fieldset>
+    </form>
   </div>
   <div class="usa-section grid-row">
     <div class="grid-col-12"></div>
-      <table class="usa-table usa-table--borderless">
+      {# TODO: reconsider table sizing / number of columns #}
+      <table class="usa-table font-serif-3xs" style->
         <caption>Search Results</caption>
         <thead>
           <tr>
+            <th scope="col">Auditee Name</th>
             <th scope="col">Audit Number</th>
-            <th scope="col">Grantee Name</th>
+            <th scope="col">Audit Year</th>
+            <th scope="col">Agency</th>
+            <th scope="col">Date Audit Completed</th>
             <th scope="col">Findings</th>
-            <th scope="col">Cognizant Agency</th>
-            <th scope="col">Corrective Action Text</th>
-            <th scope="col">Repeat Findings</th>
+            <th scope="col">Previous Findings</th>
+            <th scope="col">Material Weakness</th>
+            <th scope="col">Questioned Costs</th>
+            <th scope="col">Amount Expended</th>
             <th scope="col" colspan="2">Download Links</th>
           </tr>
         </thead>
         <tbody>
-          {% for result in audit_search.results %}
+          {% for result in page.object_list %}
             <tr>
-              <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.audit_num %}">{{ result.audit_num }}</a></td>
-              <td>{{ result.grantee_name }}</td>
+              <td>{{ result.auditee_name }}</td>
+              <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.dbkey %}">{{ result.dbkey }}</a></td>
+              <td>{{ result.audit_year }}</td>
+              <td>
+                {% if result.cog_over == 'C' %}
+                  {{ result.cog_agency }} (Cognizant)
+                {% elif result.cog_over == 'O' %}
+                  {{ result.oversight_agency }} (Oversight)
+                {% endif %}
+              </td>
+              <td>{{ result.fac_accepted_date }}</td>
               <td>
                 <ul>
                   {% for finding in result.findings %}
@@ -50,9 +69,10 @@
                   {% endfor %}
                 </ul>
               </td>
-              <td>{{ result.cognizant_agency }}</td>
-              <td>{{ result.corrective_action_text }}</td>
-              <td>{{ result.repeat_findings }}</td>
+              <td>TODO</td>
+              <td>{{ result.material_weakness|yesno:"Yes,No,Unknown" }}</td>
+              <td>{{ result.qcosts|yesno:"Yes,No,Unknown" }}</td>
+              <td>{{ result.tot_fed_expend }}</td>
               <td><a href="{{ result.form_url }}">Form</a></td>
               <td><a href="{{ result.report_url }}">Report</a></td>
             </tr>
@@ -60,10 +80,16 @@
           <tfoot>
             <tr>
               <td colspan="8">
-                <a href="?page=1" aria-label="Previous Page">Previous</a>
+                {% if page.has_previous %}
+                  <a href="{% add_get page=1 %}" aria-label="First Page">&laquo; First</a>
+                  <a href="{% add_get page=page.previous_page_number %}" aria-label="Previous Page">Previous</a>
+                {% endif %}
                 <a href="?page=1">1</a>
                 <a href="?page=2">2</a>
-                <a href="?page=2" aria-label="Next Page">Next</a>
+                {% if page.has_next %}
+                  <a href="{% add_get page=page.next_page_number %}" aria-label="Next Page">Next</a>
+                  <a href="{% add_get page=page.paginator.num_pages %}" aria-label="Last Page">Last &raquo;</a>
+                {% endif %}
               </td>
             </tr>
           </tfoot>
