@@ -6,7 +6,6 @@ https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
 import csv
-import os
 import sys
 from datetime import datetime
 
@@ -51,11 +50,17 @@ def _import_file(path, model_cls, field_mapping, sanitizers):
 
 def _sanitize_row(row, field_mapping, sanitizers):
     sanitized_row = {}
-
     for csv_column_name, model_field_name in field_mapping.items():
         # These are fixedwidth CSVs, so strip off excess whitespace and handle
         # NULL values.
-        value = row[csv_column_name].strip() or None
+        value = row[csv_column_name]
+
+        # FIXME: There are rows in cfda.txt that only contain a single, string
+        # value. For now, just skip these rows.
+        if value is None:
+            return None
+
+        value = value.strip() or None
         if csv_column_name in sanitizers:
             sanitized_row[model_field_name] = sanitizers[csv_column_name](value)
         else:
@@ -66,13 +71,21 @@ def _sanitize_row(row, field_mapping, sanitizers):
 
 def _strip_rows(rows):
     for row in rows:
+        if not row:
+            continue
         yield row.strip()
 
 
 def _yield_rows(csv_file, field_mapping, sanitizers):
     reader = csv.DictReader(csv_file)
-    for row in reader:
-        yield _sanitize_row(row, field_mapping, sanitizers)
+    try:
+        for row in reader:
+            sanitized_row = _sanitize_row(row, field_mapping, sanitizers)
+            if sanitized_row is not None:
+                yield sanitized_row
+    except:
+        import pdb; pdb.set_trace()  #pylint: disable=C0321
+        pass
 
 
 def _yield_model_instances(csv_file, model_cls, field_mapping, sanitizers):
@@ -87,7 +100,7 @@ def _get_table_details(year):
         {
             # 'url': f'{ROOT_URL}/gen{year}.zip',
             'url': '/Users/dan/src/10x/fac-distiller/general.txt',
-            'model': models.General,
+            'model': models.Audit,
             'field_mapping': {
                 'AUDITYEAR': 'audit_year',
                 'DBKEY': 'dbkey',
@@ -180,17 +193,59 @@ def _get_table_details(year):
                 'PYSCHEDULE': boolean,
                 'REPORTREQUIRED': boolean,
             }
-        },  # {
+        # }, {
         #     'url': f'{ROOT_URL}/agency{year}.zip',
         #     'model': models.Agency,
         #     'field_mapping': [],
         #     'sanitizers': {}
-        # }, {
-        #     'url': f'{ROOT_URL}/cfda{year}.zip',
-        #     'model': models.CFDA,
-        #     'field_mapping': [],
-        #     'sanitizers': {}
-        # }, {
+        #
+        # NOTE: This table has 28 columns in the CSV HEADER, but only 27
+        # columns of data in each row. As a consequence, CFDAPROGRAMNAME (the
+        # last columns) is null.
+        }, {
+            # 'url': f'{ROOT_URL}/cfda{year}.zip',
+            'url': '/Users/dan/src/10x/fac-distiller/cfda.txt',
+            'model': models.CFDA,
+            'field_mapping': {
+                'AUDITYEAR': 'audit_year',
+                'DBKEY': 'dbkey',
+                'EIN': 'ein',
+                'CFDA': 'cfda',
+                'AWARDIDENTIFICATION': 'award_identification',
+                'RD': 'r_and_d',
+                'LOANS': 'loans',
+                'LOANBALANCE': 'loan_balance',
+                'ARRA': 'arra',
+                'FEDERALPROGRAMNAME': 'federal_program_name',
+                'AMOUNT': 'amount',
+                'CLUSTERNAME': 'cluster_name',
+                'STATECLUSTERNAME': 'state_cluster_name',
+                'PROGRAMTOTAL': 'program_total',
+                'CLUSTERTOTAL': 'cluster_total',
+                'DIRECT': 'direct',
+                'PASSTHROUGHAWARD': 'pass_through_award',
+                'PASSTHROUGHAMOUNT': 'pass_through_amount',
+                'MAJORPROGRAM': 'major_program',
+                'TYPEREPORT_MP': 'type_report_mp',
+                'QCOSTS2': 'qcosts2',
+                'FINDINGS': 'findings',
+                'TYPEREQUIREMENT': 'type_requirement',
+                'FINDINGREFNUMS': 'finding_ref_nums',
+                'FINDINGSCOUNT': 'findings_count',
+                'ELECAUDITSID': 'elec_audits_id',
+                'OTHERCLUSTERNAME': 'other_cluster_name',
+                # 'CFDAPROGRAMNAME': 'cfda_program_name',
+            },
+            'sanitizers': {
+                'RD': boolean,
+                'LOANS': boolean,
+                'ARRA': boolean,
+                'DIRECT': boolean,
+                'PASSTHROUGHAWARD': boolean,
+                'MAJORPROGRAM': boolean,
+                'QCOSTS2': boolean,
+            }
+        }
         #     'url': f'{ROOT_URL}/ein{year}.zip',
         #     'model': models.EIN,
         #     'field_mapping': [],

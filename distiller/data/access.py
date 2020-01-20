@@ -45,10 +45,10 @@ def filter_audits(
         q_obj &= Q(fac_accepted_date__gte=start_date)
     if end_date:
         q_obj &= Q(fac_accepted_date__lte=end_date)
-    # if cfda_num:
-    #     q_obj &= Q(cfda_num__startswith=cfda_num)
+    #if cfda_num:
+    #    q_obj &= Q(cfda__cfda__startswith=cfda_num)
 
-    audits = models.General.objects.filter(q_obj).order_by('fac_accepted_date')
+    audits = models.Audit.objects.filter(q_obj).order_by('fac_accepted_date')
 
     return Paginator(audits, paginate_by).get_page(page or 1)
 
