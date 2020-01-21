@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% load widget_tweaks %}
 {% load add_get_parameter %}
 
@@ -16,9 +17,9 @@
           </div>
           <div class="tablet:grid-col-4">
             {{ form.start_date|add_label_class:"usa-label" }}
-            {% render_field form.start_date type="date" %}
+            {% render_field form.start_date type="date" class+="usa-input" %}
             {{ form.end_date|add_label_class:"usa-label" }}
-            {% render_field form.end_date type="date" %}
+            {% render_field form.end_date type="date" class+="usa-input" %}
             {{ form.page.as_hidden }}
           </div>
         </div>
@@ -72,7 +73,11 @@
                   <td>TODO</td>
                   <td>{{ result.material_weakness|yesno:"Yes,No,Unknown" }}</td>
                   <td>{{ result.qcosts|yesno:"Yes,No,Unknown" }}</td>
-                  <td>{{ result.tot_fed_expend }}</td>
+                  <td>
+                    {% if result.tot_fed_expend %}
+                    ${{ result.tot_fed_expend|intcomma }}
+                    {% endif %}
+                  </td>
                   <td><a href="{{ result.form_url }}">Form</a></td>
                   <td><a href="{{ result.report_url }}">Report</a></td>
                 </tr>
@@ -112,7 +117,8 @@
 
   <script>
     document.querySelector("select[name=agency]").addEventListener('change', function () {
-      window.location = (window.pathname || '') + '?agency=' + this.value;
+        this.form.sub_agency.value = '';
+        this.form.submit();
     }, false);;
   </script>
 

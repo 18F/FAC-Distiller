@@ -99,7 +99,7 @@ def _get_table_details(year):
     return (
         {
             # 'url': f'{ROOT_URL}/gen{year}.zip',
-            'url': '/Users/dan/src/10x/fac-distiller/general.txt',
+            'url': '/Users/dan/src/10x/fac-distiller/imports/general.txt',
             'model': models.Audit,
             'field_mapping': {
                 'AUDITYEAR': 'audit_year',
@@ -204,7 +204,7 @@ def _get_table_details(year):
         # last columns) is null.
         }, {
             # 'url': f'{ROOT_URL}/cfda{year}.zip',
-            'url': '/Users/dan/src/10x/fac-distiller/cfda.txt',
+            'url': '/Users/dan/src/10x/fac-distiller/imports/cfda.txt',
             'model': models.CFDA,
             'field_mapping': {
                 'AUDITYEAR': 'audit_year',
