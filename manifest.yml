@@ -1,3 +1,15 @@
 applications:
-- name: distiller
-
+- name: fac-distiller
+  buildpacks:
+  - python_buildpack
+  command: bash ./run.sh
+  disk_quota: 1G
+  env:
+    DJANGO_SETTINGS_MODULE: distiller.settings.production
+  instances: 1
+  memory: 512M
+  routes:
+  - route: fac-distiller.app.cloud.gov
+  services:
+  - fac-distiller-db
+  stack: cflinuxfs3

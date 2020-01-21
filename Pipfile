@@ -9,7 +9,7 @@ pytest = "*"
 
 [packages]
 selenium = "*"
-django = ">=2.2.5"
+django = ">=3.0.2"
 psycopg2-binary = "*"
 django-localflavor = "*"
 pandas = "*"
@@ -17,6 +17,7 @@ whitenoise = "*"
 dj-database-url = "*"
 smart-open = "*"
 django-widget-tweaks = "*"
+gunicorn = {extras = ["gevent"],version = "*"}
 
 [requires]
 python_version = "3.7"
