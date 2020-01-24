@@ -6,12 +6,21 @@ note that many columns are only used in certain calendar years.
 See: https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
+from compositefk.fields import CompositeForeignKey
 from django.db import models
+
+from .assistance_listings import AssistanceListing
 
 
 class Audit(models.Model):
     class Meta:
         verbose_name = 'audit detail'
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+           models.Index(fields=['fac_accepted_date']),
+           models.Index(fields=['audit_year']),
+           models.Index(fields=['dbkey']),
+        ]
 
     # Use these fields to link tables- 4 digits
     audit_year = models.DecimalField(
@@ -24,6 +33,16 @@ class Audit(models.Model):
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
     )
+    # Map to CFDA
+    cfda = CompositeForeignKey(
+        'CFDA',
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        }
+    )
+
     # Contact FAC for information
     type_of_entity = models.CharField(
         null=True,
@@ -47,9 +66,9 @@ class Audit(models.Model):
         max_length=16,
         help_text='Audit Period Covered by Audit',
         choices=(
-            ('A', 'Annual'),
-            ('B', 'Biennial'),
-            ('O', 'Other'),
+           ('A', 'Annual'),
+           ('B', 'Biennial'),
+           ('O', 'Other'),
         )
     )
     # number of months
@@ -276,8 +295,8 @@ class Audit(models.Model):
         max_length=1,
         help_text='',
         choices=(
-            ('C', 'Cognizant'),
-            ('O', 'Oversight'),
+           ('C', 'Cognizant'),
+           ('O', 'Oversight'),
         )
     )
     # 2 Digit Federal Agency prefix
@@ -312,8 +331,8 @@ class Audit(models.Model):
     sp_framework_required = models.BooleanField(
         null=True,
         help_text=(
-            'Indicate whether or not the special purpose framework used '
-            'as basis of accounting by state law or tribal law'
+           'Indicate whether or not the special purpose framework used '
+           'as basis of accounting by state law or tribal law'
         )
     )
     # U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer
@@ -323,43 +342,43 @@ class Audit(models.Model):
         max_length=16,
         help_text="The auditor's opinion on the special purpose framework",
         choices=(
-            ('U', 'Unqualifed'),
-            ('Q', 'Qualified'),
-            ('A', 'Adverse'),
-            ('D', 'Disclaimer')
+           ('U', 'Unqualifed'),
+           ('Q', 'Qualified'),
+           ('A', 'Adverse'),
+           ('D', 'Disclaimer')
        )
     )
     # (Y)es / (N)o indicator
     going_concern = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the audit contained a going concern paragraph on '
-            'financial statements'
+           'Whether or not the audit contained a going concern paragraph on '
+           'financial statements'
         )
     )
     # (Y)es / (N)o indicator
     reportable_condition = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the audit disclosed a reportable '
-            'condition/significant deficiency on financial statements'
+           'Whether or not the audit disclosed a reportable '
+           'condition/significant deficiency on financial statements'
         )
     )
     # (Y)es / (N)o indicator
     material_weakness = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the audit disclosed any reportable '
-            'condition/significant deficiency as a material weakness on '
-            'financial statements'
+           'Whether or not the audit disclosed any reportable '
+           'condition/significant deficiency as a material weakness on '
+           'financial statements'
         )
     )
     # (Y)es / (N)o indicator
     material_noncompliance = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the audit disclosed a material noncompliance on '
-            'financial statements'
+           'Whether or not the audit disclosed a material noncompliance on '
+           'financial statements'
         )
     )
     # U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer
@@ -369,18 +388,18 @@ class Audit(models.Model):
         max_length=16,
         help_text='Type of Report Issued on the Major Program Compliance',
         choices=(
-            ('U', 'Unqualifed'),
-            ('Q', 'Qualified'),
-            ('A', 'Adverse'),
-            ('D', 'Disclaimer')
+           ('U', 'Unqualifed'),
+           ('Q', 'Qualified'),
+           ('A', 'Adverse'),
+           ('D', 'Disclaimer')
        )
     )
     # (Y)es / (N)o indicator
     dup_reports = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the financial statements include departments that '
-            'have separate expenditures not included in this audit'
+           'Whether or not the financial statements include departments that '
+           'have separate expenditures not included in this audit'
         )
     )
     # ($) 12 digits max
@@ -399,18 +418,18 @@ class Audit(models.Model):
     reportable_condition_mp = models.BooleanField(
         null=True,
         help_text=(
-            'Whether or not the audit disclosed a reportable '
-            'condition/significant deficiency for any major program in the '
-            'Schedule of Findings and Questioned Costs'
+           'Whether or not the audit disclosed a reportable '
+           'condition/significant deficiency for any major program in the '
+           'Schedule of Findings and Questioned Costs'
         )
     )
     # (Y)es / (N)o indicator
     material_weakness_mp = models.BooleanField(
         null=True,
         help_text=(
-            'Indicate whether any reportable condition/signficant deficiency '
-            'was disclosed as a material weakness for a major program in the '
-            'Schedule of Findings and Questioned Costs'
+           'Indicate whether any reportable condition/signficant deficiency '
+           'was disclosed as a material weakness for a major program in the '
+           'Schedule of Findings and Questioned Costs'
         )
     )
     # (Y)es / (N)o indicator
@@ -422,16 +441,16 @@ class Audit(models.Model):
     cy_findings = models.BooleanField(
         null=True,
         help_text=(
-            'Indicate whether or not current year findings or prior year '
-            'findings affecting direct funds were reported'
+           'Indicate whether or not current year findings or prior year '
+           'findings affecting direct funds were reported'
         )
     )
     # (Y)es / (N)o indicator
     py_schedule = models.BooleanField(
         null=True,
         help_text=(
-            'Indicate whether or not the report includes a Summary Schedule of '
-            'Prior Year Audit Findings'
+           'Indicate whether or not the report includes a Summary Schedule of '
+           'Prior Year Audit Findings'
         )
     )
     # 12 digits max
@@ -456,9 +475,9 @@ class Audit(models.Model):
         blank=True,
         null=True,
         help_text=(
-            'The most recent date an audit report was submitted to the FAC '
-            'that passed FAC screening and was accepted as a valid OMB '
-            'Circular A-133 report submission.'
+           'The most recent date an audit report was submitted to the FAC '
+           'that passed FAC screening and was accepted as a valid OMB '
+           'Circular A-133 report submission.'
         )
     )
     # 200 characters max
@@ -480,6 +499,9 @@ class Audit(models.Model):
 class CFDA(models.Model):
     class Meta:
         verbose_name = 'CFDA number'
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+        ]
 
     # Use these fields to link tables- 4 digits
     audit_year = models.DecimalField(
@@ -498,8 +520,10 @@ class CFDA(models.Model):
         help_text='Employer Identification Number'
     )
     # 52 digit max
-    cfda = models.CharField(
-        max_length=52,
+    cfda = models.ForeignKey(
+        AssistanceListing,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
         help_text='Federal Agency Prefix and Extension'
     )
     # 50 character max
@@ -601,10 +625,10 @@ class CFDA(models.Model):
         max_length=1,
         help_text='Type of Report Issued on the Major Program Compliance',
         choices=(
-            ('U', 'Unqualified'),
-            ('Q', 'Qualified'),
-            ('A', 'Adverse'),
-            ('D', 'Disclaimer'),
+           ('U', 'Unqualified'),
+           ('Q', 'Qualified'),
+           ('A', 'Adverse'),
+           ('D', 'Disclaimer'),
         )
     )
     # A=Activities allowed or unallowed
@@ -639,6 +663,7 @@ class CFDA(models.Model):
     )
     # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
     elec_audits_id = models.IntegerField(
+        primary_key=True,
         help_text='FAC system generated sequence number used to link to Findings data between CFDA Info and Findings'
     )
     # 75 character max
@@ -652,4 +677,103 @@ class CFDA(models.Model):
     cfda_program_name = models.CharField(
         max_length=300,
         help_text='Name of Federal Program (auto-generated by FAC from the CFDA catalog)'
+    )
+
+
+class Finding(models.Model):
+    class Meta:
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+           models.Index(fields=['elec_audits_id']),
+        ]
+
+    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
+    elec_audit_findings_id = models.IntegerField(
+        primary_key=True,
+        help_text='C system generated sequence number for finding'
+    )
+
+    # Use these fields to link tables- 1-6 digits
+    dbkey = models.CharField(
+        max_length=6,
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    # Use these fields to link tables- 4 digits
+    audit_year = models.DecimalField(
+        max_digits=4,
+        decimal_places=0,
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+
+    # Map to General/Audit
+    finding = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='findings'
+    )
+
+    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
+    elec_audits = models.ForeignKey(
+        CFDA,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        help_text='FAC system generated sequence number used to link to Findings data between CFDA Info and Findings'
+    )
+
+    # 100 character max
+    finding_ref_nums = models.CharField(
+        max_length=100,
+        help_text='Findings Reference Numbers'
+    )
+    type_requirement = models.CharField(
+        blank=True,
+        null=True,
+        max_length=256,  # TODO
+        help_text='Type Requirement Failure'
+    )
+    # (Y)es / (N)o indicator
+    modified_opinion = models.BooleanField(
+        null=True,
+        help_text='Modified Opinion finding'
+    )
+    # (Y)es / (N)o indicator
+    other_noncompliance = models.BooleanField(
+        null=True,
+        help_text='Other Noncompliance finding'
+    )
+    # (Y)es / (N)o indicator
+    material_weakness = models.BooleanField(
+        null=True,
+        help_text='Material Weakness finding'
+    )
+    # (Y)es / (N)o indicator
+    significant_deficiency = models.BooleanField(
+        null=True,
+        help_text='Significant Deficiency finding'
+    )
+    # (Y)es / (N)o indicator
+    other_findings = models.BooleanField(
+        null=True,
+        help_text='Other findings'
+    )
+    # (Y)es / (N)o indicator
+    questioned_costs = models.BooleanField(
+        null=True,
+        help_text='Questioned Costs'
+    )
+    # (Y)es / (N)o indicator
+    repeat_finding = models.BooleanField(
+        null=True,
+        help_text='Indicates whether or not the audit finding was a repeat of an audit finding in the immediate prior audit'
+    )
+    # 100 character max
+    prior_finding_ref_nums = models.CharField(
+        blank=True,
+        null=True,
+        max_length=100,
+        help_text='Audit finding reference numbers from the immediate prior audit'
     )

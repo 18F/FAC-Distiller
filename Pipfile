@@ -18,6 +18,7 @@ dj-database-url = "*"
 smart-open = "*"
 django-widget-tweaks = "*"
 gunicorn = {extras = ["gevent"],version = "*"}
+django-composite-foreignkey = "*"
 
 [requires]
 python_version = "3.7"

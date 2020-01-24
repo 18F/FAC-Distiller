@@ -18,7 +18,6 @@ from .. import models
 ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
 
 
-@transaction.atomic
 def update():
     """
     Get the Distiller's database in sync with the latest from the Single Audit
@@ -27,6 +26,8 @@ def update():
     NOTE: This currently only loads selected 2019 tables.
     """
     for table in _get_table_details('19'):
+        if table['model'] != models.CFDA:
+            continue
         _import_file(
             table['url'],
             table['model'],
@@ -35,9 +36,12 @@ def update():
         )
 
 
+@transaction.atomic
 def _import_file(path, model_cls, field_mapping, sanitizers):
-    sys.stdout.write(f'Importing {path}... ')
+    sys.stdout.write(f'Importing {path}...')
     sys.stdout.flush()
+
+    model_cls.objects.all().delete()
 
     with smart_open.open(path, encoding='latin-1') as csv_file:
         model_cls.objects.bulk_create(
@@ -78,14 +82,22 @@ def _strip_rows(rows):
 
 def _yield_rows(csv_file, field_mapping, sanitizers):
     reader = csv.DictReader(csv_file)
-    try:
-        for row in reader:
-            sanitized_row = _sanitize_row(row, field_mapping, sanitizers)
-            if sanitized_row is not None:
-                yield sanitized_row
-    except:
-        import pdb; pdb.set_trace()  #pylint: disable=C0321
-        pass
+
+    index = 0
+    while True:
+        try:
+            row = next(reader)
+        except StopIteration:
+            break
+        except Exception as e:
+            print('CSV parsing error.', e)
+        sanitized_row = _sanitize_row(row, field_mapping, sanitizers)
+        if sanitized_row is not None:
+            yield sanitized_row
+
+        if index > 100_000:
+            break
+        index += 1
 
 
 def _yield_model_instances(csv_file, model_cls, field_mapping, sanitizers):
@@ -210,7 +222,7 @@ def _get_table_details(year):
                 'AUDITYEAR': 'audit_year',
                 'DBKEY': 'dbkey',
                 'EIN': 'ein',
-                'CFDA': 'cfda',
+                'CFDA': 'cfda_id',
                 'AWARDIDENTIFICATION': 'award_identification',
                 'RD': 'r_and_d',
                 'LOANS': 'loans',
@@ -245,7 +257,6 @@ def _get_table_details(year):
                 'MAJORPROGRAM': boolean,
                 'QCOSTS2': boolean,
             }
-        }
         #     'url': f'{ROOT_URL}/ein{year}.zip',
         #     'model': models.EIN,
         #     'field_mapping': [],
@@ -260,11 +271,38 @@ def _get_table_details(year):
         #     'model': models.CPAS,
         #     'field_mapping': [],
         #     'sanitizers': {}
-        # }, {
-        #     'url': f'{ROOT_URL}/findings{year}.zip',
-        #     'model': models.Finding,
-        #     'field_mapping': [],
-        #     'sanitizers': {}
+        }, {
+            'url': '/Users/dan/src/10x/fac-distiller/imports/findings.txt',
+            # 'url': f'{ROOT_URL}/findings{year}.zip',
+            'model': models.Finding,
+            'field_mapping': {
+                'DBKEY': 'dbkey',
+                'AUDITYEAR': 'audit_year',
+                'ELECAUDITSID': 'elec_audits_id',
+                'ELECAUDITFINDINGSID': 'elec_audit_findings_id',
+                'FINDINGSREFNUMS': 'finding_ref_nums',
+                'TYPEREQUIREMENT': 'type_requirement',
+                'MODIFIEDOPINION': 'modified_opinion',
+                'OTHERNONCOMPLIANCE': 'other_noncompliance',
+                'MATERIALWEAKNESS': 'material_weakness',
+                'SIGNIFICANTDEFICIENCY': 'significant_deficiency',
+                'OTHERFINDINGS': 'other_findings',
+                'QCOSTS': 'questioned_costs',
+                'REPEATFINDING': 'repeat_finding',
+                'PRIORFINDINGREFNUMS': 'prior_finding_ref_nums',
+            },
+            'sanitizers': {
+                'TYPEREQUIREMENT': boolean,
+                'MODIFIEDOPINION': boolean,
+                'OTHERNONCOMPLIANCE': boolean,
+                'MATERIALWEAKNESS': boolean,
+                'SIGNIFICANTDEFICIENCY': boolean,
+                'OTHERFINDINGS': boolean,
+                'QCOSTS': boolean,
+                'REPEATFINDING': boolean,
+                'PRIORFINDINGREFNUMS': boolean,
+            }
+        },
         # }, {
         #     'url': f'{ROOT_URL}/passthrough{year}.zip',
         #     'model': models.Passthrough,

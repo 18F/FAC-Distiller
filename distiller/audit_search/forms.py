@@ -6,6 +6,7 @@ import it both here and in the file that's actually doing the filtering.
 """
 
 from collections import defaultdict
+from datetime import datetime
 
 from django import forms
 
@@ -106,8 +107,15 @@ for prefix, agency_name in AGENCY_CHOICES:
 class AgencySelectionForm(forms.Form):
     agency = forms.ChoiceField(choices=AGENCY_CHOICES)
     sub_agency = forms.ChoiceField(required=False)
-    start_date = forms.DateField(required=False)
-    end_date = forms.DateField(required=False)
+    audit_year = forms.ChoiceField(
+        choices=(('', ''),) + tuple(
+            (year, year)
+            for year in range(datetime.now().year, 1996, -1)
+        ),
+        required=False
+    )
+    start_date = forms.DateField(required=False, label='Accepted date start')
+    end_date = forms.DateField(required=False, label='Accepted date end')
     page = forms.IntegerField(initial=1, required=False)
 
     def __init__(self, *args, **kwargs):
@@ -116,11 +124,10 @@ class AgencySelectionForm(forms.Form):
         # Support filtering on subagency, default to first choice
         agency = self['agency'].value() or AGENCY_CHOICES[0][0]
         self.fields['sub_agency'].choices = [
-            (None, '')  # all programs under this agency
+            (None, '')  # all sub-agencies under this prefix
         ] + [
-            sub_agency
-            for sub_agency in AssistanceListing.objects.subagencies_for_prefix(
-                agency).values_list('program_number', 'program_title')
+            (sub, sub)
+            for sub in AssistanceListing.objects.distinct_agencies(agency)
         ]
 
         # If the only choice is "all", make this field disabled.
@@ -129,3 +136,6 @@ class AgencySelectionForm(forms.Form):
 
     def clean_sub_agency(self):
         return self.cleaned_data['sub_agency'] or None
+
+    def clean_audit_year(self):
+        return self.cleaned_data['audit_year'] or None

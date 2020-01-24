@@ -4,7 +4,8 @@ Data access interface for external data sources used by this project.
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Dict, List
+from functools import reduce
+from typing import Dict, List, Optional
 
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -30,7 +31,7 @@ def get_audit(audit_id: int):
 
 
 def filter_audits(
-    cfda_num: str,
+    cfda_nums: List[str],
     start_date: date,
     end_date: date,
     page: int,
@@ -45,12 +46,48 @@ def filter_audits(
         q_obj &= Q(fac_accepted_date__gte=start_date)
     if end_date:
         q_obj &= Q(fac_accepted_date__lte=end_date)
-    #if cfda_num:
-    #    q_obj &= Q(cfda__cfda__startswith=cfda_num)
+    if cfda_nums:
+        q_obj &= Q(cfda__cfda__in=cfda_nums)
 
     audits = models.Audit.objects.filter(q_obj).order_by('fac_accepted_date')
 
     return Paginator(audits, paginate_by).get_page(page or 1)
+
+
+def get_audits_by_subagency(
+    sub_agency: str,
+    audit_year: Optional[int],
+    start_date: date,
+    end_date: date,
+    page: int
+):
+    # Get CFDA numbers for the given sub-agency name.
+    cfda_nums = models.AssistanceListing.objects.get_cfda_nums_for_agency(
+        sub_agency
+    )
+
+    # Get the (audit_year, dbkey) pairs for all audits matching our search
+    # criteria.
+    audit_keys = models.CFDA.objects.filter(
+        cfda__in=cfda_nums).values('audit_year', 'dbkey')
+
+    # Initialize Q object with and OR of all (audit_year, dbkey) pairs.
+    q_obj = reduce(lambda q_obj, keys: q_obj | Q(**keys), audit_keys, Q())
+
+    # Filter by dates
+    if audit_year:
+        q_obj &= Q(audit_year=audit_year)
+    if start_date:
+        q_obj &= Q(fac_accepted_date__gte=start_date)
+    if end_date:
+        q_obj &= Q(fac_accepted_date__lte=end_date)
+
+    audits = models.Audit.objects.filter(q_obj).order_by(
+        '-audit_year', '-fac_accepted_date'
+    ).prefetch_related('findings')
+
+    return Paginator(audits, 25).get_page(page or 1)
+
 
     # # Since we don't have this in the database yet, return mock data
     # return AuditSearch(

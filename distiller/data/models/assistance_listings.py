@@ -3,20 +3,37 @@ from django.contrib.postgres.fields import JSONField
 
 
 class AssistanceListingManager(models.Manager):
-    def subagencies_for_prefix(self, prefix):
+    def with_prefix(self, prefix):
         return self.filter(
             program_number__startswith=prefix
-        ).order_by('program_title')
+        )
+
+    def distinct_agencies(self, agency_prefix):
+        return self.with_prefix(agency_prefix).distinct(
+            'federal_agency').values_list('federal_agency', flat=True)
+
+    def get_cfda_nums_for_agency(self, federal_agency: str):
+        return self.filter(federal_agency=federal_agency).values_list(
+            'program_number', flat=True)
 
 
 class AssistanceListing(models.Model):
+    """
+    Assistance listings from sam.gov.
+    We load this so we may map CFDA numbers (program_number) to federal
+    agencies (federal_agency).
+    """
+
     objects = AssistanceListingManager()
 
-    program_title = models.TextField(help_text='Program Title')
     program_number = models.CharField(
-        max_length=6,
+        primary_key=True,
+        # We make this 64 rather than 6 to accomodate invalid foreign key
+        # references to this table (see: CFDA table).
+        max_length=64,
         help_text='Program Number'
     )
+    program_title = models.TextField(help_text='Program Title')
     popular_name = models.TextField(help_text='Popular Name (020)')
     federal_agency = models.TextField(help_text='Federal Agency (030)')
     authorization = JSONField(help_text='Authorization (040)')

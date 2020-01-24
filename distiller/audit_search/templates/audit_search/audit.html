@@ -5,7 +5,143 @@
   <div class="usa-section grid-row">
     <h1>Audit Details</h1>
     <div class="grid-col-12">
-      Audit #{{ audit.audit_id }}
+      Audit #{{ audit.pk }}
+      <dl>
+        <dt>audit_year</dt>
+        <dd>{{ audit.audit_year }}</dd>
+        <dt>dbkey</dt>
+        <dd>{{ audit.dbkey }}</dd>
+        <dt>cfda</dt>
+        <dd>{{ audit.cfda }}</dd>
+        <dt>type_of_entity</dt>
+        <dd>{{ audit.type_of_entity }}</dd>
+        <dt>fy_end_date</dt>
+        <dd>{{ audit.fy_end_date }}</dd>
+        <dt>audit_type</dt>
+        <dd>{{ audit.audit_type }}</dd>
+        <dt>period_covered</dt>
+        <dd>{{ audit.period_covered }}</dd>
+        <dt>number_months</dt>
+        <dd>{{ audit.number_months }}</dd>
+        <dt>ein</dt>
+        <dd>{{ audit.ein }}</dd>
+        <dt>multiple_eins</dt>
+        <dd>{{ audit.multiple_eins }}</dd>
+        <dt>ein_subcode</dt>
+        <dd>{{ audit.ein_subcode }}</dd>
+        <dt>duns</dt>
+        <dd>{{ audit.duns }}</dd>
+        <dt>multiple_duns</dt>
+        <dd>{{ audit.multiple_duns }}</dd>
+        <dt>auditee_name</dt>
+        <dd>{{ audit.auditee_name }}</dd>
+        <dt>street1</dt>
+        <dd>{{ audit.street1 }}</dd>
+        <dt>street2</dt>
+        <dd>{{ audit.street2 }}</dd>
+        <dt>city</dt>
+        <dd>{{ audit.city }}</dd>
+        <dt>state</dt>
+        <dd>{{ audit.state }}</dd>
+        <dt>zipcode</dt>
+        <dd>{{ audit.zipcode }}</dd>
+        <dt>auditee_contact</dt>
+        <dd>{{ audit.auditee_contact }}</dd>
+        <dt>auditee_title</dt>
+        <dd>{{ audit.auditee_title }}</dd>
+        <dt>auditee_phone</dt>
+        <dd>{{ audit.auditee_phone }}</dd>
+        <dt>auditee_fax</dt>
+        <dd>{{ audit.auditee_fax }}</dd>
+        <dt>auditee_email</dt>
+        <dd>{{ audit.auditee_email }}</dd>
+        <dt>auditee_date_signed</dt>
+        <dd>{{ audit.auditee_date_signed }}</dd>
+        <dt>auditee_name_title</dt>
+        <dd>{{ audit.auditee_name_title }}</dd>
+        <dt>cpa_firm_name</dt>
+        <dd>{{ audit.cpa_firm_name }}</dd>
+        <dt>auditor_ein</dt>
+        <dd>{{ audit.auditor_ein }}</dd>
+        <dt>cpa_street1</dt>
+        <dd>{{ audit.cpa_street1 }}</dd>
+        <dt>cpa_street2</dt>
+        <dd>{{ audit.cpa_street2 }}</dd>
+        <dt>cpa_city</dt>
+        <dd>{{ audit.cpa_city }}</dd>
+        <dt>cpa_state</dt>
+        <dd>{{ audit.cpa_state }}</dd>
+        <dt>cpa_zipcode</dt>
+        <dd>{{ audit.cpa_zipcode }}</dd>
+        <dt>cpa_contact</dt>
+        <dd>{{ audit.cpa_contact }}</dd>
+        <dt>cpa_title</dt>
+        <dd>{{ audit.cpa_title }}</dd>
+        <dt>cpa_phone</dt>
+        <dd>{{ audit.cpa_phone }}</dd>
+        <dt>cpa_fax</dt>
+        <dd>{{ audit.cpa_fax }}</dd>
+        <dt>cpa_email</dt>
+        <dd>{{ audit.cpa_email }}</dd>
+        <dt>cpa_date_signed</dt>
+        <dd>{{ audit.cpa_date_signed }}</dd>
+        <dt>multiple_cpas</dt>
+        <dd>{{ audit.multiple_cpas }}</dd>
+        <dt>cog_over</dt>
+        <dd>{{ audit.cog_over }}</dd>
+        <dt>cog_agency</dt>
+        <dd>{{ audit.cog_agency }}</dd>
+        <dt>oversight_agency</dt>
+        <dd>{{ audit.oversight_agency }}</dd>
+        <dt>typereport_fs</dt>
+        <dd>{{ audit.typereport_fs }}</dd>
+        <dt>sp_framework</dt>
+        <dd>{{ audit.sp_framework }}</dd>
+        <dt>sp_framework_required</dt>
+        <dd>{{ audit.sp_framework_required }}</dd>
+        <dt>typereport_sp_framework</dt>
+        <dd>{{ audit.typereport_sp_framework }}</dd>
+        <dt>going_concern</dt>
+        <dd>{{ audit.going_concern }}</dd>
+        <dt>reportable_condition</dt>
+        <dd>{{ audit.reportable_condition }}</dd>
+        <dt>material_weakness</dt>
+        <dd>{{ audit.material_weakness }}</dd>
+        <dt>material_noncompliance</dt>
+        <dd>{{ audit.material_noncompliance }}</dd>
+        <dt>typereport_mp</dt>
+        <dd>{{ audit.typereport_mp }}</dd>
+        <dt>dup_reports</dt>
+        <dd>{{ audit.dup_reports }}</dd>
+        <dt>dollar_threshold</dt>
+        <dd>{{ audit.dollar_threshold }}</dd>
+        <dt>low_risk</dt>
+        <dd>{{ audit.low_risk }}</dd>
+        <dt>reportable_condition_mp</dt>
+        <dd>{{ audit.reportable_condition_mp }}</dd>
+        <dt>material_weakness_mp</dt>
+        <dd>{{ audit.material_weakness_mp }}</dd>
+        <dt>qcosts</dt>
+        <dd>{{ audit.qcosts }}</dd>
+        <dt>cy_findings</dt>
+        <dd>{{ audit.cy_findings }}</dd>
+        <dt>py_schedule</dt>
+        <dd>{{ audit.py_schedule }}</dd>
+        <dt>tot_fed_expend</dt>
+        <dd>{{ audit.tot_fed_expend }}</dd>
+        <dt>date_firewall</dt>
+        <dd>{{ audit.date_firewall }}</dd>
+        <dt>previous_date_firewall</dt>
+        <dd>{{ audit.previous_date_firewall }}</dd>
+        <dt>report_required</dt>
+        <dd>{{ audit.report_required }}</dd>
+        <dt>fac_accepted_date</dt>
+        <dd>{{ audit.fac_accepted_date }}</dd>
+        <dt>cpa_foreign</dt>
+        <dd>{{ audit.cpa_foreign }}</dd>
+        <dt>cpa_country</dt>
+        <dd>{{ audit.cpa_country }}</dd>
+      </dl>
     </div>
   </div>
   {% block error_message %}{% endblock %}

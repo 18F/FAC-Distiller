@@ -4,12 +4,13 @@ Views for audit clearinghouse search interface.
 
 from io import StringIO
 
+from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 import pandas as pd
 
 from distiller.data.etls import selenium_scraper
-from distiller.data import access
+from distiller.data import access, models
 from .forms import AGENCIES_BY_PREFIX, AgencySelectionForm
 
 
@@ -18,8 +19,20 @@ def single_audit_search(request):
 
     results_page = None
     if form.is_valid():
-        results_page = access.filter_audits(
-            cfda_num=form.cleaned_data['sub_agency'],
+
+        # Select over the CFDA table, which has a mapping to General (Audit)
+        # and Findings...
+        # programs = models.CFDA.objects.filter(
+        #     cfda__in=cfda_nums
+        # # Join with AssistanceListing...
+        # ).select_related(
+        #     'cfda'
+        # # Prefetch the reverse relationship - audits.
+        # ).prefetch_related('audit_set')
+
+        results_page = access.get_audits_by_subagency(
+            sub_agency=form.cleaned_data['sub_agency'],
+            audit_year=form.cleaned_data['audit_year'],
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
             page=form.cleaned_data['page'],
@@ -32,13 +45,25 @@ def single_audit_search(request):
 
 
 def view_audit(request, audit_id):
-    audit = access.get_audit(audit_id)
+    audit = models.Audit.objects.get(pk=audit_id)
+    #audit = access.get_audit(audit_id)
 
     if audit is None:
         raise Http404('Audit not found.')
 
     return render(request, 'audit_search/audit.html', {
         'audit': audit
+    })
+
+
+def view_finding(request, finding_id):
+    finding = models.Finding.objects.get(pk=finding_id)
+
+    if finding is None:
+        raise Http404('Finding not found.')
+
+    return render(request, 'audit_search/finding.html', {
+        'finding': finding
     })
 
 

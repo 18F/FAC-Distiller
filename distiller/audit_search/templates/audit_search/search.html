@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
 {% load widget_tweaks %}
 {% load add_get_parameter %}
 
@@ -7,46 +8,92 @@
   <div class="usa-section">
     <form class="usa-form usa-form--large">
       <fieldset class="usa-fieldset">
-        <legend class="usa-legend">Single audit search</legend>
+        <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
         <div class="grid-row grid-gap">
           <div class="tablet:grid-col-8">
             {{ form.agency|add_label_class:"usa-label" }}
             {% render_field form.agency class+="usa-select" %}
+          </div>
+          <div class="tablet:grid-col-8">
             {{ form.sub_agency|add_label_class:"usa-label" }}
             {% render_field form.sub_agency class+="usa-select" %}
           </div>
           <div class="tablet:grid-col-4">
+            {{ form.audit_year|add_label_class:"usa-label" }}
+            {% render_field form.audit_year class+="usa-select" %}
+          </div>
+          <div class="tablet:grid-col-8">
+          </div>
+          <div class="tablet:grid-col-6">
             {{ form.start_date|add_label_class:"usa-label" }}
             {% render_field form.start_date type="date" class+="usa-input" %}
+          </div>
+          <div class="tablet:grid-col-6">
             {{ form.end_date|add_label_class:"usa-label" }}
             {% render_field form.end_date type="date" class+="usa-input" %}
-            {{ form.page.as_hidden }}
           </div>
+          {{ form.page.as_hidden }}
         </div>
         <div class="grid-row">
           <input type="submit" value="Submit" class="usa-button">
         </div>
       </fieldset>
     </form>
-    <div class="grid-row">
-      <div class="grid-col-12"></div>
-        {# TODO: reconsider table sizing / number of columns #}
-        {% if page.object_list %}
+    {% if page.object_list %}
+      <hr>
+      <div class="grid-row padding-top-2">
+        <a href="#" alt="Download CSV">
+          <svg
+            width="2em"
+            height="2em"
+            fill="none"
+            stroke="#005288"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <use xlink:href="{% static 'img/feather-sprite.svg#download' %}"/>
+          </svg>
+        </a>
+        <span class="line-height-sans-6 padding-left-2">
+          <span>
+            {% if form.cleaned_data.sub_agency %}
+              {{ form.cleaned_data.sub_agency }}
+            {% else %}
+               {{ form.agency.value }}
+            {% endif %}
+          </span>
+          <div class="font-sans-3xs line-height-sans-3">
+            {{ form.cleaned_data.audit_year|default:'All' }} audit year
+            {% if form.cleaned_data.start_date or form.cleaned_data.end_date %}
+            <br>
+              {% if form.cleaned_data.start_date %}
+                {{ form.cleaned_data.start_date|date:"SHORT_DATE_FORMAT" }}
+              {% endif %}
+              -
+              {% if form.cleaned_data.end_date %}
+                {{ form.cleaned_data.end_date|date:"SHORT_DATE_FORMAT" }}
+              {% endif %}
+            {% endif %}
+          </div>
+        </span>
+      </div>
+      <div class="grid-row">
+        <div class="grid-col-12"></div>
           <table class="usa-table font-serif-3xs" style->
-            <caption>Search Results</caption>
             <thead>
               <tr>
                 <th scope="col">Auditee Name</th>
                 <th scope="col">Audit Number</th>
                 <th scope="col">Audit Year</th>
-                <th scope="col">Agency</th>
-                <th scope="col">Date Audit Completed</th>
+                <!--th scope="col">Agency</th-->
+                <th scope="col">FAC Accepted Date</th>
                 <th scope="col">Findings</th>
                 <th scope="col">Previous Findings</th>
                 <th scope="col">Material Weakness</th>
                 <th scope="col">Questioned Costs</th>
                 <th scope="col">Amount Expended</th>
-                <th scope="col" colspan="2">Download Links</th>
+                <th scope="col">Docs</th>
               </tr>
             </thead>
             <tbody>
@@ -55,20 +102,18 @@
                   <td>{{ result.auditee_name }}</td>
                   <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.dbkey %}">{{ result.dbkey }}</a></th>
                   <td>{{ result.audit_year }}</td>
-                  <td>
+                  <!--td>
                     {% if result.cog_over == 'C' %}
                       {{ result.cog_agency }} (Cognizant)
                     {% elif result.cog_over == 'O' %}
                       {{ result.oversight_agency }} (Oversight)
                     {% endif %}
-                  </td>
-                  <td>{{ result.fac_accepted_date }}</td>
+                  </td-->
+                  <td>{{ result.fac_accepted_date|default_if_none:"Unknown" }}</td>
                   <td>
-                    <ul>
-                      {% for finding in result.findings %}
-                        <li>{{ finding.text }}</li>
-                      {% endfor %}
-                    </ul>
+                    {% for finding in result.findings.all %}
+                      <a href="{% url 'distiller.audit_search:view_finding' finding.pk %}">{{ finding.pk }}</a>
+                    {% endfor %}
                   </td>
                   <td>TODO</td>
                   <td>{{ result.material_weakness|yesno:"Yes,No,Unknown" }}</td>
@@ -78,13 +123,15 @@
                     ${{ result.tot_fed_expend|intcomma }}
                     {% endif %}
                   </td>
-                  <td><a href="{{ result.form_url }}">Form</a></td>
-                  <td><a href="{{ result.report_url }}">Report</a></td>
+                  <td>
+                    <a href="{{ result.form_url }}">Form</a>
+                    <a href="{{ result.report_url }}">Report</a>
+                  </td>
                 </tr>
               {% endfor %}
               <tfoot>
                 <tr>
-                  <td colspan="12">
+                  <td colspan="11">
                     {% if page.has_previous %}
                       <a href="{% add_get page=1 %}" aria-label="First Page">
                         &laquo;
@@ -109,9 +156,9 @@
               </tfoot>
             </tbody>
           </table>
-        {% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
   {% block error_message %}{% endblock %}
 
