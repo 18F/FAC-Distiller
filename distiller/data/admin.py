@@ -13,12 +13,10 @@ class AuditAdmin(admin.ModelAdmin):
 
 class CFDAAdmin(admin.ModelAdmin):
     list_display = (
-        'pk', 'dbkey', 'audit_year', 'ein', 'cfda', 'federal_program_name',
-        'cfda_program_name'
+        'elec_audits_id', 'dbkey', 'audit_year', 'ein', 'cfda_id',
+        'federal_program_name', 'cfda_program_name'
     )
-    search_fields = (
-        'dbkey', 'ein', 'cfda', 'federal_program_name', 'federal_agency'
-    )
+    raw_id_fields = ('cfda',)
 
 
 class AssistanceListingAdmin(admin.ModelAdmin):

@@ -503,6 +503,18 @@ class CFDA(models.Model):
            models.Index(fields=['audit_year', 'dbkey']),
         ]
 
+    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
+    elec_audits_id = models.IntegerField(
+        primary_key=True,
+        help_text='FAC system generated sequence number used to link to Findings data between CFDA Info and Findings'
+    )
+
+    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
+    findings_count = models.IntegerField(
+        null=True,
+        help_text='Number of findings for the federal program (only available for audit years 2013 and beyond)'
+    )
+
     # Use these fields to link tables- 4 digits
     audit_year = models.DecimalField(
         max_digits=4,
@@ -655,16 +667,6 @@ class CFDA(models.Model):
         blank=True,
         max_length=100,
         help_text='Findings Reference Numbers'
-    )
-    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
-    findings_count = models.IntegerField(
-        null=True,
-        help_text='Number of findings for the federal program (only available for audit years 2013 and beyond)'
-    )
-    # Use findingscount and elecauditsid fields to link CFDA INFO and FINDINGS
-    elec_audits_id = models.IntegerField(
-        primary_key=True,
-        help_text='FAC system generated sequence number used to link to Findings data between CFDA Info and Findings'
     )
     # 75 character max
     other_cluster_name = models.CharField(
