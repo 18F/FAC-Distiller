@@ -779,3 +779,28 @@ class Finding(models.Model):
         max_length=100,
         help_text='Audit finding reference numbers from the immediate prior audit'
     )
+
+
+class FindingText(models.Model):
+    seq_number = models.IntegerField(
+        primary_key=True,
+        help_text='Order that the findings text was reported'
+    )
+    dbkey = models.IntegerField(
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    audit_year = models.DecimalField(
+        max_digits=4,
+        decimal_places=0,
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    finding_ref_nums = models.CharField(
+        max_length=100,
+        help_text='Audit Finding Reference Number'
+    )
+    text = models.TextField(
+        help_text='Content of the finding text'
+    )
+    charts_tables = models.BooleanField(
+        help_text='Indicates whether or not the text contained charts or tables that could not be entered due to formatting restrictions'
+    )

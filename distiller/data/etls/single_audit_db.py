@@ -8,6 +8,7 @@ https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 import csv
 import sys
 from datetime import datetime
+from typing import Dict, Generator
 
 import smart_open
 from django.db import transaction
@@ -64,9 +65,7 @@ def _strip_rows(rows):
         yield row.strip()
 
 
-def _yield_rows(csv_file, *, field_mapping, sanitizers, **kwargs):
-    reader = csv.DictReader(csv_file)
-
+def _yield_rows(reader, *, field_mapping, sanitizers, **kwargs):
     while True:
         try:
             row = next(reader)
@@ -74,6 +73,7 @@ def _yield_rows(csv_file, *, field_mapping, sanitizers, **kwargs):
             break
         except Exception as e:
             print('CSV parsing error.', e)
+            continue
         sanitized_row = _sanitize_row(
             row,
             field_mapping=field_mapping,
@@ -83,9 +83,9 @@ def _yield_rows(csv_file, *, field_mapping, sanitizers, **kwargs):
             yield sanitized_row
 
 
-def _yield_model_instances(csv_file, *, model, field_mapping, sanitizers, **kwargs):
+def _yield_model_instances(csv_file, *, model, field_mapping, sanitizers, file_reader, **kwargs):
     for row in _yield_rows(
-        _strip_rows(csv_file),
+        file_reader(csv_file),
         field_mapping=field_mapping,
         sanitizers=sanitizers
     ):
@@ -105,11 +105,78 @@ def boolean(b):
     }.get(b)
 
 
+def parse_fac_csv(csv_file):
+    """
+    Parse a FAC-sources CSV.
+    There are random empty lines in these files, so in addition to using the
+    built-in CSV module, ignore empty lines.
+    """
+    return csv.DictReader(_strip_rows(csv_file))
+
+
+def parse_findings_text_csv(csv_file) -> Generator[Dict[str, any], None, None]:
+    """
+    The FAC findings text table includes unescaped, multi-line text which a
+    CSV parser is incapable of extracting. This function uses a regular
+    expression to grab the data, and yields dict-like rows.
+    """
+
+    # Verify the header contains the expected columns
+    first_line = next(csv_file)
+    assert first_line.rstrip() == 'SEQ_NUMBER|DBKEY|AUDITYEAR|FINDINGREFNUMS|TEXT|CHARTSTABLES'
+
+    # Iterate through the remainer of the file, collecting each row into a
+    # dictionary, and yielding them.
+    while True:
+        row = {}
+
+        # Get the first line - expected to look like:
+        #            21,        66846,2019,2019-001
+        try:
+            line = next(csv_file).strip()
+        except StopIteration:
+            break
+
+        # If the expected line isn't found, try going through the loop again.
+        parts = line.split(',')
+        if parts == ['']:
+            continue
+
+        assert len(parts) == 4, 'Unexpected field count'
+
+        row['SEQ_NUMBER'] = parts[0].strip()
+        row['DBKEY'] = parts[1].strip()
+        row['AUDITYEAR'] = parts[2].strip()
+        row['FINDINGREFNUMS'] = parts[3].strip()
+
+        # Accumulate TEXT column lines until the CHARTSTABLES field is found.
+        text_lines = []
+        while True:
+            line = next(csv_file).rstrip()
+
+            # We determine the end of a findings text row by the presence of
+            # the CHARTSTABLES value (Y/N) on its own line.
+            if line in ('N', 'Y'):
+                row['CHARTSTABLES'] = line
+
+                # There's always an empty line at the end of each row; skip it
+                # and process the next row.
+                next(csv_file)
+                break
+
+            text_lines.append(line)
+
+        row['TEXT'] = '\n'.join(text_lines)
+
+        yield row
+
+
 FAC_TABLES = {
     'audit': {
         # 'url': f'{ROOT_URL}/gen{year}.zip',
         'url': '/Users/dan/src/10x/fac-distiller/imports/gen19.txt',
         'model': models.Audit,
+        'file_reader': parse_fac_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -209,6 +276,7 @@ FAC_TABLES = {
         # 'url': f'{ROOT_URL}/cfda{year}.zip',
         'url': '/Users/dan/src/10x/fac-distiller/imports/cfda19.txt',
         'model': models.CFDA,
+        'file_reader': parse_fac_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -255,6 +323,7 @@ FAC_TABLES = {
         'url': '/Users/dan/src/10x/fac-distiller/imports/findings19.txt',
         # 'url': f'{ROOT_URL}/findings{year}.zip',
         'model': models.Finding,
+        'file_reader': parse_fac_csv,
         'field_mapping': {
             'DBKEY': 'dbkey',
             'AUDITYEAR': 'audit_year',
@@ -283,13 +352,25 @@ FAC_TABLES = {
             'PRIORFINDINGREFNUMS': boolean,
         }
     },
+    'findingtext': {
+        # 'url': f'{ROOT_URL}/findingstext19.zip',
+        'url': '/Users/dan/src/10x/fac-distiller/imports/findingstext19.txt',
+        'model': models.FindingText,
+        'file_reader': parse_findings_text_csv,
+        'field_mapping': {
+            'SEQ_NUMBER': 'seq_number',
+            'DBKEY': 'dbkey',
+            'AUDITYEAR': 'audit_year',
+            'FINDINGREFNUMS': 'finding_ref_nums',
+            'TEXT': 'text',
+            'CHARTSTABLES': 'charts_tables',
+        },
+        'sanitizers': {
+            'CHARTSTABLES': boolean
+        }
+    }
     #     'url': f'{ROOT_URL}/notes{year}.zip',
     #     'model': models.Note,
-    #     'field_mapping': [],
-    #     'sanitizers': {}
-    # }, {
-    #     'url': f'{ROOT_URL}/findingstext{year}.zip',
-    #     'model': models.FindingText,
     #     'field_mapping': [],
     #     'sanitizers': {}
     # }, {

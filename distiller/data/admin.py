@@ -32,8 +32,15 @@ class FindingAdmin(admin.ModelAdmin):
     raw_id_fields = ('elec_audits',)
 
 
+class FindingTextAdmin(admin.ModelAdmin):
+    list_display = (
+        'seq_number', 'dbkey', 'audit_year', 'finding_ref_nums', 'charts_tables'
+    )
+
+
 
 admin.site.register(models.AssistanceListing, AssistanceListingAdmin)
 admin.site.register(models.Audit, AuditAdmin)
 admin.site.register(models.CFDA, CFDAAdmin)
 admin.site.register(models.Finding, FindingAdmin)
+admin.site.register(models.FindingText, FindingTextAdmin)
