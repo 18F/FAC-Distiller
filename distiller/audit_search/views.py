@@ -19,17 +19,6 @@ def single_audit_search(request):
 
     results_page = None
     if form.is_valid():
-
-        # Select over the CFDA table, which has a mapping to General (Audit)
-        # and Findings...
-        # programs = models.CFDA.objects.filter(
-        #     cfda__in=cfda_nums
-        # # Join with AssistanceListing...
-        # ).select_related(
-        #     'cfda'
-        # # Prefetch the reverse relationship - audits.
-        # ).prefetch_related('audit_set')
-
         results_page = access.get_audits_by_subagency(
             sub_agency=form.cleaned_data['sub_agency'],
             audit_year=form.cleaned_data['audit_year'],
