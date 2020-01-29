@@ -1,8 +1,6 @@
 """
-This module contains a Django management command to load assistance listings
-from beta.sam.gov into the database.
-
-Assistance Listings include metadata about programs receiving grant funding.
+This module contains a Django management command to download source table dumps
+into a central location.
 """
 
 import sys
@@ -14,27 +12,27 @@ from ...etls import single_audit_db
 
 
 class Command(BaseCommand):
-    help = 'Load tables from the Single Audit Database'
+    help = 'Download table dump(s) from upstream source location'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--all',
             action='store_true',
-            help='Load all supported FAC tables',
+            help='Load all supported tables',
         )
         for table in single_audit_db.FAC_TABLES_NAMES:
             parser.add_argument(
                 f'--{table}',
                 action='store_true',
-                help=f'Load {table} FAC table',
+                help=f'Download {table} table',
             )
 
     def handle(self, *args, **options):
         for table in single_audit_db.FAC_TABLES_NAMES:
             if options['all'] or options[table]:
-                sys.stdout.write(f'Loading FAC table "{table}"...\n')
+                sys.stdout.write(f'Downloading table "{table}"...\n')
                 sys.stdout.flush()
-                single_audit_db.update_table(
+                single_audit_db.download_table(
                     table,
-                    source_dir=settings.DEFAULT_IMPORT_DIR,
+                    target_dir=settings.DEFAULT_IMPORT_DIR
                 )

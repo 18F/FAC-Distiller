@@ -7,6 +7,7 @@ import it both here and in the file that's actually doing the filtering.
 
 from collections import defaultdict
 from datetime import datetime
+from typing import Mapping
 
 from django import forms
 
@@ -98,7 +99,7 @@ AGENCY_CHOICES = (
     ('99', 'Miscellaneous'),
 )
 
-AGENCIES_BY_PREFIX = defaultdict(list)
+AGENCIES_BY_PREFIX: Mapping = defaultdict(list)
 for prefix, agency_name in AGENCY_CHOICES:
     if prefix:
         AGENCIES_BY_PREFIX[prefix].append(agency_name)

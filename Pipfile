@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest-django = "*"
 pytest = "*"
+mypy = "*"
+django-stubs = "*"
 
 [packages]
 selenium = "*"
@@ -19,6 +21,8 @@ smart-open = "*"
 django-widget-tweaks = "*"
 gunicorn = {extras = ["gevent"],version = "*"}
 django-composite-foreignkey = "*"
+s3fs = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"

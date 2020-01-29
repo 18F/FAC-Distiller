@@ -5,43 +5,123 @@ This module imports all columns defined in `key.xls`, available here:
 https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
+import abc
 import csv
+import io
+import os
+import shutil
 import sys
 from datetime import datetime
-from typing import Dict, Generator
+from typing import Any, Dict, Generator, Iterator, List, Union
+from zipfile import ZipFile
 
 import smart_open
 from django.db import transaction
 
 from .. import models
+from ..gateways import files
 
 
-ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
+FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
+
+# In addition to the current year, the number of years to load.
+# Note that 2018 has currently unparsable CFDA CSV.
+FAC_PRIOR_YEARS = 1
+
+def download_table(
+    table_name: str,
+    target_dir: str,
+    unzip: bool = False,
+) -> None:
+    """
+    Download given table to specified location. Target files will be in the
+    form: <target-root>/<table-name>/<timestamp>/<file-name>
+    """
+
+    table = FAC_TABLES[table_name]
+    timestamp = datetime.now().isoformat().replace(':', '-')
+    target_dir = os.path.join(target_dir, table_name, timestamp)
+
+    for source_path in table['source_urls']:
+        sys.stdout.write(f'Loading {source_path}...')
+        sys.stdout.flush()
+        file_name = os.path.basename(source_path)
+
+        # Do the copy operation from source to destination
+        try:
+            with files.input_file(source_path, mode='rb') as src_file:
+                if source_path.endswith('.zip'):
+                    # We can't stream data out of a zip file, so load the
+                    # entire thing into memory.
+                    with ZipFile(io.BytesIO(src_file.read())) as zip_file:
+                        for zip_entry in zip_file.namelist():
+                            with zip_file.open(zip_entry) as zip_entry_file:
+                                target_path = os.path.join(target_dir, zip_entry)
+                                with files.output_file(target_path, mode='wb') as dest_file:
+                                    shutil.copyfileobj(zip_entry_file, dest_file)
+
+                else:
+                    target_path = os.path.join(target_dir, file_name)
+                    with files.output_file(target_path, mode='wb') as dest_file:
+                        shutil.copyfileobj(src_file, dest_file)
+
+        # If we can't open, the file probably doesn't exist. This will happen
+        # with current audit year table dumps early in the year.
+        except files.FileOpenFailure as e:
+            sys.stdout.write(f'Load failure, skipping...\n')
+            sys.stdout.flush()
+            continue
+
+        sys.stdout.write(f'Done!\n')
+        sys.stdout.flush()
 
 
 @transaction.atomic
-def update_table(table_name: str):
+def update_table(
+    table_name: str,
+    source_dir: str,
+    delete_existing: bool = True
+) -> None:
     """
     Get the Distiller's database in sync with the latest from the Single Audit
     Database.
-
-    NOTE: This currently only loads selected 2019 tables.
     """
 
     table = FAC_TABLES[table_name]
 
-    sys.stdout.write(f'Importing {table["url"]}...')
+    if delete_existing:
+        sys.stdout.write(f'Clearing {table_name} table... ')
+        sys.stdout.flush()
+        table["model"].objects.all().delete()
+
+    sys.stdout.write(f'Loading {table_name}...\n')
     sys.stdout.flush()
 
-    table["model"].objects.all().delete()
+    root_dir = os.path.join(source_dir, table_name)
+    dump_dirs = files.glob(f'{root_dir}/*/')
+    most_recent_dump_dir = dump_dirs[-1]
 
-    with smart_open.open(table["url"], encoding='latin-1') as csv_file:
-        table["model"].objects.bulk_create(
-            _yield_model_instances(csv_file, **table),
-            batch_size=1_000
-        )
+    file_paths = files.glob(f'{most_recent_dump_dir}*')
+    for file_path in file_paths:
+        sys.stdout.write(f'\tImporting {file_path}...')
+        sys.stdout.flush()
+        with smart_open.open(file_path, encoding='latin-1') as csv_file:
+            table["model"].objects.bulk_create(
+                _yield_model_instances(csv_file, **table),
+                batch_size=1_000
+            )
 
     sys.stdout.write('Done!\n')
+
+
+# @transaction.atomic
+# def update_table(table_name: str) -> None:
+
+#     SourceFileClass = {
+#         'cfda': CfdaFile
+#     }[table_name]
+#     SourceFileClass.get_source_files()
+
 
 
 def _sanitize_row(row, *, field_mapping, sanitizers, **kwargs):
@@ -114,7 +194,7 @@ def parse_fac_csv(csv_file):
     return csv.DictReader(_strip_rows(csv_file))
 
 
-def parse_findings_text_csv(csv_file) -> Generator[Dict[str, any], None, None]:
+def parse_findings_text_csv(csv_file) -> Generator[Dict[str, Any], None, None]:
     """
     The FAC findings text table includes unescaped, multi-line text which a
     CSV parser is incapable of extracting. This function uses a regular
@@ -171,10 +251,59 @@ def parse_findings_text_csv(csv_file) -> Generator[Dict[str, any], None, None]:
         yield row
 
 
+class SourceFile(abc.ABC):
+    @classmethod
+    @abc.abstractmethod
+    def get_source_files(cls) -> Iterator['SourceFile']:
+        raise NotImplemented
+
+    def __init__(self, source_path: str):
+        self._source_path = source_path
+
+
+class FacSourceFile(SourceFile):
+    ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
+
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def file_prefix(cls) -> str:
+        raise NotImplemented('Provide a file prefix')
+
+    @classmethod
+    def get_url(cls, year) -> str:
+        return os.path.join(ROOT_URL, f'{cls.file_prefix}')
+
+    @classmethod
+    def yield_source_files(cls) -> List[SourceFile]:
+        # Get two prior years, plus this year (if the file exists).
+        this_year = datetime.now().year
+        return [
+            cls.get_url(year)
+            for year in range(this_year, this_year - 3, -1)
+        ]
+
+
+class AuditSourceFile(FacSourceFile):
+    @classmethod
+    @property
+    def file_prefix(cls) -> str:
+        return 'gen'
+
+
+def _fac_urls(file_prefix: str):
+    # Get two prior years, plus this year (if the file exists).
+    this_year = datetime.now().year
+    return [
+        os.path.join(FAC_ROOT_URL, f'{file_prefix}{year % 100:02d}.zip')
+        for year in range(this_year, this_year - FAC_PRIOR_YEARS - 1, -1)
+    ]
+
+
+
 FAC_TABLES = {
     'audit': {
-        # 'url': f'{ROOT_URL}/gen{year}.zip',
-        'url': '/Users/dan/src/10x/fac-distiller/imports/gen19.txt',
+        'source_urls': _fac_urls('gen'),
         'model': models.Audit,
         'file_reader': parse_fac_csv,
         'field_mapping': {
@@ -273,8 +402,7 @@ FAC_TABLES = {
         }
     },
     'cfda': {
-        # 'url': f'{ROOT_URL}/cfda{year}.zip',
-        'url': '/Users/dan/src/10x/fac-distiller/imports/cfda19.txt',
+        'source_urls': _fac_urls('cfda'),
         'model': models.CFDA,
         'file_reader': parse_fac_csv,
         'field_mapping': {
@@ -320,8 +448,7 @@ FAC_TABLES = {
         }
     },
     'finding': {
-        'url': '/Users/dan/src/10x/fac-distiller/imports/findings19.txt',
-        # 'url': f'{ROOT_URL}/findings{year}.zip',
+        'source_urls': _fac_urls('findings'),
         'model': models.Finding,
         'file_reader': parse_fac_csv,
         'field_mapping': {
@@ -353,8 +480,7 @@ FAC_TABLES = {
         }
     },
     'findingtext': {
-        # 'url': f'{ROOT_URL}/findingstext19.zip',
-        'url': '/Users/dan/src/10x/fac-distiller/imports/findingstext19.txt',
+        'source_urls': _fac_urls('findingstext'),
         'model': models.FindingText,
         'file_reader': parse_findings_text_csv,
         'field_mapping': {

@@ -7,7 +7,7 @@ from datetime import date
 from functools import reduce
 from typing import Dict, List, Optional
 
-from django.core.paginator import Paginator
+from django.core.paginator import Page, Paginator
 from django.db.models import Q
 
 from . import models
@@ -36,7 +36,7 @@ def filter_audits(
     end_date: date,
     page: int,
     paginate_by: int = 25,
-) -> AuditSearch:
+) -> Page:
     """
     Return audit search results
     """
