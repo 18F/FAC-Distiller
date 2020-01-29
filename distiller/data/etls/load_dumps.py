@@ -17,7 +17,7 @@ from typing import Any, Dict, Generator, Iterator, List, Union
 from zipfile import ZipFile
 
 import smart_open
-from django.db import transaction
+from django.db import connection, transaction
 
 from .. import models
 from ..gateways import files
@@ -95,7 +95,11 @@ def update_table(
     if delete_existing:
         sys.stdout.write(f'Clearing {table_name} table... ')
         sys.stdout.flush()
-        table["model"].objects.all().delete()
+        # Clear the existing table.
+        # We could DELETE here rather than TRUNCATE, which would be safe
+        # transactionally, but performance is very poor for the larger tables.
+        with connection.cursor() as cursor:
+            cursor.execute(f'TRUNCATE TABLE {table["model"]._meta.db_table}')
 
     sys.stdout.write(f'Loading {table_name}...\n')
     sys.stdout.flush()
