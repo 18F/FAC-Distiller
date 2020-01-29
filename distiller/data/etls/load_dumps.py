@@ -8,6 +8,7 @@ https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 import abc
 import csv
 import io
+import json
 import os
 import shutil
 import sys
@@ -27,6 +28,7 @@ FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
 # In addition to the current year, the number of years to load.
 # Note that 2018 has currently unparsable CFDA CSV.
 FAC_PRIOR_YEARS = 1
+
 
 def download_table(
     table_name: str,
@@ -80,7 +82,8 @@ def download_table(
 def update_table(
     table_name: str,
     source_dir: str,
-    delete_existing: bool = True
+    delete_existing: bool = True,
+    batch_size: int = 1_000,
 ) -> None:
     """
     Get the Distiller's database in sync with the latest from the Single Audit
@@ -99,6 +102,12 @@ def update_table(
 
     root_dir = os.path.join(source_dir, table_name)
     dump_dirs = files.glob(f'{root_dir}/*/')
+
+    if not dump_dirs:
+        sys.stdout.write(f'No table dump exists. Exiting...\n')
+        sys.stdout.flush()
+        return
+
     most_recent_dump_dir = dump_dirs[-1]
 
     file_paths = files.glob(f'{most_recent_dump_dir}*')
@@ -108,20 +117,10 @@ def update_table(
         with smart_open.open(file_path, encoding='latin-1') as csv_file:
             table["model"].objects.bulk_create(
                 _yield_model_instances(csv_file, **table),
-                batch_size=1_000
+                batch_size=batch_size
             )
 
     sys.stdout.write('Done!\n')
-
-
-# @transaction.atomic
-# def update_table(table_name: str) -> None:
-
-#     SourceFileClass = {
-#         'cfda': CfdaFile
-#     }[table_name]
-#     SourceFileClass.get_source_files()
-
 
 
 def _sanitize_row(row, *, field_mapping, sanitizers, **kwargs):
@@ -136,13 +135,6 @@ def _sanitize_row(row, *, field_mapping, sanitizers, **kwargs):
             sanitized_row[model_field_name] = value
 
     return sanitized_row
-
-
-def _strip_rows(rows):
-    for row in rows:
-        if not row:
-            continue
-        yield row.strip()
 
 
 def _yield_rows(reader, *, field_mapping, sanitizers, **kwargs):
@@ -183,6 +175,13 @@ def boolean(b):
         'Y': True,
         'N': False
     }.get(b)
+
+
+def _strip_rows(rows):
+    for row in rows:
+        if not row:
+            continue
+        yield row.strip()
 
 
 def parse_fac_csv(csv_file):
@@ -251,46 +250,6 @@ def parse_findings_text_csv(csv_file) -> Generator[Dict[str, Any], None, None]:
         yield row
 
 
-class SourceFile(abc.ABC):
-    @classmethod
-    @abc.abstractmethod
-    def get_source_files(cls) -> Iterator['SourceFile']:
-        raise NotImplemented
-
-    def __init__(self, source_path: str):
-        self._source_path = source_path
-
-
-class FacSourceFile(SourceFile):
-    ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
-
-    @classmethod
-    @property
-    @abc.abstractmethod
-    def file_prefix(cls) -> str:
-        raise NotImplemented('Provide a file prefix')
-
-    @classmethod
-    def get_url(cls, year) -> str:
-        return os.path.join(ROOT_URL, f'{cls.file_prefix}')
-
-    @classmethod
-    def yield_source_files(cls) -> List[SourceFile]:
-        # Get two prior years, plus this year (if the file exists).
-        this_year = datetime.now().year
-        return [
-            cls.get_url(year)
-            for year in range(this_year, this_year - 3, -1)
-        ]
-
-
-class AuditSourceFile(FacSourceFile):
-    @classmethod
-    @property
-    def file_prefix(cls) -> str:
-        return 'gen'
-
-
 def _fac_urls(file_prefix: str):
     # Get two prior years, plus this year (if the file exists).
     this_year = datetime.now().year
@@ -302,6 +261,68 @@ def _fac_urls(file_prefix: str):
 
 
 FAC_TABLES = {
+    'assistancelisting': {
+        'source_urls': [
+            'https://s3.amazonaws.com/falextracts/Assistance%20Listings/datagov/AssistanceListings_DataGov_PUBLIC_CURRENT.csv'
+        ],
+        'model': models.AssistanceListing,
+        'file_reader': csv.DictReader,
+        'field_mapping': {
+            'Program Title': 'program_title',
+            'Program Number': 'program_number',
+            'Popular Name (020)': 'popular_name',
+            'Federal Agency (030)': 'federal_agency',
+            'Authorization (040)': 'authorization',
+            'Objectives (050)': 'objectives',
+            'Types of Assistance (060)': 'assistance_types',
+            'Uses and Use Restrictions (070)': 'uses_restrictions',
+            'Applicant Eligibility (081)': 'applicant_eligibility',
+            'Beneficiary Eligibility (082)': 'beneficiary_eligibility',
+            'Credentials/Documentation (083)': 'credentials_documentation',
+            'Preapplication Coordination (091)': 'preapplication_coordination',
+            'Application Procedures (092)': 'application_procedures',
+            'Award Procedure (093)': 'award_procedure',
+            'Deadlines (094)': 'deadlines',
+            'Range of Approval/Disapproval Time (095)': 'approval_time',
+            'Appeals (096)': 'appeals',
+            'Renewals (097)': 'renewals',
+            'Formula and Matching Requirements (101)': 'requirements',
+            'Length and Time Phasing of Assistance (102)': 'assistance_period',
+            'Reports (111)': 'reports',
+            'Audits (112)': 'audits',
+            'Records (113)': 'records',
+            'Account Identification (121)': 'account_identification',
+            'Obligations (122)': 'obligations',
+            'Range and Average of Financial Assistance (123)': 'assistance_range',
+            'Program Accomplishments (130)': 'program_accomplishments',
+            'Regulations, Guidelines, and Literature (140)': 'regulations',
+            'Regional or Local Office (151)': 'regional_local_office',
+            'Headquarters Office (152)': 'headquarters_office',
+            'Website Address (153)': 'website',
+            'Related Programs (160)': 'related_programs',
+            'Examples of Funded Projects (170)': 'funded_project_examples',
+            'Criteria for Selecting Proposals (180)': 'selection_criteria',
+            'Published Date': 'published_date',
+            'Parent Shortname': 'parent_shortname',
+            'URL': 'sam_gov_url',
+            'Recovery': 'recovery',
+        },
+        'sanitizers': {
+            'Recovery': lambda x: {'Yes': True, 'No': False}[x],
+            'Published Date': lambda x: datetime.strptime(x, '%b %d,%Y').date(),
+            'Authorization (040)': json.loads,
+            'Credentials/Documentation (083)': json.loads,
+            'Preapplication Coordination (091)': json.loads,
+            'Application Procedures (092)': json.loads,
+            'Deadlines (094)': json.loads,
+            'Formula and Matching Requirements (101)': json.loads,
+            'Length and Time Phasing of Assistance (102)': json.loads,
+            'Reports (111)': json.loads,
+            'Audits (112)': json.loads,
+            'Program Accomplishments (130)': json.loads,
+            'Regional or Local Office (151)': json.loads,
+        }
+    },
     'audit': {
         'source_urls': _fac_urls('gen'),
         'model': models.Audit,
@@ -495,21 +516,6 @@ FAC_TABLES = {
             'CHARTSTABLES': boolean
         }
     }
-    #     'url': f'{ROOT_URL}/notes{year}.zip',
-    #     'model': models.Note,
-    #     'field_mapping': [],
-    #     'sanitizers': {}
-    # }, {
-    #     'url': f'{ROOT_URL}/captext{year}.zip',
-    #     'model': models.CAPText,
-    #     'field_mapping': [],
-    #     'sanitizers': {}
-    # }, {
-    #     'url': f'{ROOT_URL}/revisions{year}.zip',
-    #     'model': models.Revision,
-    #     'field_mapping': [],
-    #     'sanitizers': {}
-    # }
 }
 
 FAC_TABLES_NAMES = tuple(FAC_TABLES.keys())

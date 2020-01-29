@@ -10,7 +10,7 @@ import sys
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from ...etls import single_audit_db
+from ...etls import load_dumps
 
 
 class Command(BaseCommand):
@@ -22,7 +22,7 @@ class Command(BaseCommand):
             action='store_true',
             help='Load all supported FAC tables',
         )
-        for table in single_audit_db.FAC_TABLES_NAMES:
+        for table in load_dumps.FAC_TABLES_NAMES:
             parser.add_argument(
                 f'--{table}',
                 action='store_true',
@@ -30,11 +30,11 @@ class Command(BaseCommand):
             )
 
     def handle(self, *args, **options):
-        for table in single_audit_db.FAC_TABLES_NAMES:
+        for table in load_dumps.FAC_TABLES_NAMES:
             if options['all'] or options[table]:
                 sys.stdout.write(f'Loading FAC table "{table}"...\n')
                 sys.stdout.flush()
-                single_audit_db.update_table(
+                load_dumps.update_table(
                     table,
                     source_dir=settings.DEFAULT_IMPORT_DIR,
                 )

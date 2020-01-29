@@ -5,7 +5,7 @@ Tests for the load of FAC tables.
 import datetime
 import os
 
-from ..etls.single_audit_db import parse_findings_text_csv
+from ..etls.load_dumps import parse_findings_text_csv
 
 DATA_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), os.path.join('data'))
@@ -13,16 +13,6 @@ DATA_PATH = os.path.abspath(
 TEST_FINDINGS_TEXT_PATH = os.path.join(
     DATA_PATH, os.path.join('sample_findings_text.txt')
 )
-
-
-# def test_load_cdfa():
-#     table = _get_table_details()[1]
-#     csv_file = smart_open.open(table['url'], encoding='latin-1')
-#     _yield_rows(
-#         csv_file,
-#         table['field_mapping'],
-#         table['sanitizers'],
-#     )
 
 
 def test_findings_text_parser():

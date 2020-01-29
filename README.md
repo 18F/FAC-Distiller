@@ -100,6 +100,20 @@ You can access the admin panel at [http://localhost:8000/admin](http://localhost
 
 This application relies on external data sources. To populate the database with required data, run these ETL jobs.
 
+### Download source tables
+
+To load, first download the source table dumps. By default, these tables will be placed in timestamped directories under `/imports`. In production, these files will be placed in an S3 bucket.
+
+To may download specific tables, or all tables at once.
+
+```shell
+pipenv run python manage.py download_table --all
+pipenv run python manage.py download_table --audit
+pipenv run python manage.py download_table --cfda
+pipenv run python manage.py download_table --finding
+pipenv run python manage.py download_table --findingtext
+```
+
 ### Assistance listings from beta.sam.gov
 
 ```shell

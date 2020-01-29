@@ -34,7 +34,11 @@ class AssistanceListing(models.Model):
         help_text='Program Number'
     )
     program_title = models.TextField(help_text='Program Title')
-    popular_name = models.TextField(help_text='Popular Name (020)')
+    popular_name = models.TextField(
+        help_text='Popular Name (020)',
+        blank=True,
+        null=True,
+    )
     federal_agency = models.TextField(help_text='Federal Agency (030)')
     authorization = JSONField(help_text='Authorization (040)')
     objectives = models.TextField(help_text='Objectives (050)')
@@ -76,13 +80,19 @@ class AssistanceListing(models.Model):
     )
     reports = JSONField(help_text='Reports (111)')
     audits = JSONField(help_text='Audits (112)')
-    records = models.TextField(help_text='Records (113)')
+    records = models.TextField(
+        help_text='Records (113)',
+        blank=True,
+        null=True,
+    )
     account_identification = models.TextField(
         help_text='Account Identification (121)'
     )
     obligations = models.TextField(help_text='Obligations (122)')
     assistance_range = models.TextField(
-        help_text='Range and Average of Financial Assistance (123)'
+        help_text='Range and Average of Financial Assistance (123)',
+        blank=True,
+        null=True,
     )
     program_accomplishments = JSONField(
         help_text='Program Accomplishments (130)'
@@ -96,10 +106,20 @@ class AssistanceListing(models.Model):
     headquarters_office = models.TextField(
         help_text='Headquarters Office (152)'
     )
-    website = models.URLField(help_text='Website Address (153)')
-    related_programs = models.TextField(help_text='Related Programs (160)')
+    website = models.URLField(
+        help_text='Website Address (153)',
+        blank=True,
+        null=True,
+    )
+    related_programs = models.TextField(
+        help_text='Related Programs (160)',
+        blank=True,
+        null=True,
+    )
     funded_project_examples = models.TextField(
-        help_text='Examples of Funded Projects (170)'
+        help_text='Examples of Funded Projects (170)',
+        blank=True,
+        null=True,
     )
     selection_criteria = models.TextField(
         help_text='Criteria for Selecting Proposals (180)'
@@ -107,7 +127,9 @@ class AssistanceListing(models.Model):
     published_date = models.DateField(help_text='Published Date')
     parent_shortname = models.CharField(
         max_length=8,
-        help_text='Parent Shortname'
+        help_text='Parent Shortname',
+        blank=True,
+        null=True,
     )
     sam_gov_url = models.URLField(help_text='URL')
     recovery = models.BooleanField(help_text='Recovery')
