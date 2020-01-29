@@ -61,7 +61,7 @@ def glob(path: str) -> List[str]:
         fs = s3fs.S3FileSystem(anon=False)
         return [
             f's3://{path}'
-            for path in fs.glob(f'{bucket}{path}')
+            for path in fs.glob(f'{url.netloc}{path}')
         ]
 
     # Assume filesystem path
