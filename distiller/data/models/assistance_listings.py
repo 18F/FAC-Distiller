@@ -3,21 +3,42 @@ from django.contrib.postgres.fields import JSONField
 
 
 class AssistanceListingManager(models.Manager):
-    def subagencies_for_prefix(self, prefix):
+    def with_prefix(self, prefix):
         return self.filter(
             program_number__startswith=prefix
-        ).order_by('program_title')
+        )
+
+    def distinct_agencies(self, agency_prefix):
+        return self.with_prefix(agency_prefix).distinct(
+            'federal_agency').values_list('federal_agency', flat=True)
+
+    def get_cfda_nums_for_agency(self, federal_agency: str):
+        return self.filter(federal_agency=federal_agency).values_list(
+            'program_number', flat=True)
 
 
 class AssistanceListing(models.Model):
+    """
+    Assistance listings from sam.gov.
+    We load this so we may map CFDA numbers (program_number) to federal
+    agencies (federal_agency).
+    """
+
     objects = AssistanceListingManager()
 
-    program_title = models.TextField(help_text='Program Title')
     program_number = models.CharField(
-        max_length=6,
+        primary_key=True,
+        # We make this 64 rather than 6 to accomodate invalid foreign key
+        # references to this table (see: CFDA table).
+        max_length=64,
         help_text='Program Number'
     )
-    popular_name = models.TextField(help_text='Popular Name (020)')
+    program_title = models.TextField(help_text='Program Title')
+    popular_name = models.TextField(
+        help_text='Popular Name (020)',
+        blank=True,
+        null=True,
+    )
     federal_agency = models.TextField(help_text='Federal Agency (030)')
     authorization = JSONField(help_text='Authorization (040)')
     objectives = models.TextField(help_text='Objectives (050)')
@@ -59,13 +80,19 @@ class AssistanceListing(models.Model):
     )
     reports = JSONField(help_text='Reports (111)')
     audits = JSONField(help_text='Audits (112)')
-    records = models.TextField(help_text='Records (113)')
+    records = models.TextField(
+        help_text='Records (113)',
+        blank=True,
+        null=True,
+    )
     account_identification = models.TextField(
         help_text='Account Identification (121)'
     )
     obligations = models.TextField(help_text='Obligations (122)')
     assistance_range = models.TextField(
-        help_text='Range and Average of Financial Assistance (123)'
+        help_text='Range and Average of Financial Assistance (123)',
+        blank=True,
+        null=True,
     )
     program_accomplishments = JSONField(
         help_text='Program Accomplishments (130)'
@@ -79,10 +106,20 @@ class AssistanceListing(models.Model):
     headquarters_office = models.TextField(
         help_text='Headquarters Office (152)'
     )
-    website = models.URLField(help_text='Website Address (153)')
-    related_programs = models.TextField(help_text='Related Programs (160)')
+    website = models.URLField(
+        help_text='Website Address (153)',
+        blank=True,
+        null=True,
+    )
+    related_programs = models.TextField(
+        help_text='Related Programs (160)',
+        blank=True,
+        null=True,
+    )
     funded_project_examples = models.TextField(
-        help_text='Examples of Funded Projects (170)'
+        help_text='Examples of Funded Projects (170)',
+        blank=True,
+        null=True,
     )
     selection_criteria = models.TextField(
         help_text='Criteria for Selecting Proposals (180)'
@@ -90,7 +127,9 @@ class AssistanceListing(models.Model):
     published_date = models.DateField(help_text='Published Date')
     parent_shortname = models.CharField(
         max_length=8,
-        help_text='Parent Shortname'
+        help_text='Parent Shortname',
+        blank=True,
+        null=True,
     )
     sam_gov_url = models.URLField(help_text='URL')
     recovery = models.BooleanField(help_text='Recovery')

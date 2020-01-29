@@ -2,10 +2,11 @@
 Tests for the load of assistance listings.
 """
 
+import csv
 import datetime
 import os
 
-from ..etls.assistance_listings import _yield_rows
+from ..etls.load_dumps import FAC_TABLES, _yield_rows
 
 
 def test_baseline():
@@ -17,7 +18,12 @@ def test_baseline():
     """
 
     with open(SAMPLE_CSV_PATH) as csv_file:
-        assert list(_yield_rows(csv_file)) == PARSED_ROWS
+        assert list(
+            _yield_rows(
+                csv.DictReader(csv_file),
+                **FAC_TABLES['assistancelisting']
+            )
+        ) == PARSED_ROWS
 
     assert True
 
@@ -88,7 +94,7 @@ PARSED_ROWS = [
         },
         "records": "Financial records, supporting documents, statistical records, and all other records pertinent to an award shall be retained for a period of three years from the date of submission of the final expenditure report or, for awards that are renewed quarterly or annually, from the date of the submission of the quarterly or annual financial report, as authorized by the Federal awarding agency.",
         "account_identification": "12-1400-0-1-352;",
-        "obligations": "(Project Grants) FY 18$6,271,318.00; FY 19 est $4,704,045.00; FY 20 est $4,713,453.00; FY 17$45,381,885.00; FY 16$45,381,885.00; - ",
+        "obligations": "(Project Grants) FY 18$6,271,318.00; FY 19 est $4,704,045.00; FY 20 est $4,713,453.00; FY 17$45,381,885.00; FY 16$45,381,885.00; -",
         "assistance_range": "$5,000 to $50,000.  Average $20,000",
         "program_accomplishments": {"list": [], "isApplicable": False},
         "regulations": "2 CFR 200",
@@ -98,7 +104,7 @@ PARSED_ROWS = [
         },
         "headquarters_office": "Kathleen S. Townson,5601 Sunnyside Ave, MS-5110, Beltsville, MD 20705 Email:< a href='mailto:kathleen.townson@ars.usda.gov'>kathleen.townson@ars.usda.gov</a>Phone: (301) 504-1702.;",
         "website": "http://www.ars.usda.gov",
-        "related_programs": "10.200 Grants for Agricultural Research, Special Research Grants; 10.207 Animal Health and Disease Research; 10.203 Payments to Agricultural Experiment Stations Under the Hatch Act; 10.500 Cooperative Extension Service; 10.202 Cooperative Forestry Research; 10.205 Payments to 1890 Land-Grant Colleges and Tuskegee University; 10.250 Agricultural and Rural Economic Research, Cooperative Agreements and Collaborations; 10.652 Forestry Research; 10.700 National Agricultural Library; ",
+        "related_programs": "10.200 Grants for Agricultural Research, Special Research Grants; 10.207 Animal Health and Disease Research; 10.203 Payments to Agricultural Experiment Stations Under the Hatch Act; 10.500 Cooperative Extension Service; 10.202 Cooperative Forestry Research; 10.205 Payments to 1890 Land-Grant Colleges and Tuskegee University; 10.250 Agricultural and Rural Economic Research, Cooperative Agreements and Collaborations; 10.652 Forestry Research; 10.700 National Agricultural Library;",
         "funded_project_examples": "Not Applicable.",
         "selection_criteria": "Peer review.",
         "published_date": datetime.date(1965, 1, 1),
@@ -109,7 +115,7 @@ PARSED_ROWS = [
     {
         "program_title": "Plant and Animal Disease, Pest Control, and Animal Care",
         "program_number": "10.025",
-        "popular_name": "",
+        "popular_name": None,
         "federal_agency": "ANIMAL AND PLANT HEALTH INSPECTION SERVICE, AGRICULTURE, DEPARTMENT OF",
         "authorization": {
             "list": [
@@ -203,8 +209,8 @@ PARSED_ROWS = [
         "audits": {"isApplicable": True, "description": "N/A"},
         "records": "Instruction provided in the Notice of Award.  Grantees are expected to maintain separate records for each grant to ensure that funds are used for the purpose for which the grant was made.  Records are subject to inspection during the life of the grant and for three years thereafter.",
         "account_identification": "12-9971-0-7-352;12-1600-0-1-352;",
-        "obligations": "(Salaries and Expenses) FY 18$246,769,118.00; FY 19 est $249,527,131.00; FY 20 est $280,732,387.00; FY 17$243,631,584.00; FY 16$239,406,515.00; - APHIS has a difference between budget authority and obligations because there is carryover funding available from no year funding.\n",
-        "assistance_range": "",
+        "obligations": "(Salaries and Expenses) FY 18$246,769,118.00; FY 19 est $249,527,131.00; FY 20 est $280,732,387.00; FY 17$243,631,584.00; FY 16$239,406,515.00; - APHIS has a difference between budget authority and obligations because there is carryover funding available from no year funding.",
+        "assistance_range": None,
         "program_accomplishments": {
             "list": [
                 {
@@ -237,7 +243,7 @@ PARSED_ROWS = [
         },
         "headquarters_office": "Eileen M. Berke,4700 River Road, Unit 55, Riverdale, MD 20737 Email:< a href='mailto:eileen.m.berke@aphis.usda.gov'>eileen.m.berke@aphis.usda.gov</a>Phone: (301) 851-2856;",
         "website": "http://www.aphis.usda.gov/",
-        "related_programs": "10.207 Animal Health and Disease Research; 10.215 Sustainable Agriculture Research and Education; 10.219 Biotechnology Risk Assessment Research; 15.611 Wildlife Restoration and Basic Hunter Education; 10.001 Agricultural Research Basic and Applied Research; 10.500 Cooperative Extension Service; 10.028 Wildlife Services; 10.202 Cooperative Forestry Research; 10.902 Soil and Water Conservation; 10.250 Agricultural and Rural Economic Research, Cooperative Agreements and Collaborations; 10.652 Forestry Research; ",
+        "related_programs": "10.207 Animal Health and Disease Research; 10.215 Sustainable Agriculture Research and Education; 10.219 Biotechnology Risk Assessment Research; 15.611 Wildlife Restoration and Basic Hunter Education; 10.001 Agricultural Research Basic and Applied Research; 10.500 Cooperative Extension Service; 10.028 Wildlife Services; 10.202 Cooperative Forestry Research; 10.902 Soil and Water Conservation; 10.250 Agricultural and Rural Economic Research, Cooperative Agreements and Collaborations; 10.652 Forestry Research;",
         "funded_project_examples": "Not Applicable.",
         "selection_criteria": "Not Applicable.",
         "published_date": datetime.date(1972, 1, 1),
@@ -248,7 +254,7 @@ PARSED_ROWS = [
     {
         "program_title": "Wildlife Services",
         "program_number": "10.028",
-        "popular_name": "",
+        "popular_name": None,
         "federal_agency": "ANIMAL AND PLANT HEALTH INSPECTION SERVICE, AGRICULTURE, DEPARTMENT OF",
         "authorization": {
             "list": [
@@ -327,7 +333,7 @@ PARSED_ROWS = [
         "records": "Instruction provided in the Notice of Award.  Grantees are expected to maintain separate records for each grant to ensure that funds are used for the purpose for which the grant was made.  Records are subject to inspection during the life of the grant and for three years thereafter.",
         "account_identification": "12-1600-0-1-352;",
         "obligations": "(Salaries and Expenses) FY 18$7,905,018.00; FY 19 est $8,063,118.00; FY 20 est $13,466,274.00; FY 17$8,583,390.00; FY 16$6,649,664.00; - APHIS has a difference between budget authority and obligations because there is carryover funding available from no year funding.",
-        "assistance_range": "No Data Available. ",
+        "assistance_range": "No Data Available.",
         "program_accomplishments": {"list": [], "isApplicable": False},
         "regulations": 'Uniform Administrative Requirements, Cost Principles, and Audit Requirements for Federal Awards<94>, 2 CFR Part 200; Nonprocurement  Debarment and Suspension<94> 2 CFR 417; <93>Requirements for Drug-Free Workplace", 2 CFR Part 421; "New Restrictions on Lobbying", 2 CFR Part 418; and Office of Management and Budget regulations governing "Controlling Paperwork Burdens on the Public", 5 CFR 1320',
         "regional_local_office": {
@@ -336,7 +342,7 @@ PARSED_ROWS = [
         },
         "headquarters_office": "Eileen M. Berke,4700 River Road, Unit 55, Suite 3B06.3, Riverdale, MD 20737 Email:< a href='mailto:eileen.m.berke@aphis.usda.gov'>eileen.m.berke@aphis.usda.gov</a>Phone: (301) 851-2856;",
         "website": "http://www.aphis.usda.gov",
-        "related_programs": "15.611 Wildlife Restoration and Basic Hunter Education; 10.025 Plant and Animal Disease, Pest Control, and Animal Care; 10.652 Forestry Research; ",
+        "related_programs": "15.611 Wildlife Restoration and Basic Hunter Education; 10.025 Plant and Animal Disease, Pest Control, and Animal Care; 10.652 Forestry Research;",
         "funded_project_examples": "Not Applicable.",
         "selection_criteria": "Relevance to agency program mission and qualification of principle investigator and institution.",
         "published_date": datetime.date(1986, 1, 1),
@@ -347,7 +353,7 @@ PARSED_ROWS = [
     {
         "program_title": "Indemnity Program",
         "program_number": "10.030",
-        "popular_name": "",
+        "popular_name": None,
         "federal_agency": "ANIMAL AND PLANT HEALTH INSPECTION SERVICE, AGRICULTURE, DEPARTMENT OF",
         "authorization": {
             "list": [
@@ -362,7 +368,7 @@ PARSED_ROWS = [
                 },
             ]
         },
-        "objectives": "Animal and Plant Health Inspection Service administers regulations at 9 CFR parts 50 to 54 that authorizes payment for indemnities.  This authority covers a wide variety of indemnity situations ranging from large livestock depopulations to small fowl depopulations, and there are various indemnity calculations and processes for determining the indemnity value for each specific species.  The Secretary of Agriculture offers an opinion that constitutes an emergency and threatens the U.S. animal population.  Payment for the destroyed animals is based on fair market value.  Also, under Section 415 (e) of the Plant Protection Act (Title IV of Public Law 106-224), under a declaration of extraordinary emergency because of the presence of a plant pest or noxious weed that is new to or not known to be widely prevalent in the United States, the Secretary may pay compensation for economic losses incurred by as a result of actions taken under the authorities in this section (415).\n",
+        "objectives": "Animal and Plant Health Inspection Service administers regulations at 9 CFR parts 50 to 54 that authorizes payment for indemnities.  This authority covers a wide variety of indemnity situations ranging from large livestock depopulations to small fowl depopulations, and there are various indemnity calculations and processes for determining the indemnity value for each specific species.  The Secretary of Agriculture offers an opinion that constitutes an emergency and threatens the U.S. animal population.  Payment for the destroyed animals is based on fair market value.  Also, under Section 415 (e) of the Plant Protection Act (Title IV of Public Law 106-224), under a declaration of extraordinary emergency because of the presence of a plant pest or noxious weed that is new to or not known to be widely prevalent in the United States, the Secretary may pay compensation for economic losses incurred by as a result of actions taken under the authorities in this section (415).",
         "assistance_types": "DIRECT PAYMENTS WITH UNRESTRICTED USE",
         "uses_restrictions": "Not Applicable",
         "applicant_eligibility": "N/A",
@@ -394,8 +400,8 @@ PARSED_ROWS = [
         "audits": {"isApplicable": False},
         "records": "Record requirements will be specified in the Declaration of Emergency issued by the Secretary of Agriculture",
         "account_identification": "12-1600-0-1-352;",
-        "obligations": "(Direct Payments with Unrestricted Use) FY 18$6,586,698.00; FY 19 est $13,751,903.00; FY 20 est $14,400,228.00; FY 17$6,794,055.00; FY 16$30,472,730.00; - ",
-        "assistance_range": "No Data Available. ",
+        "obligations": "(Direct Payments with Unrestricted Use) FY 18$6,586,698.00; FY 19 est $13,751,903.00; FY 20 est $14,400,228.00; FY 17$6,794,055.00; FY 16$30,472,730.00; -",
+        "assistance_range": "No Data Available.",
         "program_accomplishments": {"list": [], "isApplicable": False},
         "regulations": "Not Applicable.",
         "regional_local_office": {"flag": "appendix"},
@@ -487,7 +493,7 @@ PARSED_ROWS = [
         "records": "Not applicable.",
         "account_identification": "12-4336-0-3-999;",
         "obligations": "(Direct Loans) FY 18$3,145,610,000.00; FY 19 est $3,205,858,000.00; FY 20 est $3,159,314,000.00; FY 17$6,914,144,153.00; FY 16$6,560,230,313.00; - (Direct Payments with Unrestricted Use) FY 18$72,000.00; FY 19 est $33,451,000.00; FY 20 est $65,467,000.00; FY 17$46,564,581.00; FY 16$212,967,255.00; - Loan Deficiency Payments",
-        "assistance_range": "",
+        "assistance_range": None,
         "program_accomplishments": {"list": [], "isApplicable": False},
         "regulations": 'Program regulations published in the Federal Register 7 CFR, Chapter XIV, Parts 1421, 1425, 1427, 1434, and 1435; announcements issued to news media and letters to producers; " FSA Commodity Fact Sheets, " no cost: The Price Support Program," ; Farm Service Agency, Department of Agriculture, STOP 0506, 1400 Independence Avenue S.W., Washington, DC 20250-0506.',
         "regional_local_office": {
@@ -496,7 +502,7 @@ PARSED_ROWS = [
         },
         "headquarters_office": "Shayla Watson-Porter1400 Independence Avenue, SW, Stop 0510, Washington, DC 20250-0510 Email:< a href='mailto:Shayla.watson-porter@usda.gov'>Shayla.watson-porter@usda.gov</a>Phone: (202) 690-2350;",
         "website": "http://www.fsa.usda.gov/programs-and-services/price-support/Index",
-        "related_programs": "10.155 Marketing Agreements and Orders; ",
+        "related_programs": "10.155 Marketing Agreements and Orders;",
         "funded_project_examples": "Not Applicable.",
         "selection_criteria": "Not Applicable.",
         "published_date": datetime.date(1965, 1, 1),
@@ -580,7 +586,7 @@ PARSED_ROWS = [
         "audits": {"isApplicable": False, "description": ""},
         "records": "The dairy farmer and the manufacturer of dairy products must keep any records in applying for a payment for 3 years following the year in which an application for payment was filed.",
         "account_identification": "12-1140-0-1-351;",
-        "obligations": "(Direct Payments with Unrestricted Use) FY 18$173,000.00; FY 19 est $3,439,646.00; FY 20 est $500,000.00; FY 17$224,334.00; FY 16$161,410.00; - ",
+        "obligations": "(Direct Payments with Unrestricted Use) FY 18$173,000.00; FY 19 est $3,439,646.00; FY 20 est $500,000.00; FY 17$224,334.00; FY 16$161,410.00; -",
         "assistance_range": "No Payment Limitation.",
         "program_accomplishments": {"list": [], "isApplicable": False},
         "regulations": "Program regulations were published in the Federal Register, 7 CFR, 760, and announced through the news media, Handbook 3-LD, Circulars and regulations issued by FSA.",
@@ -590,7 +596,7 @@ PARSED_ROWS = [
         },
         "headquarters_office": "Douglas E. Kilgore1400 Independence Avenue, SW, Washington, DC 20250-0512 Email:< a href='mailto:Douglas.E.Kilgore@usda.gov'>Douglas.E.Kilgore@usda.gov</a>Phone: (202) 720-9011;",
         "website": "http://www.fsa.usda.gov/programs-and-services/price-support/Index",
-        "related_programs": "10.500 Cooperative Extension Service; ",
+        "related_programs": "10.500 Cooperative Extension Service;",
         "funded_project_examples": "Not Applicable.",
         "selection_criteria": "Not Applicable.",
         "published_date": datetime.date(1969, 1, 1),

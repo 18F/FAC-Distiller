@@ -9,6 +9,8 @@ import dj_database_url
 
 
 BASE_DIR = Path(__file__).parents[1]
+PROJECT_ROOT = BASE_DIR.parents[0]
+DEFAULT_IMPORT_DIR = str(PROJECT_ROOT / 'imports')
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -27,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.humanize',
 
     'localflavor',
     'widget_tweaks',

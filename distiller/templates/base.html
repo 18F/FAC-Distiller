@@ -4,7 +4,7 @@
   {% load static %}
   <meta charset="utf-8">
   <link rel="stylesheet" href="{% static 'uswds/uswds.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/fgr_custom.css' %}">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   <link rel="stylesheet" href="{% static 'css/uswds_overrides.css' %}">
   <link rel="stylesheet" href="{% static 'css/visually_hidden.css' %}">
   <link rel='shortcut icon' type='image/x-icon'
@@ -75,8 +75,10 @@
       </div>
     </div>
   </div>
-  {% block content %}
-  {% endblock %}
+  <div class="grid-container">
+    {% block content %}
+    {% endblock %}
+  </div>
 </body>
 <script src="{% static 'uswds/uswds.min.js' %}"></script>
 </html>

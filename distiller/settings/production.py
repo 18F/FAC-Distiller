@@ -4,9 +4,9 @@ Production settings for FAC Distiller.
 
 from .base import *
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = False
+DEBUG = bool(os.environ.get('DEBUG'))
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

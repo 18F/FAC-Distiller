@@ -3,5 +3,13 @@ node_modules
 *.bak
 *.ipynb
 
+.pytest_cache/
+db/
+imports/
 distiller/single_audit_data_dump/pdfs
-distiller/come-back-to-these
+
+*.sublime-project
+*.sublime-workspace
+.vscode
+
+NOTES.md

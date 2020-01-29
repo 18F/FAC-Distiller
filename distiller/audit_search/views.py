@@ -4,18 +4,64 @@ Views for audit clearinghouse search interface.
 
 from io import StringIO
 
-from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 import pandas as pd
 
 from distiller.data.etls import selenium_scraper
+from distiller.data import access, models
 from .forms import AGENCIES_BY_PREFIX, AgencySelectionForm
 
 
-def search_by_agency(request):
-    # Form submissions are with POST, but filtering on parent agency is handled
-    # with GET.
-    form = AgencySelectionForm(request.POST or request.GET)
+def single_audit_search(request):
+    form = AgencySelectionForm(request.GET)
+
+    results_page = None
+    if form.is_valid():
+        results_page = access.get_audits_by_subagency(
+            sub_agency=form.cleaned_data['sub_agency'],
+            audit_year=form.cleaned_data['audit_year'],
+            start_date=form.cleaned_data['start_date'],
+            end_date=form.cleaned_data['end_date'],
+            page=form.cleaned_data['page'],
+        )
+
+    return render(request, 'audit_search/search.html', {
+        'form': form,
+        'page': results_page
+    })
+
+
+def view_audit(request, audit_id):
+    audit = models.Audit.objects.get(pk=audit_id)
+    #audit = access.get_audit(audit_id)
+
+    if audit is None:
+        raise Http404('Audit not found.')
+
+    return render(request, 'audit_search/audit.html', {
+        'audit': audit
+    })
+
+
+def view_finding(request, finding_id):
+    finding = models.Finding.objects.get(pk=finding_id)
+
+    if finding is None:
+        raise Http404('Finding not found.')
+
+    return render(request, 'audit_search/finding.html', {
+        'finding': finding
+    })
+
+
+def scrape_audits(request):
+    """
+    Run the Selenium scraper on-demand for given agency/sub-agency.
+    """
+
+    form = AgencySelectionForm(request.POST or None)
 
     # If form is valid, return results.
     if request.method == 'POST' and form.is_valid():
@@ -28,7 +74,7 @@ def search_by_agency(request):
             content_type="text/plain"
         )
 
-    return render(request, 'distiller/index.html', {'form': form})
+    raise HttpResponseBadRequest()
 
 
 def _get_findings(agency_df):
@@ -129,4 +175,4 @@ def show_agency_level_summary(request):
         raise ValueError("That doesn't seem to be a valid federal agency prefix.")
 
     highlights = _derive_agency_highlights(agency_prefix)
-    return render(request, 'distiller/results.html', highlights)
+    return render(request, 'audit_search/results.html', highlights)

@@ -1,0 +1,2 @@
+#!/bin/bash
+cf connect-to-service --no-client fac-distiller fac-distiller-db

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+  <div class="usa-section grid-row">
+    <h1>Finding Details</h1>
+    <div class="grid-col-12">
+      <dl>
+        <dt>elec_audit_findings_id</dt>
+        <dd>{{ finding.elec_audit_findings_id }}</dd>
+        <dt>dbkey</dt>
+        <dd>{{ finding.dbkey }}</dd>
+        <dt>audit_year</dt>
+        <dd>{{ finding.audit_year }}</dd>
+        <dt>finding</dt>
+        <dd>{{ finding.finding }}</dd>
+        <dt>elec_audits</dt>
+        <dd>{{ finding.elec_audits }}</dd>
+        <dt>finding_ref_nums</dt>
+        <dd>{{ finding.finding_ref_nums }}</dd>
+        <dt>type_requirement</dt>
+        <dd>{{ finding.type_requirement }}</dd>
+        <dt>modified_opinion</dt>
+        <dd>{{ finding.modified_opinion }}</dd>
+        <dt>other_noncompliance</dt>
+        <dd>{{ finding.other_noncompliance }}</dd>
+        <dt>material_weakness</dt>
+        <dd>{{ finding.material_weakness }}</dd>
+        <dt>significant_deficiency</dt>
+        <dd>{{ finding.significant_deficiency }}</dd>
+        <dt>other_findings</dt>
+        <dd>{{ finding.other_findings }}</dd>
+        <dt>questioned_costs</dt>
+        <dd>{{ finding.questioned_costs }}</dd>
+        <dt>repeat_finding</dt>
+        <dd>{{ finding.repeat_finding }}</dd>
+        <dt>prior_finding_ref_nums</dt>
+        <dd>{{ finding.prior_finding_ref_nums }}</dd>
+      </dl>
+    </div>
+  </div>
+  {% block error_message %}{% endblock %}
+
+{% endblock %}
