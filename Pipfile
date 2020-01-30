@@ -23,6 +23,8 @@ gunicorn = {extras = ["gevent"],version = "*"}
 django-composite-foreignkey = "*"
 s3fs = "*"
 requests = "*"
+django-apscheduler = "*"
+pytz = "*"
 
 [requires]
 python_version = "3.7"
