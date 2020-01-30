@@ -36,5 +36,5 @@ class Command(BaseCommand):
                 sys.stdout.flush()
                 load_dumps.update_table(
                     table,
-                    source_dir=settings.DEFAULT_IMPORT_DIR,
+                    source_dir=settings.LOAD_TABLE_ROOT,
                 )

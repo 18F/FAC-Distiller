@@ -10,7 +10,18 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).parents[1]
 PROJECT_ROOT = BASE_DIR.parents[0]
-DEFAULT_IMPORT_DIR = str(PROJECT_ROOT / 'imports')
+
+# Set this to the root path for downloading and loading tables to ETL
+# On local dev, this may be a filesystem path.
+# In production, it may be an S3 url (s3://...)
+LOAD_TABLE_ROOT = None
+
+# Set this to a dict of the form:
+# {'access_key_id': 'XX',
+#  'secret_access_key': 'XXX',
+#  'region': 'us-gov-west-1',
+#  'bucket': 'XX'}
+S3_KEY_DETAILS = None
 
 ALLOWED_HOSTS = [
     'localhost',

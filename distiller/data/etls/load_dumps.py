@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Any, Dict, Generator, Iterator, List, Union
 from zipfile import ZipFile
 
-import smart_open
 from django.db import connection, transaction
 
 from .. import models
@@ -114,11 +113,11 @@ def update_table(
 
     most_recent_dump_dir = dump_dirs[-1]
 
-    file_paths = files.glob(f'{most_recent_dump_dir}*')
+    file_paths = files.glob(os.path.join(most_recent_dump_dir, '*'))
     for file_path in file_paths:
         sys.stdout.write(f'\tImporting {file_path}...')
         sys.stdout.flush()
-        with smart_open.open(file_path, encoding='latin-1') as csv_file:
+        with files.input_file(file_path, encoding='latin-1') as csv_file:
             table["model"].objects.bulk_create(
                 _yield_model_instances(csv_file, **table),
                 batch_size=batch_size

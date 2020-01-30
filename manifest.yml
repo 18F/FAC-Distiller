@@ -12,4 +12,5 @@ applications:
   - route: fac-distiller.app.cloud.gov
   services:
   - fac-distiller-db
+  - fac-distiller-s3
   stack: cflinuxfs3
