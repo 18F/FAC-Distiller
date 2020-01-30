@@ -6,7 +6,7 @@ import os
 from glob import glob as stdlib_glob
 from pathlib import Path
 from typing import cast, Any, IO, List, Optional
-from urllib.parse import urlparse, ParseResult
+from urllib.parse import urlparse
 
 import boto3
 import requests
