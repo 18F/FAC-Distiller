@@ -18,6 +18,7 @@ def single_audit_search(request):
     form = AgencySelectionForm(request.GET)
 
     results_page = None
+    findings = None
     if form.is_valid():
         results_page = access.get_audits_by_subagency(
             sub_agency=form.cleaned_data['sub_agency'],
@@ -26,10 +27,18 @@ def single_audit_search(request):
             end_date=form.cleaned_data['end_date'],
             page=form.cleaned_data['page'],
         )
+        findings_set = set()
+        for audit in results_page.object_list:
+            findings_set.update(audit.findings.all())
+        findings = sorted(
+            findings_set,
+            key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
+        )
 
     return render(request, 'audit_search/search.html', {
         'form': form,
-        'page': results_page
+        'page': results_page,
+        'findings': findings,
     })
 
 

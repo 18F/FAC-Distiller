@@ -731,6 +731,19 @@ class Finding(models.Model):
         max_length=100,
         help_text='Findings Reference Numbers'
     )
+
+    # Map to FindingText
+    finding_text = CompositeForeignKey(
+        'FindingText',
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey',
+           'finding_ref_nums': 'finding_ref_nums',
+        },
+        related_name='findings'
+    )
+
     type_requirement = models.CharField(
         blank=True,
         null=True,
@@ -786,7 +799,8 @@ class FindingText(models.Model):
         primary_key=True,
         help_text='Order that the findings text was reported'
     )
-    dbkey = models.IntegerField(
+    dbkey = models.CharField(
+        max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
     )
     audit_year = models.DecimalField(

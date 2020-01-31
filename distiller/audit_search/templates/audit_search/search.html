@@ -3,12 +3,12 @@
 {% load static %}
 {% load widget_tweaks %}
 
-{% block content %}
-  <div class="usa-section show-findings">
-  <button class="usa-button usa-button--unstyled" onclick="this.parentNode.classList.toggle('show-findings')">
-    Toggle Findings
+{% block title %}
+  Single Audit Search
+{% endblock %}
 
-  </button>
+{% block content %}
+  <div id="search-results" class="usa-section">
     <form class="usa-form usa-form--large">
       <fieldset class="usa-fieldset">
         <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
@@ -70,7 +70,7 @@
             <div class="font-sans-3xs line-height-sans-3">
               {{ form.cleaned_data.audit_year|default:'All' }} audit year
               {% if form.cleaned_data.start_date or form.cleaned_data.end_date %}
-              <br>
+                <br>
                 {% if form.cleaned_data.start_date %}
                   {{ form.cleaned_data.start_date|date:"SHORT_DATE_FORMAT" }}
                 {% endif %}
@@ -83,11 +83,11 @@
           </span>
         </div>
         <div class="grid-row">
-          <div class="grid-col-12"></div>
+          <div class="grid-col-12">
             <table class="usa-table font-serif-3xs">
               <thead>
                 <tr>
-                  <td colspan="11" style="border: none; background-color: transparent; text-align: right;">
+                  <td colspan="9" style="border: none; background-color: transparent; text-align: right;">
                     {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
@@ -96,6 +96,7 @@
                   <th scope="col">Audit accepted</th>
                   <th scope="col">Findings count</th>
                   <th scope="col">Previous findings</th>
+                  <th scope="col">Cog/oversight agency</th>
                   <th scope="col">Material weakness</th>
                   <th scope="col">Questioned costs</th>
                   <th scope="col">Amount expended</th>
@@ -106,11 +107,24 @@
                 {% for result in page.object_list %}
                   <tr>
                     <td>{{ result.auditee_name }}</td>
-                    <td>{{ result.fac_accepted_date|default_if_none:"Unknown" }}</td>
+                    <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
-                        <a href="#">{{ result.findings.all | length }}</a>
+                      {% if result.findings.all %}
+                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
+                          {{ result.findings.all | length }}
+                        </button>
+                      {% else %}
+                        {{ result.findings.all | length }}
+                      {% endif %}
                     </td>
                     <td class="text-center">TODO</td>
+                    <td>
+                      {% if result.cog_over == 'C' %}
+                        {{ result.cog_agency }} (Cognizant)
+                      {% elif result.cog_over == 'O' %}
+                        {{ result.oversight_agency }} (Oversight)
+                      {% endif %}
+                    </td>
                     <td class="text-center">
                       {% if result.material_weakness %}
                         <i class="fas fa-check"></i>
@@ -135,7 +149,7 @@
               </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="11" style="border: none; background-color: transparent; text-align: right;">
+                  <td colspan="9" style="border: none; background-color: transparent; text-align: right;">
                     {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
@@ -146,26 +160,33 @@
       </div>
       <div class="findings-results-page">
         <div class="grid-row">
-          <div class="grid-col-12"></div>
+          <div class="grid-col-12">
             <table class="usa-table font-serif-3xs">
               <thead>
                 <tr>
-                  <td colspan="11" style="border: none; background-color: transparent; text-align: right;">
+                  <td colspan="2" style="border: none; background-color: transparent;">
+                    <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
+                      &lt; back to audit list
+                    </button>
+                  </td>
+                  <td colspan="2" style="border: none; background-color: transparent; text-align: right;">
                     {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
                 <tr>
                   <th scope="col" style="white-space: nowrap">Finding #</th>
+                  <th scope="col" style="white-space: nowrap">CFDA #</th>
+                  <th scope="col" style="white-space: nowrap">Award amount</th>
                   <th scope="col">Finding text</th>
                   <th scope="col">Corrective action plan</th>
                   <th scope="col">Previous finding</th>
                 </tr>
               </thead>
               <tbody>
-                {% for result in page.object_list %}
-                  <tr class="finding-collapsed">
+                {% for finding in findings %}
+                  <tr class="finding-collapsed" data-dbkey="{{ finding.dbkey }}" data-audit-year="{{ finding.audit_year }}">
                     <td class="text-top finding-min-width">
-                      2525-001
+                      {{ finding.finding_ref_nums }}
                       <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
                         <i class="fas fa-expand-alt expand-icon"></i>
                       </button>
@@ -173,14 +194,19 @@
                         <i class="fas fa-compress-alt compress-icon"></i>
                       </button>
                     </td>
-                    <td>
+                    <td class="text-top">
+                      {{ finding.elec_audits.cfda_id }}
+                    </td>
+                    <td class="text-top">
+                      ${{ finding.elec_audits.amount | intcomma }}
+                    </td>
+                    <td class="text-top">
                       <div class="finding-text">
-                        {% lorem 1 %}
+                        {{ finding.finding_text.text | escape | linebreaksbr }}
                       </div>
                     </td>
-                    <td>
+                    <td class="text-top">
                       <div class="finding-text">
-                        {% lorem 1 %}
                       </div>
                     </td>
                     <td class="text-top finding-min-width">
@@ -191,16 +217,35 @@
               </tbody>
             </table>
           </div>
+        </div>
       </div>
     {% endif %}
   </div>
+
   {% block error_message %}{% endblock %}
 
   <script>
-    document.querySelector("select[name=agency]").addEventListener('change', function () {
+    document.querySelector('select[name=agency]').addEventListener('change', function () {
         this.form.sub_agency.value = '';
         this.form.submit();
     }, false);
+
+    function showFindings(dbkey, auditYear) {
+      // Hide all rows in findings table
+      var selector = '.findings-results-page tbody tr';
+      document.querySelectorAll(selector).forEach(function (node) {
+        node.style.display = 'none';
+      });
+
+      // Show rows for this audit
+      selector = '.findings-results-page tbody tr[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
+      document.querySelectorAll(selector).forEach(function (node) {
+        node.style.display = 'table-row';
+      });
+
+      // Show the findings table section
+      document.getElementById('search-results').classList.toggle('show-findings');
+    }
   </script>
 
   <style>
@@ -234,11 +279,16 @@
       display: none;
     }
 
-    .usa-section .findings-results-page {
+    .show-findings .audit-results-page {
       display: none;
     }
-    .usa-section.show-findings .audit-results-page {
+
+    .findings-results-page {
       display: none;
+    }
+
+    .show-findings .findings-results-page {
+      display: block;
     }
   </style>
 {% endblock %}
