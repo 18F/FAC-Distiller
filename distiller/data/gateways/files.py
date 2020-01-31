@@ -33,7 +33,7 @@ def _open(
 ) -> IO[Any]:
     transport_params = None
 
-    # If local file system, create directory if it doesn't exist.
+    # If S3, create boto3 session with necessary credentials.
     if scheme == 's3':
         transport_params = {
             'session': _get_boto3_session()
