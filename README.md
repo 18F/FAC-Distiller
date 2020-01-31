@@ -114,11 +114,19 @@ pipenv run python manage.py download_table --finding
 pipenv run python manage.py download_table --findingtext
 ```
 
-### Assistance listings from beta.sam.gov
+### Load tables
 
 ```shell
-pipenv run python manage.py load_assistance_listings
+pipenv run python manage.py load_table --all
+pipenv run python manage.py load_table --audit
+pipenv run python manage.py load_table --cfda
+pipenv run python manage.py load_table --finding
+pipenv run python manage.py load_table --findingtext
 ```
+
+### Cloud.gov table loads
+
+In the deployed environment, `django-apscheduler` is used to refresh all tables daily at 12:00 AM EST.
 
 ## Running tests
 
