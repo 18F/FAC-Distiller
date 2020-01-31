@@ -25,6 +25,7 @@ s3fs = "*"
 requests = "*"
 django-apscheduler = "*"
 pytz = "*"
+fontawesome-free = "*"
 
 [requires]
 python_version = "3.7"

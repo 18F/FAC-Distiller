@@ -1,0 +1,21 @@
+{% load add_get_parameter %}
+
+{% if page.has_previous %}
+  <a href="{% add_get page=1 %}" aria-label="First Page">
+    &laquo;
+  </a>
+  &nbsp;
+  <a href="{% add_get page=page.previous_page_number %}" aria-label="Previous Page">
+    &lt; Previous
+  </a>
+{% endif %}
+Page {{ page.number }} of {{ page.paginator.num_pages }}
+{% if page.has_next %}
+  <a href="{% add_get page=page.next_page_number %}" aria-label="Next Page">
+    Next &gt;
+  </a>
+  &nbsp;
+  <a href="{% add_get page=page.paginator.num_pages %}" aria-label="Last Page">
+    &raquo;
+  </a>
+{% endif %}

@@ -2,7 +2,6 @@
 {% load humanize %}
 {% load static %}
 {% load widget_tweaks %}
-{% load add_get_parameter %}
 
 {% block content %}
   <div class="usa-section">
@@ -83,41 +82,40 @@
           <table class="usa-table font-serif-3xs" style->
             <thead>
               <tr>
-                <th scope="col">Auditee Name</th>
-                <th scope="col">Audit Number</th>
-                <th scope="col">Audit Year</th>
-                <!--th scope="col">Agency</th-->
-                <th scope="col">FAC Accepted Date</th>
-                <th scope="col">Findings</th>
-                <th scope="col">Previous Findings</th>
-                <th scope="col">Material Weakness</th>
-                <th scope="col">Questioned Costs</th>
-                <th scope="col">Amount Expended</th>
-                <th scope="col">Docs</th>
+                <td colspan="11" style="border: none; background-color: transparent; text-align: right;">
+                  {% include './_pagination.html' with page=page %}
+                </td>
+              </tr>
+              <tr>
+                <th scope="col">Auditee name</th>
+                <th scope="col">Audit accepted</th>
+                <th scope="col">Findings count</th>
+                <th scope="col">Previous findings</th>
+                <th scope="col">Material weakness</th>
+                <th scope="col">Questioned costs</th>
+                <th scope="col">Amount expended</th>
+                <th scope="col">Files</th>
               </tr>
             </thead>
             <tbody>
               {% for result in page.object_list %}
                 <tr>
                   <td>{{ result.auditee_name }}</td>
-                  <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.dbkey %}">{{ result.dbkey }}</a></th>
-                  <td>{{ result.audit_year }}</td>
-                  <!--td>
-                    {% if result.cog_over == 'C' %}
-                      {{ result.cog_agency }} (Cognizant)
-                    {% elif result.cog_over == 'O' %}
-                      {{ result.oversight_agency }} (Oversight)
-                    {% endif %}
-                  </td-->
                   <td>{{ result.fac_accepted_date|default_if_none:"Unknown" }}</td>
-                  <td>
-                    {% for finding in result.findings.all %}
-                      <a href="{% url 'distiller.audit_search:view_finding' finding.pk %}">{{ finding.pk }}</a>
-                    {% endfor %}
+                  <td class="text-center">
+                      <a href="#">{{ result.findings.all | length }}</a>
                   </td>
-                  <td>TODO</td>
-                  <td>{{ result.material_weakness|yesno:"Yes,No,Unknown" }}</td>
-                  <td>{{ result.qcosts|yesno:"Yes,No,Unknown" }}</td>
+                  <td class="text-center">TODO</td>
+                  <td class="text-center">
+                    {% if result.material_weakness %}
+                      <i class="fas fa-check"></i>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if result.qcosts %}
+                      <i class="fas fa-check"></i>
+                    {% endif %}
+                  </td>
                   <td>
                     {% if result.tot_fed_expend %}
                     ${{ result.tot_fed_expend|intcomma }}
@@ -125,36 +123,18 @@
                   </td>
                   <td>
                     <a href="{{ result.form_url }}">Form</a>
-                    <a href="{{ result.report_url }}">Report</a>
+                    <a href="{{ result.report_url }}">PDF</a>
                   </td>
                 </tr>
               {% endfor %}
-              <tfoot>
-                <tr>
-                  <td colspan="11">
-                    {% if page.has_previous %}
-                      <a href="{% add_get page=1 %}" aria-label="First Page">
-                        &laquo;
-                      </a>
-                      &nbsp;
-                      <a href="{% add_get page=page.previous_page_number %}" aria-label="Previous Page">
-                        &lt; Previous
-                      </a>
-                    {% endif %}
-                    Page {{ page.number }} of {{ page.paginator.num_pages }}
-                    {% if page.has_next %}
-                      <a href="{% add_get page=page.next_page_number %}" aria-label="Next Page">
-                        Next &gt;
-                      </a>
-                      &nbsp;
-                      <a href="{% add_get page=page.paginator.num_pages %}" aria-label="Last Page">
-                        &raquo;
-                      </a>
-                    {% endif %}
-                  </td>
-                </tr>
-              </tfoot>
             </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="11" style="border: none; background-color: transparent; text-align: right;">
+                  {% include './_pagination.html' with page=page %}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
