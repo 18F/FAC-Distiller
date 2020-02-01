@@ -11,6 +11,7 @@ from typing import Mapping
 
 from django import forms
 
+from distiller.data.etls.load_dumps import FAC_PRIOR_YEARS
 from distiller.data.models import AssistanceListing
 
 
@@ -109,9 +110,9 @@ class AgencySelectionForm(forms.Form):
     agency = forms.ChoiceField(choices=AGENCY_CHOICES)
     sub_agency = forms.ChoiceField(required=False)
     audit_year = forms.ChoiceField(
-        choices=(('', ''),) + tuple(
+        choices=lambda: (('', ''),) + tuple(
             (year, year)
-            for year in range(datetime.now().year, 1996, -1)
+            for year in range(datetime.now().year, datetime.now().year - FAC_PRIOR_YEARS - 1, -1)
         ),
         required=False
     )

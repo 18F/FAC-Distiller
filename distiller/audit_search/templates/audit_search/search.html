@@ -2,10 +2,13 @@
 {% load humanize %}
 {% load static %}
 {% load widget_tweaks %}
-{% load add_get_parameter %}
+
+{% block title %}
+  Single Audit Search
+{% endblock %}
 
 {% block content %}
-  <div class="usa-section">
+  <div id="search-results" class="usa-section">
     <form class="usa-form usa-form--large">
       <fieldset class="usa-fieldset">
         <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
@@ -41,132 +44,251 @@
     </form>
     {% if page.object_list %}
       <hr>
-      <div class="grid-row padding-top-2">
-        <a href="#" alt="Download CSV">
-          <svg
-            width="2em"
-            height="2em"
-            fill="none"
-            stroke="#005288"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <use xlink:href="{% static 'img/feather-sprite.svg#download' %}"/>
-          </svg>
-        </a>
-        <span class="line-height-sans-6 padding-left-2">
-          <span>
-            {% if form.cleaned_data.sub_agency %}
-              {{ form.cleaned_data.sub_agency }}
-            {% else %}
-               {{ form.agency.value }}
-            {% endif %}
+      <div class="audit-results-page">
+        <div class="grid-row padding-top-2">
+          <a href="#" alt="Download CSV">
+            <svg
+              width="2em"
+              height="2em"
+              fill="none"
+              stroke="#005288"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <use xlink:href="{% static 'img/feather-sprite.svg#download' %}"/>
+            </svg>
+          </a>
+          <span class="line-height-sans-6 padding-left-2">
+            <span>
+              {% if form.cleaned_data.sub_agency %}
+                {{ form.cleaned_data.sub_agency }}
+              {% else %}
+                 {{ form.agency.value }}
+              {% endif %}
+            </span>
+            <div class="font-sans-3xs line-height-sans-3">
+              {{ form.cleaned_data.audit_year|default:'All' }} audit year
+              {% if form.cleaned_data.start_date or form.cleaned_data.end_date %}
+                <br>
+                {% if form.cleaned_data.start_date %}
+                  {{ form.cleaned_data.start_date|date:"SHORT_DATE_FORMAT" }}
+                {% endif %}
+                -
+                {% if form.cleaned_data.end_date %}
+                  {{ form.cleaned_data.end_date|date:"SHORT_DATE_FORMAT" }}
+                {% endif %}
+              {% endif %}
+            </div>
           </span>
-          <div class="font-sans-3xs line-height-sans-3">
-            {{ form.cleaned_data.audit_year|default:'All' }} audit year
-            {% if form.cleaned_data.start_date or form.cleaned_data.end_date %}
-            <br>
-              {% if form.cleaned_data.start_date %}
-                {{ form.cleaned_data.start_date|date:"SHORT_DATE_FORMAT" }}
-              {% endif %}
-              -
-              {% if form.cleaned_data.end_date %}
-                {{ form.cleaned_data.end_date|date:"SHORT_DATE_FORMAT" }}
-              {% endif %}
-            {% endif %}
-          </div>
-        </span>
-      </div>
-      <div class="grid-row">
-        <div class="grid-col-12"></div>
-          <table class="usa-table font-serif-3xs" style->
-            <thead>
-              <tr>
-                <th scope="col">Auditee Name</th>
-                <th scope="col">Audit Number</th>
-                <th scope="col">Audit Year</th>
-                <!--th scope="col">Agency</th-->
-                <th scope="col">FAC Accepted Date</th>
-                <th scope="col">Findings</th>
-                <th scope="col">Previous Findings</th>
-                <th scope="col">Material Weakness</th>
-                <th scope="col">Questioned Costs</th>
-                <th scope="col">Amount Expended</th>
-                <th scope="col">Docs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for result in page.object_list %}
+        </div>
+        <div class="grid-row">
+          <div class="grid-col-12">
+            <table class="usa-table font-serif-3xs">
+              <thead>
                 <tr>
-                  <td>{{ result.auditee_name }}</td>
-                  <th scope="row"><a href="{% url 'distiller.audit_search:view_audit' result.dbkey %}">{{ result.dbkey }}</a></th>
-                  <td>{{ result.audit_year }}</td>
-                  <!--td>
-                    {% if result.cog_over == 'C' %}
-                      {{ result.cog_agency }} (Cognizant)
-                    {% elif result.cog_over == 'O' %}
-                      {{ result.oversight_agency }} (Oversight)
-                    {% endif %}
-                  </td-->
-                  <td>{{ result.fac_accepted_date|default_if_none:"Unknown" }}</td>
-                  <td>
-                    {% for finding in result.findings.all %}
-                      <a href="{% url 'distiller.audit_search:view_finding' finding.pk %}">{{ finding.pk }}</a>
-                    {% endfor %}
-                  </td>
-                  <td>TODO</td>
-                  <td>{{ result.material_weakness|yesno:"Yes,No,Unknown" }}</td>
-                  <td>{{ result.qcosts|yesno:"Yes,No,Unknown" }}</td>
-                  <td>
-                    {% if result.tot_fed_expend %}
-                    ${{ result.tot_fed_expend|intcomma }}
-                    {% endif %}
-                  </td>
-                  <td>
-                    <a href="{{ result.form_url }}">Form</a>
-                    <a href="{{ result.report_url }}">Report</a>
+                  <td colspan="9" style="border: none; background-color: transparent; text-align: right;">
+                    {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
-              {% endfor %}
+                <tr>
+                  <th scope="col">Auditee name</th>
+                  <th scope="col">Audit accepted</th>
+                  <th scope="col">Findings count</th>
+                  <th scope="col">Previous findings</th>
+                  <th scope="col">Cog/oversight agency</th>
+                  <th scope="col">Material weakness</th>
+                  <th scope="col">Questioned costs</th>
+                  <th scope="col">Amount expended</th>
+                  <th scope="col">Files</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for result in page.object_list %}
+                  <tr>
+                    <td>{{ result.auditee_name }}</td>
+                    <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
+                    <td class="text-center">
+                      {% if result.findings.all %}
+                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
+                          {{ result.findings.all | length }}
+                        </button>
+                      {% else %}
+                        {{ result.findings.all | length }}
+                      {% endif %}
+                    </td>
+                    <td class="text-center">TODO</td>
+                    <td>
+                      {% if result.cog_over == 'C' %}
+                        {{ result.cog_agency }} (Cognizant)
+                      {% elif result.cog_over == 'O' %}
+                        {{ result.oversight_agency }} (Oversight)
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if result.material_weakness %}
+                        <i class="fas fa-check"></i>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if result.qcosts %}
+                        <i class="fas fa-check"></i>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if result.tot_fed_expend %}
+                      ${{ result.tot_fed_expend|intcomma }}
+                      {% endif %}
+                    </td>
+                    <td>
+                      <a href="{{ result.form_url }}">Form</a>
+                      <a href="{{ result.report_url }}">PDF</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
               <tfoot>
                 <tr>
-                  <td colspan="11">
-                    {% if page.has_previous %}
-                      <a href="{% add_get page=1 %}" aria-label="First Page">
-                        &laquo;
-                      </a>
-                      &nbsp;
-                      <a href="{% add_get page=page.previous_page_number %}" aria-label="Previous Page">
-                        &lt; Previous
-                      </a>
-                    {% endif %}
-                    Page {{ page.number }} of {{ page.paginator.num_pages }}
-                    {% if page.has_next %}
-                      <a href="{% add_get page=page.next_page_number %}" aria-label="Next Page">
-                        Next &gt;
-                      </a>
-                      &nbsp;
-                      <a href="{% add_get page=page.paginator.num_pages %}" aria-label="Last Page">
-                        &raquo;
-                      </a>
-                    {% endif %}
+                  <td colspan="9" style="border: none; background-color: transparent; text-align: right;">
+                    {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
               </tfoot>
-            </tbody>
-          </table>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="findings-results-page">
+        <div class="grid-row">
+          <div class="grid-col-12">
+            <table class="usa-table font-serif-3xs">
+              <thead>
+                <tr>
+                  <td colspan="3" style="border: none; background-color: transparent;">
+                    <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
+                      &lt; back to audit list
+                    </button>
+                  </td>
+                  <td colspan="3" style="border: none; background-color: transparent; text-align: right;">
+                    {% include './_pagination.html' with page=page %}
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="col" style="white-space: nowrap">Finding #</th>
+                  <th scope="col" style="white-space: nowrap">CFDA #</th>
+                  <th scope="col" style="white-space: nowrap">Award amount</th>
+                  <th scope="col">Finding text</th>
+                  <th scope="col">Corrective action plan</th>
+                  <th scope="col">Previous finding</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for finding in findings %}
+                  <tr class="finding-collapsed" data-dbkey="{{ finding.dbkey }}" data-audit-year="{{ finding.audit_year }}">
+                    <td class="text-top finding-min-width">
+                      {{ finding.finding_ref_nums }}
+                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        <i class="fas fa-expand-alt expand-icon"></i>
+                      </button>
+                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        <i class="fas fa-compress-alt compress-icon"></i>
+                      </button>
+                    </td>
+                    <td class="text-top">
+                      {{ finding.elec_audits.cfda_id }}
+                    </td>
+                    <td class="text-top">
+                      ${{ finding.elec_audits.amount | intcomma }}
+                    </td>
+                    <td class="text-top">
+                      <div class="finding-text">
+                        {{ finding.finding_text.text | escape | linebreaksbr }}
+                      </div>
+                    </td>
+                    <td class="text-top">
+                      <div class="finding-text">
+                      </div>
+                    </td>
+                    <td class="text-top finding-min-width">
+                      2525-001
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     {% endif %}
   </div>
+
   {% block error_message %}{% endblock %}
 
   <script>
-    document.querySelector("select[name=agency]").addEventListener('change', function () {
+    document.querySelector('select[name=agency]').addEventListener('change', function () {
         this.form.sub_agency.value = '';
         this.form.submit();
-    }, false);;
+    }, false);
+
+    function showFindings(dbkey, auditYear) {
+      // Hide all rows in findings table
+      var selector = '.findings-results-page tbody tr';
+      document.querySelectorAll(selector).forEach(function (node) {
+        node.style.display = 'none';
+      });
+
+      // Show rows for this audit
+      selector = '.findings-results-page tbody tr[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
+      document.querySelectorAll(selector).forEach(function (node) {
+        node.style.display = 'table-row';
+      });
+
+      // Show the findings table section
+      document.getElementById('search-results').classList.toggle('show-findings');
+    }
   </script>
 
+  <style>
+    .finding-min-width {
+      min-width: 8em;
+    }
+
+    .finding-collapsed .finding-text {
+      max-height: 3em;
+      overflow: hidden;
+    }
+
+    .expand-icon {
+      display: none;
+    }
+    .finding-collapsed .expand-icon {
+      display: inline-block;
+      color: lightgray;
+    }
+
+    .compress-icon {
+      display: inline-block;
+      color: white;
+      background: #57CDFA;
+      border-radius: 50%;
+      text-align: center;
+      vertical-align: middle;
+      padding: 2px;
+    }
+    .finding-collapsed .compress-icon {
+      display: none;
+    }
+
+    .show-findings .audit-results-page {
+      display: none;
+    }
+
+    .findings-results-page {
+      display: none;
+    }
+
+    .show-findings .findings-results-page {
+      display: block;
+    }
+  </style>
 {% endblock %}

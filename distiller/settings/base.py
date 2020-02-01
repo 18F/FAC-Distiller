@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     'django_apscheduler',
+    'fontawesome_free',
     'localflavor',
     'widget_tweaks',
 

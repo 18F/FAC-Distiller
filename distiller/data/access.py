@@ -61,6 +61,10 @@ def get_audits_by_subagency(
     end_date: date,
     page: int
 ):
+    """
+    Return audit model instances with findings pre-fetched.
+    """
+
     # Get CFDA numbers for the given sub-agency name.
     cfda_nums = models.AssistanceListing.objects.get_cfda_nums_for_agency(
         sub_agency
@@ -84,7 +88,7 @@ def get_audits_by_subagency(
 
     audits = models.Audit.objects.filter(q_obj).order_by(
         '-audit_year', '-fac_accepted_date'
-    ).prefetch_related('findings')
+    ).prefetch_related('findings', 'findings__finding_text', 'findings__elec_audits')
 
     return Paginator(audits, 25).get_page(page or 1)
 
