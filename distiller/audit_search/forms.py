@@ -116,8 +116,8 @@ class AgencySelectionForm(forms.Form):
         ),
         required=False
     )
-    start_date = forms.DateField(required=False, label='Accepted date start')
-    end_date = forms.DateField(required=False, label='Accepted date end')
+    start_date = forms.DateField(required=False, label='Audit accepted - From')
+    end_date = forms.DateField(required=False, label='Audit accepted - To')
     page = forms.IntegerField(initial=1, required=False)
 
     def __init__(self, *args, **kwargs):

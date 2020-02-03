@@ -29,7 +29,7 @@ def single_audit_search(request):
         )
         findings_set = set()
         for audit in results_page.object_list:
-            findings_set.update(audit.findings.all())
+            findings_set.update(audit.findings.all().distinct())
         findings = sorted(
             findings_set,
             key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
