@@ -109,7 +109,7 @@
                     <td>{{ result.auditee_name }}</td>
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
-                      {% if result.findings.all %}
+                      {% if result.finding_texts.all %}
                         <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
                           {{ result.finding_texts.all | length }}
                         </button>

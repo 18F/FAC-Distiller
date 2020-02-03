@@ -9,27 +9,33 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 import pandas as pd
 
+from distiller.data.constants import AGENCIES_BY_PREFIX
 from distiller.data.etls import selenium_scraper
-from distiller.data import access, models
-from .forms import AGENCIES_BY_PREFIX, AgencySelectionForm
+from distiller.data import models
+from .forms import AgencySelectionForm
 
 
 def single_audit_search(request):
     form = AgencySelectionForm(request.GET)
 
-    results_page = None
+    page = None
     finding_texts = None
     if form.is_valid():
-        results_page = access.get_audits_by_subagency(
-            sub_agency=form.cleaned_data['sub_agency'],
+        audits = models.Audit.objects.search(
+            agency_name=form.cleaned_data['sub_agency'],
             audit_year=form.cleaned_data['audit_year'],
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
-            page=form.cleaned_data['page'],
+        ).prefetch_related(
+            'finding_texts', 'finding_texts__findings',
+            'finding_texts__findings__elec_audits'
         )
+        page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
+
         finding_texts_set = set()
-        for audit in results_page.object_list:
+        for audit in page.object_list:
             finding_texts_set.update(audit.finding_texts.all())
+
         finding_texts = sorted(
             finding_texts_set,
             key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
@@ -37,7 +43,7 @@ def single_audit_search(request):
 
     return render(request, 'audit_search/search.html', {
         'form': form,
-        'page': results_page,
+        'page': page,
         'finding_texts': finding_texts,
     })
 

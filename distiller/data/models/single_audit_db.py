@@ -6,13 +6,52 @@ note that many columns are only used in certain calendar years.
 See: https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
+from datetime import date
+from functools import reduce
+from typing import Optional
+
 from compositefk.fields import CompositeForeignKey
+from django.core.paginator import Paginator
 from django.db import models
 
 from .assistance_listings import AssistanceListing
 
 
+class AuditManager(models.Manager):
+    def search(
+        self,
+        *,
+        agency_name: str,
+        audit_year: Optional[int],
+        start_date: date,
+        end_date: date,
+    ):
+        audit_keys = CFDA.objects.get_audits_for_agency(agency_name)
+
+        # Initialize Q object with and OR of all (audit_year, dbkey) pairs.
+        q_obj = reduce(
+            lambda q_obj, keys: q_obj | models.Q(**keys),
+            audit_keys,
+            models.Q()
+        )
+
+        # Filter by dates
+        if audit_year:
+            q_obj &= models.Q(audit_year=audit_year)
+        if start_date:
+            q_obj &= models.Q(fac_accepted_date__gte=start_date)
+        if end_date:
+            q_obj &= models.Q(fac_accepted_date__lte=end_date)
+
+        return self.filter(q_obj).order_by(
+            '-audit_year',
+            '-fac_accepted_date'
+        )
+
+
 class Audit(models.Model):
+    objects = AuditManager()
+
     class Meta:
         verbose_name = 'audit detail'
         indexes = [
@@ -496,7 +535,19 @@ class Audit(models.Model):
     )
 
 
+class CFDAManager(models.Manager):
+    def get_audits_for_agency(self, agency_name):
+        # Get CFDA numbers for the given agency name.
+        cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(agency_name)
+
+        # Return the (audit_year, dbkey) pairs for all audits matching our
+        # search criteria.
+        return self.filter(cfda__in=cfdas).values('audit_year', 'dbkey')
+
+
 class CFDA(models.Model):
+    objects = CFDAManager()
+
     class Meta:
         verbose_name = 'CFDA number'
         indexes = [
