@@ -42,6 +42,8 @@ class AgencySelectionForm(forms.Form):
     start_date = forms.DateField(required=False, label='Audit accepted - From')
     end_date = forms.DateField(required=False, label='Audit accepted - To')
     page = forms.IntegerField(initial=1, required=False)
+    # Used when drilling-down search terms
+    filtering = forms.IntegerField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,3 +66,8 @@ class AgencySelectionForm(forms.Form):
 
     def clean_audit_year(self):
         return self.cleaned_data['audit_year'] or None
+
+    def clean_filtering(self):
+        if self.cleaned_data['filtering']:
+            raise forms.ValidationError('Cannot search when filtering')
+        return self.cleaned_data['filtering']

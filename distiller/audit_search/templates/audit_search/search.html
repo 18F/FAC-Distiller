@@ -37,6 +37,7 @@
             {% render_field form.end_date type="date" class+="usa-input" %}
           </div>
           {{ form.page.as_hidden }}
+          <input type="hidden" name="filtering" id="id_filtering" value="">
         </div>
         <div class="grid-row">
           <input type="submit" value="Search single audits" class="usa-button" alt="Search for single audits">
@@ -118,7 +119,7 @@
                         {{ result.finding_texts.all | length }}
                       {% endif %}
                     </td>
-                    <td class="text-center">TODO</td>
+                    <td class="text-center">{{ result.finding_texts.finding.0.prior_finding_ref_nums }}</td>
                     <td class="">
                       {% if result.cog_over == 'C' %}
                         {{ result.cog_agency | agency_name }}
@@ -238,6 +239,7 @@
   <script>
     document.querySelector('select[name=agency]').addEventListener('change', function () {
       this.form.sub_agency.value = '';
+      this.form.filtering.value = '1';
       this.form.submit();
     }, false);
 
@@ -283,8 +285,8 @@
     }
 
     .finding-collapsed .finding-text {
-      max-height: 3em;
-      overflow: hidden;
+      max-height: 6em;
+      overflow: scroll;
     }
 
     .expand-icon {
