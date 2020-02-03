@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% load widget_tweaks %}
+{% load agency_name %}
 
 {% block title %}
   Single Audit Search
@@ -64,7 +65,7 @@
               {% if form.cleaned_data.sub_agency %}
                 {{ form.cleaned_data.sub_agency }}
               {% else %}
-                 {{ form.agency.value }}
+                 {{ form.agency.value | agency_name }}
               {% endif %}
             </span>
             <div class="font-sans-3xs line-height-sans-3">
@@ -118,11 +119,13 @@
                       {% endif %}
                     </td>
                     <td class="text-center">TODO</td>
-                    <td>
+                    <td class="">
                       {% if result.cog_over == 'C' %}
-                        {{ result.cog_agency }} (Cognizant)
+                        {{ result.cog_agency | agency_name }}
+                        <span class="text-gray-50 text-italic">Cognizant</span>
                       {% elif result.cog_over == 'O' %}
-                        {{ result.oversight_agency }} (Oversight)
+                        {{ result.oversight_agency | agency_name }}
+                        <span class="text-gray-50 text-italic">Oversight</span>
                       {% endif %}
                     </td>
                     <td class="text-center">
