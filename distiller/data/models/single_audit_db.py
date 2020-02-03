@@ -808,6 +808,18 @@ class FindingText(models.Model):
         decimal_places=0,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
     )
+
+    # Map to General/Audit
+    audit = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='finding_texts'
+    )
+
     finding_ref_nums = models.CharField(
         max_length=100,
         help_text='Audit Finding Reference Number'
