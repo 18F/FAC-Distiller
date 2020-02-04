@@ -846,6 +846,12 @@ class Finding(models.Model):
 
 
 class FindingText(models.Model):
+    class Meta:
+        verbose_name_plural = 'finding text'
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+        ]
+
     seq_number = models.IntegerField(
         primary_key=True,
         help_text='Order that the findings text was reported'
@@ -880,4 +886,57 @@ class FindingText(models.Model):
     )
     charts_tables = models.BooleanField(
         help_text='Indicates whether or not the text contained charts or tables that could not be entered due to formatting restrictions'
+    )
+
+
+class CAPText(models.Model):
+    class Meta:
+        verbose_name = 'CAP text'
+        verbose_name_plural = 'CAP text'
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+           models.Index(fields=['audit_year', 'dbkey', 'finding_ref_nums']),
+        ]
+
+    # 4 digits
+    seq_number = models.IntegerField(
+        primary_key=True,
+        help_text='Order that the CAP text was reported',
+    )
+    # Use these fields to link tables- 1-6 digits
+    dbkey = models.CharField(
+        max_length=6,
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    # Use these fields to link tables- 4 digits
+    audit_year = models.DecimalField(
+        max_digits=4,
+        decimal_places=0,
+        help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    # 100 characters max
+    finding_ref_nums = models.CharField(
+        max_length=100,
+        help_text='Audit Finding Reference Number'
+    )
+
+    # Map to Finding Text
+    finding_text = CompositeForeignKey(
+        FindingText,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey',
+           'finding_ref_nums': 'finding_ref_nums',
+        },
+        related_name='cap_texts'
+    )
+
+    # Unlimitted Text
+    text = models.TextField(
+        help_text='Content of the Corrective Action Plan (CAP)',
+    )
+    # 1 character
+    charts_tables = models.BooleanField(
+        help_text='Indicates whether or not the text contained charts or tables that could not be entered due to formatting restrictions',
     )

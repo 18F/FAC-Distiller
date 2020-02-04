@@ -5,7 +5,6 @@ This module imports all columns defined in `key.xls`, available here:
 https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
-import abc
 import csv
 import io
 import json
@@ -13,7 +12,7 @@ import os
 import shutil
 import sys
 from datetime import datetime
-from typing import Any, Dict, Generator, Iterator, List, Union
+from typing import Any, Dict, Generator
 from zipfile import ZipFile
 
 from django.db import connection, transaction
@@ -32,7 +31,6 @@ FAC_PRIOR_YEARS = 1
 def download_table(
     table_name: str,
     target_dir: str,
-    unzip: bool = False,
 ) -> None:
     """
     Download given table to specified location. Target files will be in the
@@ -68,7 +66,7 @@ def download_table(
 
         # If we can't open, the file probably doesn't exist. This will happen
         # with current audit year table dumps early in the year.
-        except files.FileOpenFailure as e:
+        except files.FileOpenFailure:
             sys.stdout.write(f'Load failure, skipping...\n')
             sys.stdout.flush()
             continue
@@ -98,7 +96,7 @@ def update_table(
         # We could DELETE here rather than TRUNCATE, which would be safe
         # transactionally, but performance is very poor for the larger tables.
         with connection.cursor() as cursor:
-            cursor.execute(f'TRUNCATE TABLE {table["model"]._meta.db_table}')
+            cursor.execute(f'TRUNCATE TABLE {table["model"]._meta.db_table}')  # pylint: disable=W0212
 
     sys.stdout.write(f'Loading {table_name}...\n')
     sys.stdout.flush()
@@ -126,7 +124,7 @@ def update_table(
     sys.stdout.write('Done!\n')
 
 
-def _sanitize_row(row, *, field_mapping, sanitizers, **kwargs):
+def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):
     sanitized_row = {}
     for csv_column_name, model_field_name in field_mapping.items():
         # These are fixedwidth CSVs, so strip off excess whitespace and handle
@@ -140,13 +138,13 @@ def _sanitize_row(row, *, field_mapping, sanitizers, **kwargs):
     return sanitized_row
 
 
-def _yield_rows(reader, *, field_mapping, sanitizers, **kwargs):
+def _yield_rows(reader, *, field_mapping, sanitizers, **_kwargs):
     while True:
         try:
             row = next(reader)
         except StopIteration:
             break
-        except Exception as e:
+        except Exception as e:  # pylint: disable=W0703
             print('CSV parsing error.', e)
             continue
         sanitized_row = _sanitize_row(
@@ -158,7 +156,15 @@ def _yield_rows(reader, *, field_mapping, sanitizers, **kwargs):
             yield sanitized_row
 
 
-def _yield_model_instances(csv_file, *, model, field_mapping, sanitizers, file_reader, **kwargs):
+def _yield_model_instances(
+    csv_file,
+    *,
+    model,
+    field_mapping,
+    sanitizers,
+    file_reader,
+    **_kwargs
+):
     for row in _yield_rows(
         file_reader(csv_file),
         field_mapping=field_mapping,
@@ -196,10 +202,10 @@ def parse_fac_csv(csv_file):
     return csv.DictReader(_strip_rows(csv_file))
 
 
-def parse_findings_text_csv(csv_file) -> Generator[Dict[str, Any], None, None]:
+def parse_text_tables_csv(csv_file) -> Generator[Dict[str, Any], None, None]:
     """
-    The FAC findings text table includes unescaped, multi-line text which a
-    CSV parser is incapable of extracting. This function uses a regular
+    The FAC findings and cap text tables includes unescaped, multi-line text
+    which a CSV parser is incapable of extracting. This function uses a regular
     expression to grab the data, and yields dict-like rows.
     """
 
@@ -506,7 +512,23 @@ FAC_TABLES = {
     'findingtext': {
         'source_urls': _fac_urls('findingstext'),
         'model': models.FindingText,
-        'file_reader': parse_findings_text_csv,
+        'file_reader': parse_text_tables_csv,
+        'field_mapping': {
+            'SEQ_NUMBER': 'seq_number',
+            'DBKEY': 'dbkey',
+            'AUDITYEAR': 'audit_year',
+            'FINDINGREFNUMS': 'finding_ref_nums',
+            'TEXT': 'text',
+            'CHARTSTABLES': 'charts_tables',
+        },
+        'sanitizers': {
+            'CHARTSTABLES': boolean
+        }
+    },
+    'captext': {
+        'source_urls': _fac_urls('captext'),
+        'model': models.CAPText,
+        'file_reader': parse_text_tables_csv,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',

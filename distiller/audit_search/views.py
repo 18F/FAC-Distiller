@@ -28,7 +28,8 @@ def single_audit_search(request):
             end_date=form.cleaned_data['end_date'],
         ).prefetch_related(
             'finding_texts', 'finding_texts__findings',
-            'finding_texts__findings__elec_audits'
+            'finding_texts__findings__elec_audits',
+            'finding_texts__cap_texts'
         )
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
 
