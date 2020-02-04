@@ -219,6 +219,11 @@
                     </td>
                     <td class="text-top">
                       <div class="finding-text">
+                        {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
+                        {% for cap_text in finding_text.cap_texts.all %}
+                          {{ cap_text.text | escape | linebreaksbr }}
+                          {% if not forloop.last %}<hr>{% endif %}
+                        {% endfor %}
                       </div>
                     </td>
                     <td class="text-top finding-min-width">

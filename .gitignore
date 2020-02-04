@@ -21,6 +21,7 @@ geckodriver.log
 .vscode
 
 .env
+.mypy_cache/
 .pytest_cache/
 db/
 imports/

@@ -10,3 +10,5 @@ from .base import *
 DEBUG = True
 
 SECRET_KEY = 'SECRET'
+
+LOAD_TABLE_ROOT = str(PROJECT_ROOT / 'imports')
