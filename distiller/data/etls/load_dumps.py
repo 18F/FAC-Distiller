@@ -129,11 +129,7 @@ def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):
     for csv_column_name, model_field_name in field_mapping.items():
         # These are fixedwidth CSVs, so strip off excess whitespace and handle
         # NULL values.
-        try:
-            value = row[csv_column_name].strip() or None
-        except:
-            import pdb; pdb.set_trace()  #pylint: disable=C0321
-            pass
+        value = row[csv_column_name].strip() or None
         if csv_column_name in sanitizers:
             sanitized_row[model_field_name] = sanitizers[csv_column_name](value)
         else:
