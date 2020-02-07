@@ -102,3 +102,11 @@ def glob(path: str) -> List[str]:
     paths = sorted(f for f in stdlib_glob(path, recursive=True))
 
     return paths
+
+
+def exists(path: str) -> bool:
+    url = urlparse(path)
+    if url.scheme == 's3':
+        fs = s3fs.S3FileSystem(anon=False)
+        return fs.exists(path)
+    return os.path.exists(path)

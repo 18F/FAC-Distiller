@@ -42,7 +42,7 @@ class FACSpider(Spider):
 
         ext = parts[1] if len(parts) > 1 else None
         if ext and len(ext) > 3:
-            raise ValueError('CFDA suffix should no more than three digits')
+            raise ValueError('CFDA suffix should be no more than three digits')
 
         wild = not (ext and len(ext) == 3)
 
@@ -103,8 +103,7 @@ class FACSpider(Spider):
         if self.open_pages:
             open_in_browser(response)
 
-        # Find search result rows (tr) - Each results row has a download
-        # checkbox.
+        # Find search result rows (tr) using a `span` EIN container.
         rows = response.xpath(
             '//table[@id="MainContent_ucA133SearchResults_ResultsGrid"]//td//span[starts-with(@id, "MainContent_ucA133SearchResults_ResultsGrid_EIN")]/../../..'
         )
@@ -171,7 +170,7 @@ class FACSpider(Spider):
                 )
 
                 # If the file has already been downloaded, yield the result.
-                if os.path.exists(row_data['file_path']):
+                if files.exists(row_data['file_path']):
                     yield row_data
 
                 # If the file has not been downloaded, download it and then
