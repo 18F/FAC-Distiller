@@ -36,6 +36,12 @@
             {{ form.end_date|add_label_class:"usa-label" }}
             {% render_field form.end_date type="date" class+="usa-input" %}
           </div>
+          <div class="tablet:grid-col-12">
+            <div class="usa-checkbox">
+              <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
+              <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
+            </div>
+          </div>
           {{ form.page.as_hidden }}
           <input type="hidden" name="filtering" id="id_filtering" value="">
         </div>

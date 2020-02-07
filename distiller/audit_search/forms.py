@@ -42,6 +42,12 @@ class AgencySelectionForm(forms.Form):
     start_date = forms.DateField(required=False, label='Audit accepted - From')
     end_date = forms.DateField(required=False, label='Audit accepted - To')
     page = forms.IntegerField(initial=1, required=False)
+    findings = forms.BooleanField(
+        required=False,
+        initial=True,
+        label='Only show audits with findings',
+        label_suffix="",
+    )
     # Used when drilling-down search terms
     filtering = forms.IntegerField(required=False)
 
