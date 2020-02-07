@@ -16,6 +16,11 @@ PROJECT_ROOT = BASE_DIR.parents[0]
 # In production, it may be an S3 url (s3://...)
 LOAD_TABLE_ROOT = None
 
+# Set this to the path to save FAC documents to.
+# On local dev, this may be a filesystem path.
+# In production, it may be an S3 url (s3://...)
+FAC_DOCUMENT_DIR = None
+
 # Set this to a dict of the form:
 # {'access_key_id': 'XX',
 #  'secret_access_key': 'XXX',
