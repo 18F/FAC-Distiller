@@ -2,9 +2,10 @@ import json
 import os
 import re
 
+from django.conf import settings
 from scrapy import FormRequest, Spider
 from scrapy.exceptions import CloseSpider
-from django.conf import settings
+from scrapy.utils.response import open_in_browser
 
 from distiller.gateways import files
 from ..items import FacSearchResultDocument
@@ -15,7 +16,51 @@ class FACSpider(Spider):
     start_urls = ['https://harvester.census.gov/facdissem/SearchA133.aspx']
     download_delay = 1.5
 
+    def __init__(
+        self,
+        *args,
+        cfda=None,
+        open_pages=False,
+        **kwargs
+    ):
+        super(FACSpider, self).__init__(*args, **kwargs)
+
+        # Set to open each search results page in a local browser, for
+        # debugging purposes.
+        self.open_pages = open_pages
+
+        if not cfda:
+            raise ValueError('A CFDA number/prefix is required')
+
+        parts = cfda.split('.')
+        if len(parts) > 2:
+            raise ValueError('CFDA numbers are of the form XX.XXX')
+
+        prefix = parts[0]
+        if len(prefix) != 2:
+            raise ValueError('CFDA prefix should be two digits')
+
+        ext = parts[1] if len(parts) > 1 else None
+        if ext and len(ext) > 3:
+            raise ValueError('CFDA suffix should no more than three digits')
+
+        wild = not (ext and len(ext) == 3)
+
+        self.cfda_options = [{
+            # Treat all queries as wildcards, with
+            "Prefix": prefix,
+            "Ext": ext,
+            "Wild": wild
+
+            # For reference, these attributes are also present on some
+            # requests. (They may only be for the front-end's usage)
+            # 'IsFullCFDAQuery': False,
+            # "IsPrefixOnlyQuery": Flas,
+            # 'IsExtensionOnlyQuery': False,
+        }]
+
     def parse(self, response):
+        # TODO: Determine how to parametize audit year and date ranges.
         return FormRequest.from_response(
             response,
             formdata={
@@ -33,13 +78,9 @@ class FACSpider(Spider):
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$ToDate': '09/05/2019',
 
                 # CFDA numbers:
-                "ctl00$MainContent$UcSearchFilters$CDFASelectionControl$txtCfdaData": json.dumps([
-                    {
-                        "Prefix": "96",
-                        #"Ext": "5",
-                        "Wild": True
-                    }
-                ])
+                "ctl00$MainContent$UcSearchFilters$CDFASelectionControl$txtCfdaData": json.dumps(
+                    self.cfda_options
+                )
             },
             callback=self.parse_uniform_guidance_acknowledgement
         )
@@ -59,8 +100,8 @@ class FACSpider(Spider):
         Toggle through each paginated search results page.
         """
 
-        # from scrapy.utils.response import open_in_browser
-        # open_in_browser(response)
+        if self.open_pages:
+            open_in_browser(response)
 
         # Find search result rows (tr) - Each results row has a download
         # checkbox.

@@ -128,6 +128,28 @@ pipenv run python manage.py load_table --findingtext
 
 In the deployed environment, `django-apscheduler` is used to refresh all tables daily at 12:00 AM EST.
 
+## Scrapying FAC documents
+
+Scrapy is used to download documents from the Federal Audit Clearinghouse website.
+
+Here are some example crawls:
+
+```shell
+# Crawl all documents from prior year with CFDA `11.*`
+pipenv run scrapy crawl fac -a cfda=11
+
+# Crawl all documents from prior year with CFDA `11.2*`
+pipenv run scrapy crawl fac -a cfda=11.2
+
+# Crawl all documents from prior year with CFDA `11.123`
+pipenv run scrapy crawl fac -a cfda=11.123
+
+# Crawl all documents from prior year with CFDA `11*`
+# Also, for debugging, open a copy of each search results page in a browser.
+pipenv run scrapy crawl fac -a cfda=11.123 -a open_pages=1
+
+```
+
 ## Running tests
 
 To run the test suite with `pytest`:
