@@ -174,12 +174,12 @@
             <table class="findings-table usa-table font-serif-3xs">
               <thead>
                 <tr>
-                  <td colspan="3" style="border: none; background-color: transparent;">
+                  <td colspan="2" style="border: none; background-color: transparent;">
                     <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
                       &lt; back to audit list
                     </button>
                   </td>
-                  <td colspan="3" style="border: none; background-color: transparent; text-align: right;">
+                  <td colspan="2" style="border: none; background-color: transparent; text-align: right;">
                     {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
@@ -188,7 +188,7 @@
                   <th scope="col" style="white-space: nowrap">CFDA awards</th>
                   <th scope="col">Finding text</th>
                   <th scope="col">Corrective action plan</th>
-                  <th scope="col">Previous finding</th>
+                  {#<th scope="col">Previous finding</th>#}
                 </tr>
               </thead>
               <tbody>
@@ -232,9 +232,9 @@
                         {% endfor %}
                       </div>
                     </td>
-                    <td class="text-top finding-min-width">
+                    {% comment %}<td class="text-top finding-min-width">
                       YYYY-001
-                    </td>
+                    </td>{% endcomment %}
                   </tr>
                 {% endfor %}
               </tbody>
