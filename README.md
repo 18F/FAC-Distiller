@@ -147,7 +147,12 @@ pipenv run scrapy crawl fac -a cfda=11.123
 # Crawl all documents from prior year with CFDA `11*`
 # Also, for debugging, open a copy of each search results page in a browser.
 pipenv run scrapy crawl fac -a cfda=11.123 -a open_pages=1
+```
 
+In production usage, metadata on these documents should be output to file, so it may be loaded into the Distiller database. Use the `-t` and `-o` Scrapy options to specify a format and target file name:
+
+```shell
+pipenv run scrapy crawl fac -a cfda=11.123 -t json -o test.json
 ```
 
 ## Running tests
