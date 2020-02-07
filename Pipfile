@@ -26,6 +26,7 @@ requests = "*"
 django-apscheduler = "*"
 pytz = "*"
 fontawesome-free = "*"
+scrapy = "*"
 
 [requires]
 python_version = "3.7"

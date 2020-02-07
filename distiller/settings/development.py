@@ -12,3 +12,4 @@ DEBUG = True
 SECRET_KEY = 'SECRET'
 
 LOAD_TABLE_ROOT = str(PROJECT_ROOT / 'imports')
+FAC_DOCUMENT_DIR = PROJECT_ROOT / 'fac-documents'

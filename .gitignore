@@ -24,5 +24,6 @@ geckodriver.log
 .mypy_cache/
 .pytest_cache/
 db/
+fac-documents/
 imports/
 distiller/settings/local.py
