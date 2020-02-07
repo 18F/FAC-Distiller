@@ -193,7 +193,7 @@
               </thead>
               <tbody>
                 {% for finding_text in finding_texts %}
-                  <tr class="finding-collapsed" data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
+                  <tr data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
                     <td class="text-top finding-min-width">
                       {{ finding_text.finding_ref_nums }}
                       <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
