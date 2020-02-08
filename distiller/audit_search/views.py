@@ -16,7 +16,7 @@ from .forms import AgencySelectionForm
 
 
 def single_audit_search(request):
-    form = AgencySelectionForm(request.GET)
+    form = AgencySelectionForm(request.GET or None)
 
     page = None
     finding_texts = None
@@ -31,6 +31,8 @@ def single_audit_search(request):
             'finding_texts__findings__elec_audits',
             'finding_texts__cap_texts'
         )
+        if form.cleaned_data['findings']:
+            audits = audits.filter(finding_texts__isnull=False)
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()

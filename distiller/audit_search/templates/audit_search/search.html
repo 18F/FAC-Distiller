@@ -36,6 +36,12 @@
             {{ form.end_date|add_label_class:"usa-label" }}
             {% render_field form.end_date type="date" class+="usa-input" %}
           </div>
+          <div class="tablet:grid-col-12">
+            <div class="usa-checkbox">
+              <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
+              <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
+            </div>
+          </div>
           {{ form.page.as_hidden }}
           <input type="hidden" name="filtering" id="id_filtering" value="">
         </div>
@@ -97,7 +103,7 @@
                   <th scope="col">Auditee name</th>
                   <th scope="col">Audit accepted</th>
                   <th scope="col">Findings count</th>
-                  <th scope="col">Previous findings</th>
+                  {#<th scope="col">Previous findings</th>#}
                   <th scope="col">Cog/oversight agency</th>
                   <th scope="col">Material weakness</th>
                   <th scope="col">Questioned costs</th>
@@ -119,7 +125,7 @@
                         {{ result.finding_texts.all | length }}
                       {% endif %}
                     </td>
-                    <td class="text-center">{{ result.finding_texts.finding.0.prior_finding_ref_nums }}</td>
+                    {#<td class="text-center">{{ result.finding_texts.finding.0.prior_finding_ref_nums }}</td>#}
                     <td class="">
                       {% if result.cog_over == 'C' %}
                         {{ result.cog_agency | agency_name }}
@@ -168,12 +174,12 @@
             <table class="findings-table usa-table font-serif-3xs">
               <thead>
                 <tr>
-                  <td colspan="3" style="border: none; background-color: transparent;">
+                  <td colspan="2" style="border: none; background-color: transparent;">
                     <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
                       &lt; back to audit list
                     </button>
                   </td>
-                  <td colspan="3" style="border: none; background-color: transparent; text-align: right;">
+                  <td colspan="2" style="border: none; background-color: transparent; text-align: right;">
                     {% include './_pagination.html' with page=page %}
                   </td>
                 </tr>
@@ -182,12 +188,12 @@
                   <th scope="col" style="white-space: nowrap">CFDA awards</th>
                   <th scope="col">Finding text</th>
                   <th scope="col">Corrective action plan</th>
-                  <th scope="col">Previous finding</th>
+                  {#<th scope="col">Previous finding</th>#}
                 </tr>
               </thead>
               <tbody>
                 {% for finding_text in finding_texts %}
-                  <tr class="finding-collapsed" data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
+                  <tr data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
                     <td class="text-top finding-min-width">
                       {{ finding_text.finding_ref_nums }}
                       <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
@@ -226,9 +232,9 @@
                         {% endfor %}
                       </div>
                     </td>
-                    <td class="text-top finding-min-width">
+                    {% comment %}<td class="text-top finding-min-width">
                       YYYY-001
-                    </td>
+                    </td>{% endcomment %}
                   </tr>
                 {% endfor %}
               </tbody>
