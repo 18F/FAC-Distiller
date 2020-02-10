@@ -27,7 +27,7 @@ class FacSearchResultDocument(scrapy.Item):
          'ID': '1318542016',
          'REPORTID': '02807677',
          'VERSION': '2',
-         'file_path': '/Users/dan/src/10x/fac-scraper/audit_documents/13185420162.xlsx',
+         'file_name': '13185420162.xlsx',
          'file_type': 'form'}
     """
 
@@ -43,7 +43,12 @@ class FacSearchResultDocument(scrapy.Item):
     FACACCEPTEDDATE = scrapy.Field()
     DATERECEIVED = scrapy.Field()
 
-    # Document details.
-    # file_type is "form" or "audit"
+    # "form" or "audit"
     file_type = scrapy.Field()
-    file_path = scrapy.Field()
+
+    # <dbkey><audit-year><version>.<pdf | xlsx>
+    file_name = scrapy.Field()
+
+    # `False` if this scrape job downloaded the file; `True` if the file was
+    # previously downloaded.
+    repeat_crawl = scrapy.Field()

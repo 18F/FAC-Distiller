@@ -32,7 +32,7 @@ def single_audit_search(request):
             'finding_texts__cap_texts'
         )
         if form.cleaned_data['findings']:
-            audits = audits.filter(finding_texts__isnull=False)
+            audits = audits.filter(finding_texts__isnull=False).distinct()
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()
