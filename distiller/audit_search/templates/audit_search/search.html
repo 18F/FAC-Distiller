@@ -147,12 +147,15 @@
                     </td>
                     <td>
                       {% if result.tot_fed_expend %}
-                      ${{ result.tot_fed_expend|intcomma }}
+                      ${{ result.tot_fed_expend | intcomma }}
                       {% endif %}
                     </td>
                     <td>
-                      <a href="{{ result.form_url }}">Form</a>
-                      <a href="{{ result.report_url }}">PDF</a>
+                      {% for document in result.documents.all %}
+                        <a href="{{ document.get_absolute_url }}">
+                          {{ document.file_type | title }} (v{{ document.version }})
+                        </a>
+                      {% endfor %}
                     </td>
                   </tr>
                 {% endfor %}

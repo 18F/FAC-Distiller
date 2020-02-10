@@ -1,4 +1,11 @@
+"""
+Maintains references to Federal Audit Clearinghouse documents.
+"""
+
+import os
+
 from compositefk.fields import CompositeForeignKey
+from django.conf import settings
 from django.db import models
 
 from distiller.data.models import Audit
@@ -45,3 +52,6 @@ class FacDocument(models.Model):
 
     def __str__(self):
         return self.file_name
+
+    def get_absolute_url(self):
+        return os.path.join(settings.FAC_DOWNLOAD_ROOT, self.file_name)

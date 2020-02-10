@@ -18,7 +18,6 @@ def _parse_date(date_str: str):
 
 def _yield_documents(reader):
     for row in reader:
-        import pdb; pdb.set_trace()  #pylint: disable=C0321
         yield models.FacDocument(
             version=row['VERSION'],
             report_id=row['REPORTID'],
