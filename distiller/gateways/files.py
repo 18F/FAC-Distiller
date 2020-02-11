@@ -60,8 +60,8 @@ def input_file(
 
     try:
         return _open(url.scheme, path, mode, encoding=encoding)
-    except:
-        raise FileOpenFailure(f'Load failure: {path}')
+    except Exception as e:
+        raise FileOpenFailure(f'Load failure: {path} with error {e}')
 
 
 def output_file(path: str, mode: str = 'w') -> IO[Any]:

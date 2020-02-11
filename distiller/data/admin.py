@@ -44,6 +44,12 @@ class CAPTextAdmin(admin.ModelAdmin):
     )
 
 
+class PDFExtractAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'audit_year', 'dbkey', 'finding_ref_nums'
+    )
+
+
 
 admin.site.register(models.AssistanceListing, AssistanceListingAdmin)
 admin.site.register(models.Audit, AuditAdmin)
@@ -51,3 +57,4 @@ admin.site.register(models.CFDA, CFDAAdmin)
 admin.site.register(models.Finding, FindingAdmin)
 admin.site.register(models.FindingText, FindingTextAdmin)
 admin.site.register(models.CAPText, CAPTextAdmin)
+admin.site.register(models.PDFExtract, PDFExtractAdmin)

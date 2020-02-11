@@ -128,6 +128,11 @@ pipenv run python manage.py load_table --findingtext
 
 In the deployed environment, `django-apscheduler` is used to refresh all tables daily at 12:00 AM EST.
 
+### cf-service-connect
+
+For local debugging, install [the cf service-connect plugin](https://github.com/18F/cf-service-connect "cf service connect plugin") and run `./bin/tunnel_cf_db` to access the postgres database
+on cloud.gov.
+
 ## Scrapying FAC documents
 
 Scrapy is used to download documents from the Federal Audit Clearinghouse website.
