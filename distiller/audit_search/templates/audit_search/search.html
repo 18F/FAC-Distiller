@@ -257,13 +257,17 @@
     function showFindings(dbkey, auditYear) {
       // Hide all rows in findings table
       var selector = '.findings-table > tbody > tr';
-      document.querySelectorAll(selector).forEach(function (node) {
+      Array.prototype.slice.call(
+        document.querySelectorAll(selector)
+      ).forEach(function (node) {
         node.style.display = 'none';
       });
 
       // Show rows for this audit
       selector = '.findings-table > tbody > tr[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
-      document.querySelectorAll(selector).forEach(function (node) {
+      Array.prototype.slice.call(
+        document.querySelectorAll(selector)
+      ).forEach(function (node) {
         node.style.display = 'table-row';
       });
 

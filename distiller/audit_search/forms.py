@@ -39,8 +39,14 @@ class AgencySelectionForm(forms.Form):
         ),
         required=False
     )
-    start_date = forms.DateField(required=False, label='Audit accepted - From')
-    end_date = forms.DateField(required=False, label='Audit accepted - To')
+    start_date = forms.DateField(
+        required=False,
+        label='Audit accepted - From'
+    )
+    end_date = forms.DateField(
+        required=False,
+        label='Audit accepted - To'
+    )
     page = forms.IntegerField(initial=1, required=False)
     findings = forms.BooleanField(
         required=False,
@@ -53,6 +59,9 @@ class AgencySelectionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['start_date'].widget.attrs['placeholder'] = 'mm/dd/yyyy'
+        self.fields['end_date'].widget.attrs['placeholder'] = 'mm/dd/yyyy'
 
         # Support filtering on subagency, default to first choice
         agency = self['agency'].value() or AGENCY_CHOICES[0][0]
