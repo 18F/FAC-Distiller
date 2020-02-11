@@ -14,6 +14,12 @@ from ..items import FacSearchResultDocument
 class FACSpider(Spider):
     name = 'fac'
     start_urls = ['https://harvester.census.gov/facdissem/SearchA133.aspx']
+
+    # Set `download_delay` to specify a period, in seconds, to wait between
+    # HTTP request.
+    # Leave to the default, zero, since ATM we are not able to do concurrent
+    # crawls. It seems unlikely that one un-staggered crawl will be a burden on
+    # the FAC server.
     #download_delay = 1.5
 
     def __init__(
