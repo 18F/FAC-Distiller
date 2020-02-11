@@ -15,6 +15,9 @@ class PDFExtract(models.Model):
     """
     class Meta:
         verbose_name_plural = 'PDF extracts'
+        indexes = [
+           models.Index(fields=['audit_year', 'dbkey']),
+        ]
 
     # Use these fields to link tables- 4 digits
     audit_year = models.DecimalField(
