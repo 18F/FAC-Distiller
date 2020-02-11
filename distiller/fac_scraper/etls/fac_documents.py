@@ -33,10 +33,20 @@ def _yield_documents(reader):
 
 
 @transaction.atomic
-def load_fac_csvs(source_dir: str, batch_size: int = 1_000):
+def load_fac_csvs(
+    # Load all files from this path prefix
+    source_dir: str,
+    # Clear the target table before loading
+    reload: bool = False,
+    # Number of rows to INSERT per batch
+    batch_size: int = 1_000
+):
     """
     Load all CSVs in `source_dir` to FacDocument.
     """
+
+    if reload:
+        models.FacDocument.objects.all().delete()
 
     csv_paths = files.glob(os.path.join(source_dir, '*'))
     for csv_path in csv_paths:

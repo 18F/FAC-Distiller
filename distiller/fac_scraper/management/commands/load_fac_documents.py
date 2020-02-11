@@ -20,10 +20,16 @@ class Command(BaseCommand):
             '--load-dir',
             help='Subdirectory of `FAC_CRAWL_ROOT` to load CSVs from',
         )
+        parser.add_argument(
+            '--reload',
+            action='store_true',
+            help='Clear table before loading',
+        )
 
     def handle(self, *args, **options):
         sys.stdout.write(f'Loading files from "{options["load_dir"]}"...\n')
         sys.stdout.flush()
         fac_documents.load_fac_csvs(
-            source_dir=os.path.join(settings.FAC_CRAWL_ROOT, options['load_dir'])
+            source_dir=os.path.join(settings.FAC_CRAWL_ROOT, options['load_dir']),
+            reload=options['reload'],
         )
