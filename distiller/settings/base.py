@@ -21,6 +21,16 @@ LOAD_TABLE_ROOT = None
 # In production, it may be an S3 url (s3://...)
 FAC_DOCUMENT_DIR = None
 
+# Set this to the root https path for FAC documents.
+# On local dev, this may be a filesystem path.
+# In production, it may be an S3 url (s3://...)
+FAC_DOWNLOAD_ROOT = None
+
+# Set this to the root path of FAC crawl logs (CSVs).
+# On local dev, this may be a filesystem path.
+# In production, it may be an S3 url (s3://...)
+FAC_CRAWL_ROOT = None
+
 # Set this to a dict of the form:
 # {'access_key_id': 'XX',
 #  'secret_access_key': 'XXX',
@@ -54,6 +64,7 @@ INSTALLED_APPS = [
 
     'distiller.audit_search.apps.AuditSearchConfig',
     'distiller.data.apps.DataConfig',
+    'distiller.fac_scraper.apps.FacScraperConfig',
 ]
 
 MIDDLEWARE = [

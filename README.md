@@ -155,6 +155,12 @@ In production usage, metadata on these documents should be output to file, so it
 pipenv run scrapy crawl fac -a cfda=11.123 -t json -o test.json
 ```
 
+There is a script checked into the repository that will assist in refreshing a subset of CFDA prefices on a cloud.gov deployment. To run as a one-off task:
+
+```
+cf run-task fac-distiller "/home/vcap/app/bin/crawl"
+```
+
 ## Running tests
 
 To run the test suite with `pytest`:

@@ -14,7 +14,13 @@ from ..items import FacSearchResultDocument
 class FACSpider(Spider):
     name = 'fac'
     start_urls = ['https://harvester.census.gov/facdissem/SearchA133.aspx']
-    download_delay = 1.5
+
+    # Set `download_delay` to specify a period, in seconds, to wait between
+    # HTTP request.
+    # Leave to the default, zero, since ATM we are not able to do concurrent
+    # crawls. It seems unlikely that one un-staggered crawl will be a burden on
+    # the FAC server.
+    #download_delay = 1.5
 
     def __init__(
         self,
@@ -164,13 +170,13 @@ class FACSpider(Spider):
                     'lnkbuttonAudit': 'pdf',
                     'lnkbuttonForm': 'xlsx',
                 }[link_type]
-                file_name = f'{row_data["ID"]}{row_data["VERSION"]}.{ext}'
-                row_data['file_path'] = os.path.join(
-                    settings.FAC_DOCUMENT_DIR, file_name
-                )
+                row_data['file_name'] = f'{row_data["ID"]}{row_data["VERSION"]}.{ext}'
+                row_data['repeat_crawl'] = files.exists(os.path.join(
+                    settings.FAC_DOCUMENT_DIR, row_data['file_name']
+                ))
 
                 # If the file has already been downloaded, yield the result.
-                if files.exists(row_data['file_path']):
+                if row_data['repeat_crawl']:
                     yield row_data
 
                 # If the file has not been downloaded, download it and then
@@ -203,19 +209,17 @@ class FACSpider(Spider):
         #
         pattern = re.compile(r'attachment;filename="(?P<file_name>.*)"')
         match = pattern.match(response.headers['Content-Disposition'].decode())
-        save_path = os.path.join(
-            settings.FAC_DOCUMENT_DIR,
-            match.group('file_name')
-        )
+        file_name = match.group('file_name')
 
-        if row_data['file_path'] != save_path:
+        if row_data['file_name'] != file_name:
             # Raise this as CloseSpider to make the error visible - this would
             # indicate bad assumptions were made about the format of the
             # system's file names.
             raise CloseSpider(
-                f'Unexpected file path: `{save_path}`, expected: `{row_data["file_path"]}`'
+                f'Unexpected file name: `{file_name}`, expected: `{row_data["file_name"]}`'
             )
 
+        save_path = os.path.join(settings.FAC_DOCUMENT_DIR, file_name)
         with files.output_file(save_path, 'wb') as out_file:
             out_file.write(response.body)
 

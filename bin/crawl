@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#
+# This script is tailored to run on a cloud.gov sandbox account, which has
+# resource restrictions that prevent concurrent jobs.
+#
+# NOTE: This is just a helper, and is not suitable for a real production
+# environment.
+#
+# Sequentially run crawl jobs on cloud.gov, then load to the Distiller
+# database.
+#
+
+set -euo pipefail
+
+S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
+
+# Put Scrapy metadata files in a timestamped directory.
+DIR_NAME=`TZ=UTC date`
+
+scrapy crawl fac -a cfda=11 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/11.csv"
+scrapy crawl fac -a cfda=20 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/20.csv"
+scrapy crawl fac -a cfda=47 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/47.csv"
+python manage.py load_fac_documents --reload --load-dir "${DIR_NAME}"

@@ -29,10 +29,11 @@ def single_audit_search(request):
         ).prefetch_related(
             'finding_texts', 'finding_texts__findings',
             'finding_texts__findings__elec_audits',
-            'finding_texts__cap_texts'
+            'finding_texts__cap_texts',
+            'documents',
         )
         if form.cleaned_data['findings']:
-            audits = audits.filter(finding_texts__isnull=False)
+            audits = audits.filter(finding_texts__isnull=False).distinct()
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()

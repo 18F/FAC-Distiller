@@ -53,6 +53,7 @@ VCAP_SERVICES_SECRET = json.loads(os.environ['VCAP_SERVICES'])
 S3_KEY_DETAILS = VCAP_SERVICES_SECRET['s3'][0]['credentials']
 LOAD_TABLE_ROOT = f's3://{S3_KEY_DETAILS["bucket"]}/data-sources'
 FAC_DOCUMENT_DIR = f's3://{S3_KEY_DETAILS["bucket"]}/fac-documents'
+FAC_CRAWL_ROOT = f's3://{S3_KEY_DETAILS["bucket"]}/fac-crawls'
 # Example:
 # https://s3-us-gov-west-1.amazonaws.com/cg-d344f772-e57b-42a2-bb24-fe9c8d057351/fac-documents/
-FAC_DOWNLOAD_ROOT = 'https://s3-${S3_KEY_DETAILS["region"]}.amazonaws.com/${S3_KEY_DETAILS["bucket"]}/'
+FAC_DOWNLOAD_ROOT = f'https://s3-{S3_KEY_DETAILS["region"]}.amazonaws.com/{S3_KEY_DETAILS["bucket"]}/fac-documents/'
