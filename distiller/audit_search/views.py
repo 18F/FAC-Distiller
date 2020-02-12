@@ -16,10 +16,11 @@ from .forms import AgencySelectionForm
 
 
 def single_audit_search(request):
-    form = AgencySelectionForm(request.GET or None)
+    form = AgencySelectionForm(request.GET)
 
     page = None
     finding_texts = None
+    pdf_finding_texts = None
     if form.is_valid():
         audits = models.Audit.objects.search(
             agency_name=form.cleaned_data['sub_agency'],
@@ -29,12 +30,11 @@ def single_audit_search(request):
         ).prefetch_related(
             'finding_texts', 'finding_texts__findings',
             'finding_texts__findings__elec_audits',
-            'finding_texts__cap_texts',
-            'documents',
+            'finding_texts__cap_texts'
         )
-        if form.cleaned_data['findings']:
-            audits = audits.filter(finding_texts__isnull=False).distinct()
-        page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
+        # testing purposes only
+        audits = models.Audit.objects.exclude(s3_url=None)
+        page = Paginator(audits, 100).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()
         for audit in page.object_list:
@@ -45,10 +45,21 @@ def single_audit_search(request):
             key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
         )
 
+        # TODO improve
+        pdf_finding_texts_set = set()
+        for audit in page.object_list:
+            pdf_finding_texts_set.update(audit.pdf_extracts.all())
+
+        pdf_finding_texts = sorted(
+            pdf_finding_texts_set,
+            key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
+        )
+
     return render(request, 'audit_search/search.html', {
         'form': form,
         'page': page,
         'finding_texts': finding_texts,
+        'pdf_finding_texts': pdf_finding_texts,
     })
 
 
