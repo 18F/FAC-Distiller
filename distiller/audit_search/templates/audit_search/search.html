@@ -11,30 +11,24 @@
 {% block content %}
   <div id="search-results" class="usa-section">
     <form class="usa-form usa-form--large">
+      {{ form.non_field_errors }}
       <fieldset class="usa-fieldset">
         <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
         <div class="grid-row grid-gap">
           <div class="tablet:grid-col-8">
-            {{ form.agency|add_label_class:"usa-label" }}
-            {% render_field form.agency class+="usa-select" %}
+            {% include 'audit_search/_field.html' with field=form.agency type="select" field_class="usa-select" %}
           </div>
           <div class="tablet:grid-col-8">
-            {{ form.sub_agency|add_label_class:"usa-label" }}
-            {% render_field form.sub_agency class+="usa-select" %}
+            {% include 'audit_search/_field.html' with field=form.sub_agency field_class="usa-select" %}
           </div>
           <div class="tablet:grid-col-4">
-            {{ form.audit_year|add_label_class:"usa-label" }}
-            {% render_field form.audit_year class+="usa-select" %}
-          </div>
-          <div class="tablet:grid-col-8">
+            {% include 'audit_search/_field.html' with field=form.audit_year field_class="usa-select" %}
           </div>
           <div class="tablet:grid-col-6">
-            {{ form.start_date|add_label_class:"usa-label" }}
-            {% render_field form.start_date type="date" class+="usa-input" %}
+            {% include 'audit_search/_field.html' with field=form.start_date field_class="usa-input" input_type="date" %}
           </div>
           <div class="tablet:grid-col-6">
-            {{ form.end_date|add_label_class:"usa-label" }}
-            {% render_field form.end_date type="date" class+="usa-input" %}
+            {% include 'audit_search/_field.html' with field=form.end_date field_class="usa-input" input_type="date" %}
           </div>
           <div class="tablet:grid-col-12">
             <div class="usa-checkbox">

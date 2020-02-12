@@ -86,3 +86,23 @@ class AgencySelectionForm(forms.Form):
         if self.cleaned_data['filtering']:
             raise forms.ValidationError('Cannot search when filtering')
         return self.cleaned_data['filtering']
+
+    def clean_end_date(self):
+        if self.cleaned_data.get('start_date') and (
+            self.cleaned_data['end_date'] < self.cleaned_data['start_date']
+        ):
+            raise forms.ValidationError(
+                'End date may not be earlier than start date'
+            )
+
+        return self.cleaned_data['end_date']
+
+    def clean_start_date(self):
+        if self.cleaned_data.get('end_date') and (
+            self.cleaned_data['start_date'] < self.cleaned_data['end_date']
+        ):
+            raise forms.ValidationError(
+                'Start date may not be earlier than start date'
+            )
+
+        return self.cleaned_data['start_date']
