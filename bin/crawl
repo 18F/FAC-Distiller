@@ -13,6 +13,9 @@
 
 set -euo pipefail
 
+AWS_ACCESS_KEY_ID=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.access_key_id"`
+AWS_SECRET_ACCESS_KEY=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.secret_access_key"`
+AWS_REGION=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.region"`
 S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
 
 # Put Scrapy metadata files in a timestamped directory.
