@@ -1,0 +1,12 @@
+{% load widget_tweaks %}
+
+
+{% with error_class=field_class|add:"--error" %}
+  <div class="usa-form-group {% if field.errors %}usa-form-group--error{% endif %}">
+    {% for error in field.errors %}
+      <span class="usa-error-message" role="alert">{{ error }}</span>
+    {% endfor %}
+    {{ field | add_label_class:"usa-label" | add_error_class:error_class }}
+    {% render_field field class+=field_class type=input_type %}
+  </div>
+{% endwith %}
