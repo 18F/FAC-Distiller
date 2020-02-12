@@ -1,6 +1,3 @@
-from functools import reduce
-
-
 def apply_all_heuristics(data):
     for heuristic in heuristics:
         data = heuristic(data)

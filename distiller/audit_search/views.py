@@ -13,6 +13,7 @@ from distiller.data.constants import AGENCIES_BY_PREFIX
 from distiller.data.etls import selenium_scraper
 from distiller.data import models
 from .forms import AgencySelectionForm
+from distiller.fac_scraper.models import FacDocument
 
 
 def single_audit_search(request):
@@ -33,7 +34,7 @@ def single_audit_search(request):
             'finding_texts__cap_texts'
         )
         # testing purposes only
-        audits = models.Audit.objects.exclude(s3_url=None)
+        audits = [f.audit for f in FacDocument.objects.all()]
         page = Paginator(audits, 100).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()

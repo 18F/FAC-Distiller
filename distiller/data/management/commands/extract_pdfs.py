@@ -19,17 +19,17 @@ class Command(BaseCommand):
         parser.add_argument(
             "--all", action="store_true", help="Extract all PDFs",
         )
-        parser.add_argument("audit_ids", nargs="*", type=int)
+        parser.add_argument("pdf_ids", nargs="*", type=int)
 
     def handle(self, *args, **options):
-        nlp = extract_pdf.audit_pdf_setup()
-        audit_ids = options["audit_ids"]
+        nlp = extract_pdf.setup()
+        pdf_ids = options["pdf_ids"]
         if options["all"]:
-            audit_ids = extract_pdf.get_all_audits_with_pdf()
-            sys.stdout.write("Extracting all PDFs from relevant audits ...\n")
+            pdf_ids = extract_pdf.get_all_pdfs()
+            sys.stdout.write("Extracting all PDFs ...\n")
             sys.stdout.flush()
 
-        for audit_id in audit_ids:
-            sys.stdout.write(f'Extracting PDF from audit "{audit_id}"...\n')
+        for pdf_id in pdf_ids:
+            sys.stdout.write(f'Extracting PDF id "{pdf_id}"...\n')
             sys.stdout.flush()
-            extract_pdf.process_audit_pdf(nlp, audit_id)
+            extract_pdf.process_audit_pdf(nlp, pdf_id)
