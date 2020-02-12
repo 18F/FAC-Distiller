@@ -8,7 +8,7 @@ from pdfminer.pdfpage import PDFPage
 import os
 from io import StringIO
 
-from ..gateways import files
+from ...gateways import files
 
 
 def errors(fd):

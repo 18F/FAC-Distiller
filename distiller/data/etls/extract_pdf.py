@@ -8,7 +8,7 @@ from django.conf import settings
 from . import nlp
 from . import pdf_utils
 from .analyze import analyze_doc
-from ..gateways import files
+from ...gateways import files
 from ..models.single_audit_db import Audit
 from ..models.pdf_extract import PDFExtract
 
@@ -20,9 +20,10 @@ def audit_pdf_setup():
 def get_all_audits_with_pdf():
     # for testing purposes
     # if True:
-    #     Audit.objects.filter(id=12241).update(s3_url="data-sources/pdfs/14770920191.pdf")
+    #     Audit.objects.filter(id=64618).update(s3_url="data-sources/pdfs/14770920191.pdf")
     #     PDFExtract.objects.all().delete()
-    return Audit.objects.exclude(s3_url=None).values_list('pk', flat=True)
+    # return Audit.objects.exclude(s3_url=None).values_list('pk', flat=True)
+    return Audit.objects.all()[0].pk
 
 
 def process_audit_pdf(processor, audit_id):
@@ -37,6 +38,8 @@ def process_audit_pdf(processor, audit_id):
 
         page_length = pdf_utils.page_length(pdf)
         for page_number in range(0, page_length):
+            sys.stdout.write(f'Processing {page_number}.\n')
+            sys.stdout.flush()
             page_text = pdf_utils.page(pdf, page_number)
             page_doc = processor(page_text)
             results = analyze_doc(page_number, page_doc)
