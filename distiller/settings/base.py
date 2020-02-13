@@ -24,7 +24,7 @@ FAC_DOCUMENT_DIR = None
 # Set this to the root https path for FAC documents.
 # On local dev, this may be a filesystem path.
 # In production, it may be an S3 url (s3://...)
-FAC_DOWNLOAD_ROOT = ''
+FAC_DOWNLOAD_ROOT = None
 
 # Set this to the root path of FAC crawl logs (CSVs).
 # On local dev, this may be a filesystem path.

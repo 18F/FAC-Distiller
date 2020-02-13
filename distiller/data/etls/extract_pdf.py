@@ -20,25 +20,6 @@ def setup():
 
 
 def get_all_pdfs():
-    # for testing purposes only
-    if True:
-        PDFExtract.objects.all().delete()
-        FacDocument.objects.all().delete()
-        # create a facsimile FacDocument to play with, linked to a random audit
-        audit = Audit.objects.all()[0]
-        FacDocument(
-            version=1,
-            report_id='1',
-            audit_year=audit.audit_year,
-            dbkey=audit.dbkey,
-            ein='10',
-            fy_end_date=datetime.now(),
-            fac_accepted_date=datetime.now(),
-            date_received=datetime.now(),
-            file_type='audit',
-            file_name='14770920191.pdf',
-            audit=audit,
-        ).save()
     return FacDocument.objects.all().values_list('pk', flat=True)
 
 

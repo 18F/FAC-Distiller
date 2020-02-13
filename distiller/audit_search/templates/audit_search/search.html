@@ -97,7 +97,6 @@
                   <th scope="col">Auditee name</th>
                   <th scope="col">Audit accepted</th>
                   <th scope="col">Findings count</th>
-                  <th scope="col">PDF Findings count</th>
                   {#<th scope="col">Previous findings</th>#}
                   <th scope="col">Cog/oversight agency</th>
                   <th scope="col">Material weakness</th>
@@ -113,21 +112,12 @@
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
-                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }}, '')">
+                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
                           {{ result.finding_texts.all | length }}
                         </button>
                       {% else %}
                         {{ result.finding_texts.all | length }}
                       {% endif %}
-                    </td>
-                    <td class="text-center">
-                       {% if result.pdf_extracts.all %}
-                         <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }}, 'pdf-')">
-                           {{ result.pdf_extracts.all | length }}
-                         </button>
-                       {% else %}
-                         {{ result.pdf_extracts.all | length }}
-                       {% endif %}
                     </td>
                     {#<td class="text-center">{{ result.finding_texts.finding.0.prior_finding_ref_nums }}</td>#}
                     <td class="">
@@ -246,66 +236,6 @@
           </div>
         </div>
       </div>
-      <div class="pdf-findings-results-page">
-        <div class="grid-row">
-          <div class="grid-col-12">
-            <table class="findings-table usa-table font-serif-3xs">
-              <thead>
-                <tr>
-                  <td colspan="4" style="border: none; background-color: transparent;">
-                    <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('pdf-show-findings')">
-                      &lt; back to audit list
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="col" style="white-space: nowrap">Finding #</th>
-                  <th scope="col">Finding text (PDF)</th>
-                  <th scope="col">Corrective action plan (PDF)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for pdf_finding_text in pdf_finding_texts %}
-                  <tr class="finding-collapsed" data-dbkey="{{ pdf_finding_text.dbkey }}" data-audit-year="{{ pdf_finding_text.audit_year }}">
-                    <td class="text-top finding-min-width">
-                      {{ pdf_finding_text.finding_ref_nums }}
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <i class="fas fa-expand-alt expand-icon"></i>
-                      </button>
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <i class="fas fa-compress-alt compress-icon"></i>
-                      </button>
-                    </td>
-                    <td class="text-top">
-                      <div class="finding-text">
-                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard('{{ finding_text.text | escapejs }}')">
-                          <i class="fas fa-paperclip"></i>
-                        </button>
-                        {% for key, value in pdf_finding_text.finding_to_dict.items %}
-                          <div>
-                            <strong>{{ key }}</strong>
-                            {{ value | escape | linebreaksbr }}
-                          </div>
-                        {% endfor %}
-                      </div>
-                    </td>
-                    <td class="text-top">
-                      <div class="finding-text">
-                        {% for key, value in pdf_finding_text.cap_to_dict.items %}
-                          <div>
-                            <strong>{{ key }}</strong>
-                            {{ value | escape | linebreaksbr }}
-                          </div>
-                        {% endfor %}
-                      </div>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
     {% else %}
       <div class="usa-alert usa-alert--info" >
         <div class="usa-alert__body">
@@ -324,9 +254,9 @@
       this.form.submit();
     }, false);
 
-    function showFindings(dbkey, auditYear, prefix) {
+    function showFindings(dbkey, auditYear) {
       // Hide all rows in findings table
-      var selector = '.' + prefix + 'findings-table > tbody > tr';
+      var selector = '.findings-table > tbody > tr';
       Array.prototype.slice.call(
         document.querySelectorAll(selector)
       ).forEach(function (node) {
@@ -334,7 +264,7 @@
       });
 
       // Show rows for this audit
-      selector = '.' + prefix + 'findings-table > tbody > tr[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
+      selector = '.findings-table > tbody > tr[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
       Array.prototype.slice.call(
         document.querySelectorAll(selector)
       ).forEach(function (node) {
@@ -342,7 +272,7 @@
       });
 
       // Show the findings table section
-      document.getElementById('search-results').classList.toggle(prefix + 'show-findings');
+      document.getElementById('search-results').classList.toggle('show-findings');
     }
 
     var copyToClipboard = function(text) {
@@ -394,20 +324,16 @@
       display: none;
     }
 
-    .show-findings .audit-results-page, .pdf-show-findings .audit-results-page {
+    .show-findings .audit-results-page {
       display: none;
     }
 
-    .findings-results-page, .pdf-findings-results-page {
+    .findings-results-page {
       display: none;
     }
 
-    .show-findings .findings-results-page, .pdf-show-findings .pdf-findings-results-page {
+    .show-findings .findings-results-page {
       display: block;
-    }
-
-    .pdf-findings-results-table, .pdf-findings-table {
-      width: 100%;
     }
 
     table.finding-awards td {
