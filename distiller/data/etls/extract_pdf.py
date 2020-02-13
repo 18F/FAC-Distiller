@@ -1,3 +1,4 @@
+import json
 import sys
 import smart_open
 import io
@@ -5,12 +6,12 @@ from datetime import datetime
 
 from django.conf import settings
 
-from . import nlp
-from . import pdf_utils
-from .analyze import analyze
-from ...gateways import files
 from ..models.single_audit_db import Audit
 from ..models.pdf_extract import PDFExtract
+
+from ...gateways import files
+from ...extraction import nlp, pdf_utils
+from ...extraction.analyze import analyze
 from ...fac_scraper.models import FacDocument
 
 
@@ -54,13 +55,16 @@ def process_audit_pdf(processor, pdf_id):
         audit_results = analyze(processor, pdf)
         for result in audit_results:
             audit_num = result["audit"]
-            sys.stdout.write(f'Found audit {audit_num}.\n')
+            page_number = result["page_number"]
+            finding_data = result["finding_data"]
+            cap_data = result["cap_data"]
+            sys.stdout.write(f'Found audit {audit_num} on page {page_number}.\n')
             sys.stdout.flush()
             PDFExtract(audit_year=document.audit_year,
                        dbkey=document.dbkey,
                        finding_ref_nums=audit_num,
-                       finding_text=result["finding_text"],
-                       cap_text=result["cap_text"],
+                       finding_text=json.dumps(finding_data),
+                       cap_text=json.dumps(cap_data),
                        last_updated=datetime.now(),
             ).save()
 

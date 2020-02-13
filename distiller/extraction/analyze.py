@@ -1,4 +1,3 @@
-import json
 import sys
 
 from . import nlp
@@ -26,9 +25,6 @@ def analyze(processor, pdf):
             if hit:
                 results.append(hit)
     return results
-# TODO
-# clean up the results if applicable
-# finding_dict = heuristics.apply_all_heuristics(finding_dict)
 
 
 def analyze_doc(page_doc, audit, page_number):
@@ -48,6 +44,10 @@ def analyze_doc(page_doc, audit, page_number):
             finding_dict['Page number'] = page_number
             secondaries = nlp.get_secondaries(page_doc)
             finding_dict.update(secondaries)
+            # clean up the results if applicable
+            finding_dict = heuristics.apply_all_heuristics(finding_dict)
+            if not finding_dict:
+                return None
         # if we have a cap, only add the page number
         cap_dict = dict()
         if cap:
@@ -55,7 +55,8 @@ def analyze_doc(page_doc, audit, page_number):
             cap_dict['Page number'] = page_number
         return dict(
             audit=audit,
-            finding_text=json.dumps(finding_dict),
-            cap_text=json.dumps(cap_dict),
+            finding_data=finding_dict,
+            cap_data=cap_dict,
+            page_number=page_number,
         )
     return None
