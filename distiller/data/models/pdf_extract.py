@@ -58,4 +58,4 @@ class PDFExtract(models.Model):
         return json.loads(self.finding_text)
 
     def cap_to_dict(self):
-        return json.loads(self.finding_text)
+        return json.loads(self.cap_text)
