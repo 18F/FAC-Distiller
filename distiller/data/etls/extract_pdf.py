@@ -26,7 +26,7 @@ def get_all_pdfs():
 def process_audit_pdf(processor, pdf_id):
     try:
         document = FacDocument.objects.get(id=pdf_id)
-        pdf = files.input_file(f"{settings.LOAD_TABLE_ROOT}/pdfs/{document.file_name}", mode='rb')
+        pdf = files.input_file(f"{settings.FAC_DOCUMENT_ROOT}/{document.file_name}", mode='rb')
         errors = pdf_utils.errors(pdf)
         if errors:
             sys.stdout.write(f'Could not read file: {errors}. Bailing out.\n')
