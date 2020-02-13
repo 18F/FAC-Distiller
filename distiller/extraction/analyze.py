@@ -16,7 +16,7 @@ def analyze(processor, pdf):
     for page in pages:
         page_number = page["page_number"]
         page_text = page["text"]
-        sys.stdout.write(f'Processing page {page_number}.\n')
+        sys.stdout.write(f"Processing page {page_number}.\n")
         sys.stdout.flush()
         page_doc = processor(page_text)
         audits = nlp.get_audit_numbers(page_doc)
@@ -40,8 +40,8 @@ def analyze_doc(page_doc, audit, page_number):
         # if we have a finding, supplement with secondary keywords and page number
         finding_dict = dict()
         if finding:
-            finding_dict['Finding'] = finding
-            finding_dict['Page number'] = page_number
+            finding_dict["Finding"] = finding
+            finding_dict["Page number"] = page_number
             secondaries = nlp.get_secondaries(page_doc)
             finding_dict.update(secondaries)
             # clean up the results if applicable
@@ -51,8 +51,8 @@ def analyze_doc(page_doc, audit, page_number):
         # if we have a cap, only add the page number
         cap_dict = dict()
         if cap:
-            cap_dict['Plan'] = cap
-            cap_dict['Page number'] = page_number
+            cap_dict["Plan"] = cap
+            cap_dict["Page number"] = page_number
         return dict(
             audit=audit,
             finding_data=finding_dict,

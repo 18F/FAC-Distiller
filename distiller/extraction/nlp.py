@@ -161,7 +161,9 @@ def extract_finding(page, audit):
 
 
 def extract_cap(doc, audit):
-    for (audit_match, cap_text) in paragraphs(doc, "CORRECTIVE_ACTION", startswith=True):
+    for (audit_match, cap_text) in paragraphs(
+        doc, "CORRECTIVE_ACTION", startswith=True
+    ):
         if audit_match == audit:
             return cap_text
     return None
