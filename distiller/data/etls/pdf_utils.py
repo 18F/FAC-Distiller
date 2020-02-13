@@ -71,3 +71,28 @@ def page_cached(fd, filename, page_number):
         with open(text_filename, "w") as fd:
             fd.write(text)
     return "".join(open(text_filename, "r").readlines())
+
+
+def all_pages(fd):
+    """
+    Given a PDF, extract the text per page.
+    """
+    resource = PDFResourceManager()
+    string = StringIO()
+    device = TextConverter(resource, string, codec="utf-8", laparams=LAParams())
+    interpreter = PDFPageInterpreter(resource, device)
+    kwargs = {
+        "maxpages": 0,
+        "password": "",
+        "caching": True,
+        "check_extractable": False,
+    }
+    pages = []
+    all_pages = PDFPage.get_pages(fd, set(), **kwargs)
+    for index, page in enumerate(all_pages):
+        interpreter.process_page(page)
+        text = string.getvalue()
+        pages.append(dict(page_number=index, text=text))
+    device.close()
+    string.close()
+    return pages

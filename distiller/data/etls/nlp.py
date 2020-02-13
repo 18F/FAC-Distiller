@@ -98,6 +98,78 @@ def sentences(doc, what):
     return [ent.sent for ent in doc.ents if ent.label_ == what]
 
 
+def paragraphs(doc, what, startswith=False, experimental=False):
+    """
+    Given a document with named entities, extract the paragraph
+    belonging to the named entity.
+    """
+    start = False
+    overflow = 0
+    current_audit = None
+    current_sentence = ""
+    sentences = []
+    for sent in doc.sents:
+        labels = [ent.label_ for ent in sent.ents]
+        if "AUDIT_NUMBER" in labels:
+            index = labels.index("AUDIT_NUMBER")
+            current_audit = sent.ents[index].text
+        if what in labels:
+            if experimental:
+                # experimental: if we have a secondary then we likely
+                # accidentally hit the audit finding itself.
+                if set(labels).intersection(set(secondaries)):
+                    continue
+            text = sent.text
+            if startswith:
+                index = labels.index(what)
+                start = sent.ents[index].start
+                text = doc[start : sent.end].text
+            current_sentence = text
+            start = True
+            overflow = 0
+        else:
+            if start:
+                if not "\n\n" in sent.text:
+                    current_sentence += sent.text
+                    overflow += 1
+                else:
+                    sentences.append((current_audit, clean(current_sentence)))
+                    current_sentence = ""
+                    start = False
+                    overflow = 0
+                if overflow > 20:
+                    # prevent excessively large text dumps
+                    sentences.append((current_audit, (clean(current_sentence))))
+                    current_sentence = ""
+                    start = False
+                    overflow = 0
+    return sentences
+
+
+def extract_finding(page, audit):
+    """
+    Given a header, examine the relevant context and see if we have
+    a finding on our hands that corresponds to the given audit.
+    """
+    for sentence in sentences(page, "HEADER"):
+        found = False
+        for ent in page.ents:
+            if ent.start > sentence.start:
+                if ent.label_ in ["AUDIT_NUMBER"] and ent.text == audit:
+                    found = True
+        if found:
+            return clean(page[sentence.start:].text)
+    return None
+
+
+def extract_cap(doc):
+    return paragraphs(doc, "CORRECTIVE_ACTION", startswith=True)
+
+
+def extract_findings(doc):
+    return [sent.text for sent in sentences(doc, "HEADER")]
+
+
 def get_secondaries(doc):
     results = []
     for ent in doc.ents:
