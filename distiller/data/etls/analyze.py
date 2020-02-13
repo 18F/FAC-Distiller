@@ -24,11 +24,11 @@ def analyze(processor, pdf):
         for audit in audits:
             hit = analyze_doc(page_doc, audit, page_number)
             if hit:
-                hit["page_number"] = page_number # stash for future reference
                 results.append(hit)
-    # clean up the results if applicable
-    # TODO not working
-    return heuristics.apply_all_heuristics(results)
+    return results
+# TODO
+# clean up the results if applicable
+# finding_dict = heuristics.apply_all_heuristics(finding_dict)
 
 
 def analyze_doc(page_doc, audit, page_number):
@@ -39,8 +39,7 @@ def analyze_doc(page_doc, audit, page_number):
     reference.
     """
     finding = nlp.extract_finding(page_doc, audit)
-    # TODO match against audit
-    cap = nlp.extract_cap(page_doc)
+    cap = nlp.extract_cap(page_doc, audit)
     if finding or cap:
         # if we have a finding, supplement with secondary keywords and page number
         finding_dict = dict()

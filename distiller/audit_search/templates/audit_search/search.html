@@ -291,10 +291,11 @@
                     </td>
                     <td class="text-top">
                       <div class="finding-text">
-                        {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
-                        {% for cap_text in pdf_finding_text.cap_text.all %}
-                          {{ cap_text.text | escape | linebreaksbr }}
-                          {% if not forloop.last %}<hr>{% endif %}
+                        {% for key, value in pdf_finding_text.cap_to_dict.items %}
+                          <div>
+                            <strong>{{ key }}</strong>
+                            {{ value | escape | linebreaksbr }}
+                          </div>
                         {% endfor %}
                       </div>
                     </td>

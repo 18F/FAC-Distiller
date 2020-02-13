@@ -152,18 +152,19 @@ def extract_finding(page, audit):
     a finding on our hands that corresponds to the given audit.
     """
     for sentence in sentences(page, "HEADER"):
-        found = False
         for ent in page.ents:
-            if ent.start > sentence.start:
-                if ent.label_ in ["AUDIT_NUMBER"] and ent.text == audit:
-                    found = True
-        if found:
-            return clean(page[sentence.start:].text)
+            if ent.start <= sentence.start:
+                continue
+            if ent.label_ in ["AUDIT_NUMBER"] and ent.text == audit:
+                return clean(sentence.text)
     return None
 
 
-def extract_cap(doc):
-    return paragraphs(doc, "CORRECTIVE_ACTION", startswith=True)
+def extract_cap(doc, audit):
+    for (audit_match, cap_text) in paragraphs(doc, "CORRECTIVE_ACTION", startswith=True):
+        if audit_match == audit:
+            return cap_text
+    return None
 
 
 def extract_findings(doc):
