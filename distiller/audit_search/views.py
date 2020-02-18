@@ -22,16 +22,20 @@ def single_audit_search(request):
     finding_texts = None
     if form.is_valid():
         audits = models.Audit.objects.search(
-            agency_name=form.cleaned_data['sub_agency'],
             audit_year=form.cleaned_data['audit_year'],
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
+            cog_agency_prefix=form.cleaned_data['agency']
+                if form.cleaned_data['agency_cog_oversight'] else None,
+            findings_agency_name=form.cleaned_data['sub_agency']
+                if form.cleaned_data['agency_finding'] else None,
         ).prefetch_related(
             'finding_texts', 'finding_texts__findings',
             'finding_texts__findings__elec_audits',
             'finding_texts__cap_texts',
             'documents',
         )
+
         if form.cleaned_data['findings']:
             audits = audits.filter(finding_texts__isnull=False).distinct()
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)

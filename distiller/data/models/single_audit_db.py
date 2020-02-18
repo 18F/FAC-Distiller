@@ -21,42 +21,35 @@ class AuditManager(models.Manager):
     def search(
         self,
         *,
-        agency_name: str,
         audit_year: Optional[int],
         start_date: date,
         end_date: date,
+        cog_agency_prefix=None,
+        findings_agency_name=None,
     ):
-        audit_keys = CFDA.objects.get_audits_for_agency(agency_name)
-
-        # Initialize Q object with and OR of all (audit_year, dbkey) pairs.
-        q_obj = reduce(
-            lambda q_obj, keys: q_obj | models.Q(**keys),
-            audit_keys,
-            models.Q()
-        )
-
         # Filter by dates
+        date_q = models.Q()
         if audit_year:
-            q_obj &= models.Q(audit_year=audit_year)
+            date_q &= models.Q(audit_year=audit_year)
         if start_date:
-            q_obj &= models.Q(fac_accepted_date__gte=start_date)
+            date_q &= models.Q(fac_accepted_date__gte=start_date)
         if end_date:
-            q_obj &= models.Q(fac_accepted_date__lte=end_date)
+            date_q &= models.Q(fac_accepted_date__lte=end_date)
 
-        return self.filter(q_obj).order_by(
+        # Filter by agency
+        agency_q = models.Q()
+        if cog_agency_prefix:
+            agency_q |= models.Q(cog_agency=cog_agency_prefix)
+        if findings_agency_name:
+            cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
+                findings_agency_name
+            )
+            agency_q |= models.Q(cfda__cfda__in=cfdas)
+
+        return self.filter(date_q & agency_q).order_by(
             '-audit_year',
             '-fac_accepted_date'
         )
-
-    def filter_agency(self, agency, *, cog_oversite, has_findings):
-        q = Q()
-        if cog_oversite:
-            q |= Q(cog_agency=agency)
-        #if has_findings:
-        #    q |=
-
-    def filter_cog_oversight(self, agency):
-        return self.filter()
 
 
 class Audit(models.Model):
