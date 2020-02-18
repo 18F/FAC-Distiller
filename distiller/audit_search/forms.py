@@ -57,6 +57,17 @@ class AgencySelectionForm(forms.Form):
     # Used when drilling-down search terms
     filtering = forms.IntegerField(required=False)
 
+    agency_finding = forms.BooleanField(
+        required=False,
+        initial=True,
+        label='Include audits with findings for specified agency'
+    )
+    agency_cog_oversight = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Include audits where parent agency is cognizant/oversight',
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -48,6 +48,16 @@ class AuditManager(models.Manager):
             '-fac_accepted_date'
         )
 
+    def filter_agency(self, agency, *, cog_oversite, has_findings):
+        q = Q()
+        if cog_oversite:
+            q |= Q(cog_agency=agency)
+        #if has_findings:
+        #    q |=
+
+    def filter_cog_oversight(self, agency):
+        return self.filter()
+
 
 class Audit(models.Model):
     objects = AuditManager()
@@ -536,6 +546,9 @@ class Audit(models.Model):
 
 
 class CFDAManager(models.Manager):
+    def filter_prefix(self, prefix):
+        return self.filter(cfda__startswith=prefix)
+
     def get_audits_for_agency(self, agency_name):
         # Get CFDA numbers for the given agency name.
         cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(agency_name)
