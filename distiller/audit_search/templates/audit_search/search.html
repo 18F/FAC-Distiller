@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+
 {% load humanize %}
 {% load static %}
 {% load widget_tweaks %}
+
 {% load agency_name %}
 
 {% block title %}
@@ -46,6 +48,8 @@
               </div>
             </div>
             {{ form.page.as_hidden }}
+            {{ form.sort.as_hidden }}
+            {{ form.order.as_hidden }}
             <input type="hidden" name="filtering" id="id_filtering" value="">
           </div>
           <div class="grid-row">
@@ -104,15 +108,31 @@
                   </td>
                 </tr>
                 <tr>
-                  <th scope="col">Auditee name</th>
-                  <th scope="col">Audit accepted</th>
-                  <th scope="col">Findings count</th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='auditee_name' column_title='Auditee name' %}
+                  </th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='fac_accepted_date' column_title='Audit accepted' %}
+                  </th>
+                  <th scope="col">
+                    Findings count
+                  </th>
                   {#<th scope="col">Previous findings</th>#}
-                  <th scope="col">Cog/oversight agency</th>
-                  <th scope="col">Material weakness</th>
-                  <th scope="col">Questioned costs</th>
-                  <th scope="col">Amount expended</th>
-                  <th scope="col">Files</th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
+                  </th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='material_weakness' column_title='Material weakness' %}
+                  </th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
+                  </th>
+                  <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='tot_fed_expend' column_title='Amount expended' %}
+                  </th>
+                  <th scope="col">
+                    Files
+                  </th>
                 </tr>
               </thead>
               <tbody>

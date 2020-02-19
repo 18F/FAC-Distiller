@@ -67,6 +67,24 @@ class AgencySelectionForm(forms.Form):
         initial=False,
         label='Include audits where parent agency is cognizant/oversight',
     )
+    sort = forms.ChoiceField(
+        required=False,
+        choices=(
+            ('auditee_name', 'auditee_name'),
+            ('fac_accepted_date', 'fac_accepted_date'),
+            ('cog_over', 'cog_over'),
+            ('material_weakness', 'material_weakness'),
+            ('qcosts', 'qcosts'),
+            ('tot_fed_expend', 'tot_fed_expend'),
+        )
+    )
+    order = forms.ChoiceField(
+        required=False,
+        choices=(
+            ('asc', 'asc'),
+            ('desc', 'desc'),
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
