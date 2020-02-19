@@ -71,6 +71,7 @@ class AgencySelectionForm(forms.Form):
         required=False,
         choices=(
             ('auditee_name', 'auditee_name'),
+            ('fy_end_date', 'fy_end_date'),
             ('fac_accepted_date', 'fac_accepted_date'),
             ('cog_over', 'cog_over'),
             ('material_weakness', 'material_weakness'),

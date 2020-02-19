@@ -112,6 +112,9 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='auditee_name' column_title='Auditee name' %}
                   </th>
                   <th scope="col">
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='fy_end_date' column_title='Fiscal year end' %}
+                  </th>
+                  <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='fac_accepted_date' column_title='Audit accepted' %}
                   </th>
                   <th scope="col">
@@ -120,9 +123,6 @@
                   {#<th scope="col">Previous findings</th>#}
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
-                  </th>
-                  <th scope="col">
-                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='material_weakness' column_title='Material weakness' %}
                   </th>
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
@@ -139,6 +139,7 @@
                 {% for result in page.object_list %}
                   <tr>
                     <td>{{ result.auditee_name }}</td>
+                    <td>{{ result.fy_end_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
@@ -157,11 +158,6 @@
                       {% elif result.cog_over == 'O' %}
                         {{ result.oversight_agency | agency_name }}
                         <span class="text-gray-50 text-italic">Oversight</span>
-                      {% endif %}
-                    </td>
-                    <td class="text-center">
-                      {% if result.material_weakness %}
-                        <i class="fas fa-check"></i>
                       {% endif %}
                     </td>
                     <td class="text-center">
