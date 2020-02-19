@@ -177,6 +177,10 @@ There is a script checked into the repository that will assist in refreshing a s
 cf run-task fac-distiller "/home/vcap/app/bin/crawl"
 ```
 
+## Deployment to cloud.gov
+
+To expedite new deploys to cloud.gov, we provide a deployment script at [bin/setup-new-cf-instance.sh](https://github.com/18F/FAC-Distiller/blob/master/bin/setup-new-cf-instance.sh "shell script at bin/setup-new-cf-instance.sh"). Please note that you must be logged in cloud.gov or cloud foundry with the appropriate permissions to create an app and its associated services.
+
 ## Running tests
 
 To run the test suite with `pytest`:
