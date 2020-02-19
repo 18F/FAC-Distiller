@@ -13,6 +13,7 @@ from distiller.data.constants import AGENCIES_BY_PREFIX
 from distiller.data.etls import selenium_scraper
 from distiller.data import models
 from .forms import AgencySelectionForm
+from distiller.fac_scraper.models import FacDocument
 
 
 def single_audit_search(request):
@@ -20,6 +21,7 @@ def single_audit_search(request):
 
     page = None
     finding_texts = None
+    pdf_finding_texts = None
     if form.is_valid():
         audits = models.Audit.objects.search(
             audit_year=form.cleaned_data['audit_year'],
@@ -49,10 +51,20 @@ def single_audit_search(request):
             key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
         )
 
+        pdf_finding_texts_set = set()
+        for audit in page.object_list:
+            pdf_finding_texts_set.update(audit.pdf_extracts.all())
+
+        pdf_finding_texts = sorted(
+            pdf_finding_texts_set,
+            key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
+        )
+
     return render(request, 'audit_search/search.html', {
         'form': form,
         'page': page,
         'finding_texts': finding_texts,
+        'pdf_finding_texts': pdf_finding_texts,
     })
 
 
