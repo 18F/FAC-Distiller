@@ -7,3 +7,7 @@
   stroke-linejoin: round;
   fill: none;
 }
+
+.content {
+    padding: 1em;
+}
