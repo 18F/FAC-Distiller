@@ -21,29 +21,32 @@ class AuditManager(models.Manager):
     def search(
         self,
         *,
-        agency_name: str,
         audit_year: Optional[int],
         start_date: date,
         end_date: date,
+        cog_agency_prefix=None,
+        findings_agency_name=None,
     ):
-        audit_keys = CFDA.objects.get_audits_for_agency(agency_name)
-
-        # Initialize Q object with and OR of all (audit_year, dbkey) pairs.
-        q_obj = reduce(
-            lambda q_obj, keys: q_obj | models.Q(**keys),
-            audit_keys,
-            models.Q()
-        )
-
         # Filter by dates
+        date_q = models.Q()
         if audit_year:
-            q_obj &= models.Q(audit_year=audit_year)
+            date_q &= models.Q(audit_year=audit_year)
         if start_date:
-            q_obj &= models.Q(fac_accepted_date__gte=start_date)
+            date_q &= models.Q(fac_accepted_date__gte=start_date)
         if end_date:
-            q_obj &= models.Q(fac_accepted_date__lte=end_date)
+            date_q &= models.Q(fac_accepted_date__lte=end_date)
 
-        return self.filter(q_obj).order_by(
+        # Filter by agency
+        agency_q = models.Q()
+        if cog_agency_prefix:
+            agency_q |= models.Q(cog_agency=cog_agency_prefix)
+        if findings_agency_name:
+            cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
+                findings_agency_name
+            )
+            agency_q |= models.Q(cfda__cfda__in=cfdas)
+
+        return self.filter(date_q & agency_q).order_by(
             '-audit_year',
             '-fac_accepted_date'
         )
@@ -536,6 +539,9 @@ class Audit(models.Model):
 
 
 class CFDAManager(models.Manager):
+    def filter_prefix(self, prefix):
+        return self.filter(cfda__startswith=prefix)
+
     def get_audits_for_agency(self, agency_name):
         # Get CFDA numbers for the given agency name.
         cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(agency_name)
