@@ -120,7 +120,6 @@
                   <th scope="col">
                     Findings count
                   </th>
-                  {#<th scope="col">Previous findings</th>#}
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
                   </th>
@@ -150,7 +149,6 @@
                         {{ result.finding_texts.all | length }}
                       {% endif %}
                     </td>
-                    {#<td class="text-center">{{ result.finding_texts.finding.0.prior_finding_ref_nums }}</td>#}
                     <td class="">
                       {% if result.cog_over == 'C' %}
                         {{ result.cog_agency | agency_name }}
