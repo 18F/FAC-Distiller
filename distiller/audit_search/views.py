@@ -36,6 +36,10 @@ def single_audit_search(request):
             'documents',
         )
 
+        if form.cleaned_data['sort']:
+            prefix = '-' if form.cleaned_data.get('order') == 'asc' else ''
+            audits = audits.order_by(f'{prefix}{form.cleaned_data["sort"]}')
+
         if form.cleaned_data['findings']:
             audits = audits.filter(finding_texts__isnull=False).distinct()
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)

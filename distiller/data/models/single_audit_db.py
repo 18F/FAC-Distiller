@@ -496,8 +496,9 @@ class Audit(models.Model):
         )
     )
     # 12 digits max
-    tot_fed_expend = models.CharField(
-        max_length=12,
+    tot_fed_expend = models.DecimalField(
+        decimal_places=2,
+        max_digits=16,
         help_text='Total Federal Expenditures'
     )
     # mm/dd/yyyy

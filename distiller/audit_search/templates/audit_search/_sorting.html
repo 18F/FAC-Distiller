@@ -1,0 +1,16 @@
+{% load add_get_parameter %}
+
+{% if current_sort != column_name or order == 'asc' %}
+    <a href="{% add_get sort=column_name order='desc' %}">
+{% else %}
+    <a href="{% add_get sort=column_name order='asc' %}">
+{% endif %}
+        {{ column_title }}
+        {% if current_sort == column_name %}
+            {% if order == 'asc' %}
+                ▲
+            {% else %}
+                ▼
+            {% endif %}
+        {% endif %}
+    </a>
