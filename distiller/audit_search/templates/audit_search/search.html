@@ -105,11 +105,11 @@
                 </tr>
                 <tr>
                   <th scope="col">Auditee name</th>
+                  <th scope="col">Fiscal year end</th>
                   <th scope="col">Audit accepted</th>
                   <th scope="col">Findings count</th>
                   {#<th scope="col">Previous findings</th>#}
                   <th scope="col">Cog/oversight agency</th>
-                  <th scope="col">Material weakness</th>
                   <th scope="col">Questioned costs</th>
                   <th scope="col">Amount expended</th>
                   <th scope="col">Files</th>
@@ -119,6 +119,7 @@
                 {% for result in page.object_list %}
                   <tr>
                     <td>{{ result.auditee_name }}</td>
+                    <td>{{ result.fy_end_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
@@ -137,11 +138,6 @@
                       {% elif result.cog_over == 'O' %}
                         {{ result.oversight_agency | agency_name }}
                         <span class="text-gray-50 text-italic">Oversight</span>
-                      {% endif %}
-                    </td>
-                    <td class="text-center">
-                      {% if result.material_weakness %}
-                        <i class="fas fa-check"></i>
                       {% endif %}
                     </td>
                     <td class="text-center">
