@@ -7,7 +7,7 @@ applications:
   env:
     DJANGO_SETTINGS_MODULE: distiller.settings.production
   instances: 1
-  memory: 512M
+  memory: 256M
   routes:
   - route: fac-distiller.app.cloud.gov
   services:
