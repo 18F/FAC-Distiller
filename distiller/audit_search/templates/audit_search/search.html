@@ -103,7 +103,7 @@
                 </tr>
                 <tr>
                   <th scope="col">Auditee name</th>
-                  <th scope="col">Audit signed</th>
+                  <th scope="col">Fiscal year end</th>
                   <th scope="col">Audit accepted</th>
                   <th scope="col">Findings count</th>
                   {#<th scope="col">Previous findings</th>#}
@@ -117,7 +117,7 @@
                 {% for result in page.object_list %}
                   <tr>
                     <td>{{ result.auditee_name }}</td>
-                    <td>{{ result.auditee_date_signed|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
+                    <td>{{ result.fy_end_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
