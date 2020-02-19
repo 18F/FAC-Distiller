@@ -20,11 +20,11 @@ export S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
 
 # Put Scrapy metadata files in a timestamped directory.
 UTC_DATE_NOW=`TZ=UTC date`
-DIR_NAME=${1:-UTC_DATE_NOW}
+DIR_NAME=${1:-${UTC_DATE_NOW}}
 
 # Crawl documents for each CFDA agency prefix.
 # NOTE: Currently, this will limit the crawl to all 2019 documents.
-for AGENCY_PREFIX in '01' '03' '04' '05' '06' '07' '08' '09' '10.1' '10.2' '10.3' '10.4' '10.5' '10.6' '10.7' '10.8' '10.9' '11' '12' '13' '14' '15' '16' '17' '18' '19' '20' '21' '22' '23' '27' '29' '30' '32' '33' '34' '36' '39' '40' '42' '43' '44' '45' '46' '47' '53' '57' '58' '59' '60' '61' '62' '64' '66' '68' '70' '77' '78' '81' '82' '83' '84' '85' '86' '87' '88' '89' '90' '91' '92' '93' '94' '95' '96' '97' '98' '99'
+for AGENCY_PREFIX in `seq -w 1 0.1 99.9`
 do
     echo "Crawling CFDA prefix ${AGENCY_PREFIX}"
     scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
