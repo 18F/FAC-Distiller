@@ -119,10 +119,10 @@ if __name__ == "__main__":
     audit_results = analyze(processor, pdf, silent=True)
 
     if args.pickle:
-        with open(args.pickle, mode="wb") as fd:
+        with files.output_file(args.pickle, mode="wb") as fd:
             pickle.dump(audit_results, fd)
     elif args.csv:
-        with open(args.csv, mode="w") as fd:
+        with files.output_file(args.csv, mode="w") as fd:
             cw = csv.writer(fd)
             for line in output_as_csv(audit_results):
                 cw.writerow(line)
