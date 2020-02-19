@@ -211,15 +211,9 @@
               </thead>
               <tbody>
                 {% for finding_text in finding_texts %}
-                  <tr data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
+                  <tr class="finding-collapsed" data-dbkey="{{ finding_text.dbkey }}" data-audit-year="{{ finding_text.audit_year }}">
                     <td class="text-top finding-min-width">
                       {{ finding_text.finding_ref_nums }}
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <i class="fas fa-expand-alt expand-icon"></i>
-                      </button>
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <i class="fas fa-compress-alt compress-icon"></i>
-                      </button>
                     </td>
                     <td class="text-top">
                       <table class="finding-awards">
@@ -235,10 +229,16 @@
                     </td>
                     <td class="text-top">
                       <div class="finding-text">
-                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard('{{ finding_text.text | escapejs }}')">
-                          <i class="fas fa-paperclip"></i>
-                        </button>
                         {{ finding_text.text | escape | linebreaksbr }}
+                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard('{{ finding_text.text | escapejs }}')">
+                          copy text
+                        </button>
+                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          <span class="expand">expand</span>
+                        </button>
+                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          <span class="collapse">hide text</span>
+                        </button>
                       </div>
                     </td>
                     <td class="text-top">
@@ -322,29 +322,24 @@
       min-width: 8em;
     }
 
-    .finding-collapsed .finding-text {
-      max-height: 6em;
+    .finding-collapsed {
+      max-height: 8em;
       overflow: scroll;
     }
 
-    .expand-icon {
+    .expand {
       display: none;
     }
-    .finding-collapsed .expand-icon {
+    .finding-collapsed .expand {
       display: inline-block;
       color: lightgray;
     }
 
-    .compress-icon {
+    .collapse {
       display: inline-block;
-      color: white;
-      background: #57CDFA;
-      border-radius: 50%;
-      text-align: center;
-      vertical-align: middle;
-      padding: 2px;
     }
-    .finding-collapsed .compress-icon {
+
+    .finding-collapsed .collapse {
       display: none;
     }
 
