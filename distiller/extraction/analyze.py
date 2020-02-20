@@ -137,6 +137,7 @@ if __name__ == "__main__":
 
     if not audit_results:
         print(f"processed {args.filename} with no results")
+        sys.exit(1)
 
     if args.pickle:
         with files.output_file(args.pickle, mode="wb") as fd:
