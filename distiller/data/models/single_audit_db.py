@@ -538,6 +538,33 @@ class Audit(models.Model):
         help_text='CPA Country'
     )
 
+    def __init__(self, *args, **kwargs):
+        super(Audit, self).__init__(*args, **kwargs)
+        self._current_documents = None
+
+    @property
+    def current_documents(self):
+        if self._current_documents:
+            return self._current_documents
+
+        self._current_documents = {
+            'form': None,
+            'audit': None,
+        }
+
+        versions = {
+            'form': 0,
+            'audit': 0,
+        }
+
+        # Store the most recent version of each document type
+        for document in self.documents.all():
+            if versions[document.file_type] < document.version:
+                versions[document.file_type] = document.version
+                self._current_documents[document.file_type] = document
+
+        return self._current_documents
+
 
 class CFDAManager(models.Manager):
     def filter_prefix(self, prefix):

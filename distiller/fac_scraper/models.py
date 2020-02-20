@@ -12,6 +12,12 @@ from distiller.data.models import Audit
 
 
 class FacDocument(models.Model):
+    class Meta:
+        ordering = ('dbkey', 'audit_year', '-version', 'file_type')
+        indexes = [
+           models.Index(fields=('dbkey', 'audit_year')),
+        ]
+
     version = models.IntegerField()
     report_id = models.CharField(max_length=8)
     audit_year = models.DecimalField(
