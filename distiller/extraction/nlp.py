@@ -146,13 +146,13 @@ def paragraphs(doc, what, startswith=False, experimental=False):
     return sentences
 
 
-def extract_finding(page, audit):
+def extract_finding(doc, audit):
     """
     Given a header, examine the relevant context and see if we have
     a finding on our hands that corresponds to the given audit.
     """
-    for sentence in sentences(page, "HEADER"):
-        for ent in page.ents:
+    for sentence in sentences(doc, "HEADER"):
+        for ent in doc.ents:
             if ent.start <= sentence.start:
                 continue
             if ent.label_ in ["AUDIT_NUMBER"] and ent.text == audit:
