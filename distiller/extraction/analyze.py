@@ -80,8 +80,8 @@ def output_as_csv(results):
     headers = reduce(
         lambda accum, x: accum | set(x["finding_data"].keys()), results, set()
     )
-    headers.remove("Finding")  # already present in base header
-    headers.remove("Page number")  # already present in base header
+    headers.discard("Finding")  # may be already present in base header
+    headers.discard("Page number")  # may be already present in base header
     yield base_header + list(headers)
 
     for result in results:
@@ -106,17 +106,37 @@ if __name__ == "__main__":
     parser.add_argument("filename")
     parser.add_argument("--csv", help="store output to a CSV file")
     parser.add_argument("--pickle", help="store output to a pickle file")
+    parser.add_argument("--errors", help="record errors", action="store_true")
     args = parser.parse_args()
 
     pdf = files.input_file(args.filename, mode="rb")
-    errors = pdf_utils.errors(pdf)
-    if errors:
-        print(f"Could not read file {args.filename}: {errors}. Bailing out.")
+    pdf_errors = pdf_utils.errors(pdf)
+
+    if pdf_errors and args.errors:
+        if args.pickle:
+            with files.output_file(args.pickle, mode="wb") as fd:
+                pickle.dump(pdf_errors, fd)
+        elif args.csv:
+            with files.output_file(args.csv, mode="w") as fd:
+                cw = csv.writer(fd)
+                cw.writerow(["error"])
+                for line in pdf_errors:
+                    cw.writerow([line])
+        else:
+            for error in errors:
+                print(error)
+        sys.exit(1)
+
+    if pdf_errors:
+        print(f"Could not read file {args.filename}: {pdf_errors}. Bailing out.")
         sys.exit(1)
 
     print(f"processing {args.filename}")
     processor = nlp.setup()
     audit_results = analyze(processor, pdf, silent=True)
+
+    if not audit_results:
+        print(f"processed {args.filename} with no results")
 
     if args.pickle:
         with files.output_file(args.pickle, mode="wb") as fd:
