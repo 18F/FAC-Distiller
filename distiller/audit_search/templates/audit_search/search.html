@@ -238,11 +238,11 @@
                       <div class="finding-text">
                         {{ finding_text.text | escape | linebreaksbr }}
                       </div>
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <span class="expand">expand</span>
+                      <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        expand
                       </button>
-                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        <span class="collapse">hide text</span>
+                      <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        hide text
                       </button>
                       |
                       <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
@@ -256,11 +256,11 @@
                           {{ cap_text.text | escape | linebreaksbr }}
                           {% if not forloop.last %}<hr>{% endif %}
                         </div>
-                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          <span class="expand">expand</span>
+                        <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          expand
                         </button>
-                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          <span class="collapse">hide text</span>
+                        <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          hide text
                         </button>
                         |
                         <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
@@ -379,7 +379,6 @@
     .collapse {
       display: inline-block;
     }
-
     .finding-collapsed .collapse {
       display: none;
     }
