@@ -7,7 +7,7 @@ class FacDocumentAdmin(admin.ModelAdmin):
     search_fields = ('file_name',)
     list_filter = (
         'audit_year',
-        'audit__cfda__cfda__federal_agency',
+        'audit__cfdas__cfda__federal_agency',
     )
 
 

@@ -42,7 +42,7 @@ class AuditManager(models.Manager):
             cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
                 findings_agency_name
             )
-            agency_q |= models.Q(cfda__cfda__in=cfdas)
+            agency_q |= models.Q(cfdas__cfda__in=cfdas)
 
         return self.filter(
             date_q & agency_q
@@ -76,15 +76,6 @@ class Audit(models.Model):
     dbkey = models.CharField(
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
-    )
-    # Map to CFDA
-    cfda = CompositeForeignKey(
-        'CFDA',
-        on_delete=models.DO_NOTHING,
-        to_fields={
-           'audit_year': 'audit_year',
-           'dbkey': 'dbkey'
-        }
     )
 
     # Contact FAC for information
@@ -612,6 +603,16 @@ class CFDA(models.Model):
     dbkey = models.CharField(
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
+    )
+    # Map to General/Audit
+    audit = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='cfdas',
     )
     # 9 digits
     ein = models.CharField(
