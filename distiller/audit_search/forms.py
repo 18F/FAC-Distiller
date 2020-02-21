@@ -6,7 +6,6 @@ import it both here and in the file that's actually doing the filtering.
 """
 
 from datetime import datetime
-from typing import Mapping
 
 from django import forms
 
@@ -76,7 +75,7 @@ class AgencySelectionForm(forms.Form):
             ('cog_over', 'cog_over'),
             ('material_weakness', 'material_weakness'),
             ('qcosts', 'qcosts'),
-            ('tot_fed_expend', 'tot_fed_expend'),
+            ('num_findings', 'num_findings'),
         )
     )
     order = forms.ChoiceField(

@@ -13,8 +13,9 @@ class AssistanceListingManager(models.Manager):
             'federal_agency').values_list('federal_agency', flat=True)
 
     def get_cfda_nums_for_agency(self, federal_agency: str):
-        return self.filter(federal_agency=federal_agency).values_list(
-            'program_number', flat=True)
+        return list(self.filter(federal_agency=federal_agency).values_list(
+            'program_number', flat=True
+        ))
 
 
 class AssistanceListing(models.Model):

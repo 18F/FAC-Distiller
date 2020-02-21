@@ -7,11 +7,9 @@ See: https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
 from datetime import date
-from functools import reduce
 from typing import Optional
 
 from compositefk.fields import CompositeForeignKey
-from django.core.paginator import Paginator
 from django.db import models
 
 from .assistance_listings import AssistanceListing
@@ -40,13 +38,19 @@ class AuditManager(models.Manager):
         agency_q = models.Q()
         if cog_agency_prefix:
             agency_q |= models.Q(cog_agency=cog_agency_prefix)
+
+        cfdas = None
         if findings_agency_name:
             cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
                 findings_agency_name
             )
-            agency_q |= models.Q(cfda__cfda__in=cfdas)
+            agency_q |= models.Q(cfdas__cfda__in=cfdas)
 
-        return self.filter(date_q & agency_q).order_by(
+        return cfdas, self.filter(
+            date_q & agency_q
+        ).annotate(
+            num_findings=models.Count('finding_texts', distinct=True),
+        ).order_by(
             '-audit_year',
             '-fac_accepted_date'
         )
@@ -74,15 +78,6 @@ class Audit(models.Model):
     dbkey = models.CharField(
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
-    )
-    # Map to CFDA
-    cfda = CompositeForeignKey(
-        'CFDA',
-        on_delete=models.DO_NOTHING,
-        to_fields={
-           'audit_year': 'audit_year',
-           'dbkey': 'dbkey'
-        }
     )
 
     # Contact FAC for information
@@ -611,6 +606,16 @@ class CFDA(models.Model):
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
     )
+    # Map to General/Audit
+    audit = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='cfdas',
+    )
     # 9 digits
     ein = models.CharField(
         max_length=9,
@@ -660,10 +665,11 @@ class CFDA(models.Model):
         help_text='Name of Federal Program'
     )
     # 12 digit max
-    amount = models.CharField(
+    amount = models.DecimalField(
         null=True,
         blank=True,
-        max_length=12,
+        decimal_places=2,
+        max_digits=16,
         help_text='Amount Expended for the Federal Program'
     )
     # 75 character max
@@ -973,4 +979,15 @@ class CAPText(models.Model):
     # 1 character
     charts_tables = models.BooleanField(
         help_text='Indicates whether or not the text contained charts or tables that could not be entered due to formatting restrictions',
+    )
+
+    # Map to General/Audit
+    audit = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='cap_texts'
     )

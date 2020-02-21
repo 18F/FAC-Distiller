@@ -5,6 +5,7 @@
 {% load widget_tweaks %}
 
 {% load agency_name %}
+{% load cfda_award_sum %}
 
 {% block title %}
   Single Audit Search
@@ -118,7 +119,7 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='fac_accepted_date' column_title='Audit accepted' %}
                   </th>
                   <th scope="col">
-                    Findings count
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='num_findings' column_title='Findings count' %}
                   </th>
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
@@ -127,7 +128,7 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
                   </th>
                   <th scope="col">
-                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='tot_fed_expend' column_title='Amount expended' %}
+                    Amount expended by selected agency
                   </th>
                   <th scope="col">
                     Files
@@ -143,10 +144,10 @@
                     <td class="text-center">
                       {% if result.finding_texts.all %}
                         <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
-                          {{ result.finding_texts.all | length }}
+                          {{ result.num_findings }}
                         </button>
                       {% else %}
-                        {{ result.finding_texts.all | length }}
+                        {{ result.num_findings }}
                       {% endif %}
                     </td>
                     <td class="">
@@ -164,9 +165,7 @@
                       {% endif %}
                     </td>
                     <td>
-                      {% if result.tot_fed_expend %}
-                      ${{ result.tot_fed_expend | intcomma }}
-                      {% endif %}
+                      ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
@@ -238,16 +237,18 @@
                       <div class="finding-text">
                         {{ finding_text.text | escape | linebreaksbr }}
                       </div>
-                      <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        expand
-                      </button>
-                      <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        hide text
-                      </button>
-                      |
-                      <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
-                        copy text
-                      </button>
+                      <div class="finding-text-controls">
+                        <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          expand
+                        </button>
+                        <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          close
+                        </button>
+                        |
+                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
+                          copy text
+                        </button>
+                      </div>
                     </td>
                     <td class="text-top">
                       {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
@@ -256,16 +257,18 @@
                           {{ cap_text.text | escape | linebreaksbr }}
                           {% if not forloop.last %}<hr>{% endif %}
                         </div>
-                        <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          expand
-                        </button>
-                        <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          hide text
-                        </button>
-                        |
-                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
-                          copy text
-                        </button>
+                        <div class="finding-text-controls">
+                          <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                            expand
+                          </button>
+                          <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                            close
+                          </button>
+                          |
+                          <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
+                            copy text
+                          </button>
+                        </div>
                       {% endfor %}
                     </td>
                     {% comment %}<td class="text-top finding-min-width">
@@ -351,10 +354,27 @@
       font-size: 1em;
     }
 
+    /* Size columns on findings table */
+    .findings-table td:nth-child(1),
+    .findings-table th:nth-child(1) {
+      width: 8em;
+    }
+    .findings-table td:nth-child(3),
+    .findings-table th:nth-child(3) {
+      width: 10000em;
+    }
+    .findings-table td:nth-child(4),
+    .findings-table th:nth-child(4) {
+      width: 10000em;
+    }
+
     .finding-collapsed .finding-text {
       position: relative;
       height: 8em;
       overflow: hidden;
+    }
+    .finding-text-controls {
+      float: right;
     }
 
     /* To indicate that the text is clipped, add an overflay to fade out the text. */
@@ -402,6 +422,10 @@
     table.finding-awards td {
       border: none;
       padding: 0 .5em .5em 0;
+    }
+
+    thead a {
+      color: black;
     }
   </style>
 {% endblock %}
