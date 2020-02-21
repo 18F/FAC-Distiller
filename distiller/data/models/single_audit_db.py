@@ -7,11 +7,9 @@ See: https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
 from datetime import date
-from functools import reduce
 from typing import Optional
 
 from compositefk.fields import CompositeForeignKey
-from django.core.paginator import Paginator
 from django.db import models
 
 from .assistance_listings import AssistanceListing
@@ -46,7 +44,11 @@ class AuditManager(models.Manager):
             )
             agency_q |= models.Q(cfda__cfda__in=cfdas)
 
-        return self.filter(date_q & agency_q).order_by(
+        return self.filter(
+            date_q & agency_q
+        ).annotate(
+            num_findings=models.Count('finding_texts', distinct=True),
+        ).order_by(
             '-audit_year',
             '-fac_accepted_date'
         )
@@ -973,4 +975,15 @@ class CAPText(models.Model):
     # 1 character
     charts_tables = models.BooleanField(
         help_text='Indicates whether or not the text contained charts or tables that could not be entered due to formatting restrictions',
+    )
+
+    # Map to General/Audit
+    audit = CompositeForeignKey(
+        Audit,
+        on_delete=models.DO_NOTHING,
+        to_fields={
+           'audit_year': 'audit_year',
+           'dbkey': 'dbkey'
+        },
+        related_name='cap_texts'
     )

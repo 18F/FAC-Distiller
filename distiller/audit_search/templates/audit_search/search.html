@@ -118,7 +118,7 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='fac_accepted_date' column_title='Audit accepted' %}
                   </th>
                   <th scope="col">
-                    Findings count
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='num_findings' column_title='Findings count' %}
                   </th>
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
@@ -143,10 +143,10 @@
                     <td class="text-center">
                       {% if result.finding_texts.all %}
                         <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
-                          {{ result.finding_texts.all | length }}
+                          {{ result.num_findings }}
                         </button>
                       {% else %}
-                        {{ result.finding_texts.all | length }}
+                        {{ result.num_findings }}
                       {% endif %}
                     </td>
                     <td class="">
