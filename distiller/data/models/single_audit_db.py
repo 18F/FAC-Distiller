@@ -663,10 +663,11 @@ class CFDA(models.Model):
         help_text='Name of Federal Program'
     )
     # 12 digit max
-    amount = models.CharField(
+    amount = models.DecimalField(
         null=True,
         blank=True,
-        max_length=12,
+        decimal_places=2,
+        max_digits=16,
         help_text='Amount Expended for the Federal Program'
     )
     # 75 character max
