@@ -38,13 +38,15 @@ class AuditManager(models.Manager):
         agency_q = models.Q()
         if cog_agency_prefix:
             agency_q |= models.Q(cog_agency=cog_agency_prefix)
+
+        cfdas = None
         if findings_agency_name:
             cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
                 findings_agency_name
             )
             agency_q |= models.Q(cfdas__cfda__in=cfdas)
 
-        return self.filter(
+        return cfdas, self.filter(
             date_q & agency_q
         ).annotate(
             num_findings=models.Count('finding_texts', distinct=True),

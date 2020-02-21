@@ -5,6 +5,7 @@
 {% load widget_tweaks %}
 
 {% load agency_name %}
+{% load cfda_award_sum %}
 
 {% block title %}
   Single Audit Search
@@ -127,7 +128,7 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
                   </th>
                   <th scope="col">
-                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='tot_fed_expend' column_title='Amount expended' %}
+                    Amount expended by selected agency
                   </th>
                   <th scope="col">
                     Files
@@ -164,9 +165,7 @@
                       {% endif %}
                     </td>
                     <td>
-                      {% if result.tot_fed_expend %}
-                        ${{ result.tot_fed_expend | intcomma }}
-                      {% endif %}
+                      ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
