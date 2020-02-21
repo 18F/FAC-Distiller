@@ -21,7 +21,7 @@ Keywords are listed in `nlp.py`. For example, if we see an audit number next to 
 
 Capturing and processing PDF text is necessarily a messy process. The audit PDFs can be in any format, and so over-capture of interesting results is an explicit design goal.
 
-All pages in the PDF must be extractable. The code will reject any PDFs that are not marked as extractable or have text as images (OCR is beyond the scope of this project). The code will print out any errors encountered during the processing of the PDF.
+All pages in the PDF must be extractable. The code will reject any PDFs that are not marked as extractable or have text as images (OCR is beyond the scope of this project). The code will halt if any errors are encountered during the processing of the PDF.
 
 Because we extract findings per page, any findings that run over one page may be duplicated in the output or result in missing information.
 
@@ -31,7 +31,7 @@ You can run this module standalone:
 
     python -m distiller.extraction.analyze --help
 
-This module accepts one parameter: the PDF file to process. By default, the results will be output to stdout. You can also specify `--csv` and `--pickle` to store the output as files with these respective formats.
+This module accepts one parameter: the PDF file to process. By default, the results will be output to stdout. You can also specify `--csv` and `--pickle` to store the output as files with these respective formats. These options can also be used in conjunction with `--errors`, which will output the errors (if any) in the given format.
 
 Required libraries are in `Pipfile` or `requirements.txt` in the root of this repository.
 

@@ -79,6 +79,7 @@ def all_pages(fd):
     """
     resource = PDFResourceManager()
     string = StringIO()
+    strindex = 0
     device = TextConverter(resource, string, codec="utf-8", laparams=LAParams())
     interpreter = PDFPageInterpreter(resource, device)
     kwargs = {
@@ -91,7 +92,9 @@ def all_pages(fd):
     all_pages = PDFPage.get_pages(fd, set(), **kwargs)
     for index, page in enumerate(all_pages):
         interpreter.process_page(page)
-        text = string.getvalue()
+        alltext = string.getvalue()
+        text = alltext[strindex:]
+        strindex = len(alltext)
         pages.append(dict(page_number=index, text=text))
     device.close()
     string.close()
