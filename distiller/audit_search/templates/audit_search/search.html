@@ -221,39 +221,52 @@
                       {{ finding_text.finding_ref_nums }}
                     </td>
                     <td class="text-top">
-                      <table class="finding-awards">
-                        <tbody>
-                          {% for finding in finding_text.findings.all %}
-                            <tr>
-                              <td>{{ finding.elec_audits.cfda_id }}</td>
-                              <td>${{ finding.elec_audits.amount | intcomma }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
+                      <div class="finding-text">
+                        <table class="finding-awards">
+                          <tbody>
+                            {% for finding in finding_text.findings.all %}
+                              <tr>
+                                <td>{{ finding.elec_audits.cfda_id }}</td>
+                                <td>${{ finding.elec_audits.amount | intcomma }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
                     </td>
                     <td class="text-top">
                       <div class="finding-text">
                         {{ finding_text.text | escape | linebreaksbr }}
-                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard('{{ finding_text.text | escapejs }}')">
-                          copy text
-                        </button>
-                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          <span class="expand">expand</span>
-                        </button>
-                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          <span class="collapse">hide text</span>
-                        </button>
                       </div>
+                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        <span class="expand">expand</span>
+                      </button>
+                      <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                        <span class="collapse">hide text</span>
+                      </button>
+                      |
+                      <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
+                        copy text
+                      </button>
                     </td>
                     <td class="text-top">
-                      <div class="finding-text">
-                        {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
-                        {% for cap_text in finding_text.cap_texts.all %}
+                      {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
+                      {% for cap_text in finding_text.cap_texts.all %}
+                        <div class="finding-text">
                           {{ cap_text.text | escape | linebreaksbr }}
                           {% if not forloop.last %}<hr>{% endif %}
-                        {% endfor %}
-                      </div>
+                        </div>
+                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          <span class="expand">expand</span>
+                        </button>
+                        <button class="usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          <span class="collapse">hide text</span>
+                        </button>
+                        |
+                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
+                          copy text
+                        </button>
+                      {% endfor %}
                     </td>
                     {% comment %}<td class="text-top finding-min-width">
                       YYYY-001
@@ -304,7 +317,7 @@
       document.getElementById('search-results').classList.toggle('show-findings');
     }
 
-    var copyToClipboard = function(text) {
+    function copyToClipboard(node, text) {
       // Add an input element to the DOM containing the desired text
       var el = document.createElement('textarea');
       el.setAttribute('readonly', '');
@@ -319,6 +332,13 @@
 
       // Cleanup
       document.body.removeChild(el);
+
+      // Temporarily update the link text to indicate success.
+      var innerHTML = node.innerHTML;
+      node.innerHTML = '<i>copied!</i>';
+      setTimeout(function () {
+        node.innerHTML = innerHTML;
+      }, 3000);
     };
   </script>
 
@@ -327,9 +347,26 @@
       min-width: 8em;
     }
 
-    .finding-collapsed {
-      max-height: 8em;
-      overflow: scroll;
+    .findings-table button {
+      font-size: 1em;
+    }
+
+    .finding-collapsed .finding-text {
+      position: relative;
+      height: 8em;
+      overflow: hidden;
+    }
+
+    /* To indicate that the text is clipped, add an overflay to fade out the text. */
+    .finding-collapsed .finding-text:after {
+      content: "";
+      text-align: right;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 1.5em;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 80%);
     }
 
     .expand {
@@ -337,7 +374,6 @@
     }
     .finding-collapsed .expand {
       display: inline-block;
-      color: lightgray;
     }
 
     .collapse {
