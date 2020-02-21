@@ -169,11 +169,16 @@
                       {% endif %}
                     </td>
                     <td>
-                      {% for document in result.documents.all %}
-                        <a href="{{ document.get_absolute_url }}">
-                          {{ document.file_type | title }} (v{{ document.version }})
-                        </a>
-                      {% endfor %}
+                        {% if result.current_documents.form %}
+                          <a href="{{ result.current_documents.form.get_absolute_url }}" alt="Form version {{ result.current_documents.form.version }}">
+                            {{ result.current_documents.form.file_type | title }}
+                          </a>
+                        {% endif %}
+                        {% if result.current_documents.audit %}
+                          <a href="{{ result.current_documents.audit.get_absolute_url }}" alt="Audit version {{ result.current_documents.audit.version }}">
+                            {{ result.current_documents.audit.file_type | title }}
+                          </a>
+                        {% endif %}
                     </td>
                   </tr>
                 {% endfor %}
