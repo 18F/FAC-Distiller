@@ -238,16 +238,18 @@
                       <div class="finding-text">
                         {{ finding_text.text | escape | linebreaksbr }}
                       </div>
-                      <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        expand
-                      </button>
-                      <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                        hide text
-                      </button>
-                      |
-                      <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
-                        copy text
-                      </button>
+                      <div class="finding-text-controls">
+                        <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          expand
+                        </button>
+                        <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                          close
+                        </button>
+                        |
+                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ finding_text.text | escapejs }}')">
+                          copy text
+                        </button>
+                      </div>
                     </td>
                     <td class="text-top">
                       {# There should be one CAP, but there are no DB constraints, so for safety handle multiple. #}
@@ -256,16 +258,18 @@
                           {{ cap_text.text | escape | linebreaksbr }}
                           {% if not forloop.last %}<hr>{% endif %}
                         </div>
-                        <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          expand
-                        </button>
-                        <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
-                          hide text
-                        </button>
-                        |
-                        <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
-                          copy text
-                        </button>
+                        <div class="finding-text-controls">
+                          <button class="expand usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                            expand
+                          </button>
+                          <button class="collapse usa-button usa-button--unstyled" onclick="this.parentNode.parentNode.parentNode.classList.toggle('finding-collapsed'); this.blur();">
+                            close
+                          </button>
+                          |
+                          <button title="Copy to clipboard" class="usa-button usa-button--unstyled" onclick="copyToClipboard(this, '{{ cap_text.text | escapejs }}')">
+                            copy text
+                          </button>
+                        </div>
                       {% endfor %}
                     </td>
                     {% comment %}<td class="text-top finding-min-width">
@@ -351,10 +355,27 @@
       font-size: 1em;
     }
 
+    /* Size columns on findings table */
+    .findings-table td:nth-child(1),
+    .findings-table th:nth-child(1) {
+      width: 8em;
+    }
+    .findings-table td:nth-child(3),
+    .findings-table th:nth-child(3) {
+      width: 10000em;
+    }
+    .findings-table td:nth-child(4),
+    .findings-table th:nth-child(4) {
+      width: 10000em;
+    }
+
     .finding-collapsed .finding-text {
       position: relative;
       height: 8em;
       overflow: hidden;
+    }
+    .finding-text-controls {
+      float: right;
     }
 
     /* To indicate that the text is clipped, add an overflay to fade out the text. */
