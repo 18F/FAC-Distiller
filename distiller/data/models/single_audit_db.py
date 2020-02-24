@@ -7,7 +7,7 @@ See: https://harvester.census.gov/facdissem/PublicDataDownloads.aspx
 """
 
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from compositefk.fields import CompositeForeignKey
 from django.db import models
@@ -15,15 +15,13 @@ from django.db import models
 from .assistance_listings import AssistanceListing
 
 
-class AuditManager(models.Manager):
-    def search(
+class AuditQuerySet(models.QuerySet):
+    def filter_dates(
         self,
         *,
         audit_year: Optional[int],
         start_date: date,
         end_date: date,
-        cog_agency_prefix=None,
-        sub_agency_name=None,
     ):
         # Accumulate search conditions into a Q-object
         q_obj = models.Q()
@@ -36,29 +34,52 @@ class AuditManager(models.Manager):
         if end_date:
             q_obj &= models.Q(fac_accepted_date__lte=end_date)
 
-        # Filter by agency
-        if cog_agency_prefix:
-            q_obj &= models.Q(cog_agency=cog_agency_prefix)
-
-        cfdas = None
-        if sub_agency_name:
-            cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
-                sub_agency_name
-            )
-            q_obj &= models.Q(cfdas__cfda__in=cfdas)
-
-        return cfdas, self.filter(
+        return self.filter(
             q_obj
-        ).annotate(
-            num_findings=models.Count('finding_texts', distinct=True),
         ).order_by(
             '-audit_year',
             '-fac_accepted_date'
         )
 
+    def filter_cfda_prefix(self, agency_prefix: str):
+        return self.filter(
+            cfdas__cfda__program_number__startswith=agency_prefix
+        ).annotate(
+            cfda_award_sum=models.Sum(
+                'cfdas__amount',
+                filter=models.Q(cfdas__cfda__program_number__startswith=agency_prefix),
+                distinct=True,
+            )
+        )
+
+    def filter_cfda_list(self, cfdas: List[str]):
+        return self.filter(
+            cfdas__cfda__program_number__in=cfdas
+        ).annotate(
+            cfda_award_sum=models.Sum(
+                'cfdas__amount',
+                filter=models.Q(cfdas__cfda__program_number__in=cfdas),
+                distinct=True,
+            )
+        )
+
+    def filter_cognizant_oversight_agency(self, cog_agency_prefix):
+        # Only include results where the parent agency is cognizant.
+        return self.filter(cog_agency=cog_agency_prefix)
+
+    def filter_num_findings(self, *, require_findings):
+        audits = self.annotate(
+            num_findings=models.Count('finding_texts', distinct=True)
+        )
+
+        if require_findings:
+            audits = audits.filter(num_findings__gt=0)
+
+        return audits
+
 
 class Audit(models.Model):
-    objects = AuditManager()
+    objects = AuditQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'audit detail'

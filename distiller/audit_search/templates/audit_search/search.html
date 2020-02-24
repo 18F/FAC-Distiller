@@ -165,9 +165,7 @@
                       {% endif %}
                     </td>
                     <td>
-                      {% if cfda_prefixes %}
-                        ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
-                      {% endif %}
+                      ${{ result.cfda_award_sum | intcomma }}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
