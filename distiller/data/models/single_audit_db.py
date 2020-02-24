@@ -23,31 +23,32 @@ class AuditManager(models.Manager):
         start_date: date,
         end_date: date,
         cog_agency_prefix=None,
-        findings_agency_name=None,
+        sub_agency_name=None,
     ):
+        # Accumulate search conditions into a Q-object
+        q_obj = models.Q()
+
         # Filter by dates
-        date_q = models.Q()
         if audit_year:
-            date_q &= models.Q(audit_year=audit_year)
+            q_obj &= models.Q(audit_year=audit_year)
         if start_date:
-            date_q &= models.Q(fac_accepted_date__gte=start_date)
+            q_obj &= models.Q(fac_accepted_date__gte=start_date)
         if end_date:
-            date_q &= models.Q(fac_accepted_date__lte=end_date)
+            q_obj &= models.Q(fac_accepted_date__lte=end_date)
 
         # Filter by agency
-        agency_q = models.Q()
         if cog_agency_prefix:
-            agency_q |= models.Q(cog_agency=cog_agency_prefix)
+            q_obj &= models.Q(cog_agency=cog_agency_prefix)
 
         cfdas = None
-        if findings_agency_name:
+        if sub_agency_name:
             cfdas = AssistanceListing.objects.get_cfda_nums_for_agency(
-                findings_agency_name
+                sub_agency_name
             )
-            agency_q |= models.Q(cfdas__cfda__in=cfdas)
+            q_obj &= models.Q(cfdas__cfda__in=cfdas)
 
         return cfdas, self.filter(
-            date_q & agency_q
+            q_obj
         ).annotate(
             num_findings=models.Count('finding_texts', distinct=True),
         ).order_by(

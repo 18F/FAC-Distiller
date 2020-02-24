@@ -20,6 +20,7 @@ def single_audit_search(request):
 
     page = None
     finding_texts = None
+    cfda_search_prefixes = None
     if form.is_valid():
         cfda_search_prefixes, audits = models.Audit.objects.search(
             audit_year=form.cleaned_data['audit_year'],
@@ -27,7 +28,7 @@ def single_audit_search(request):
             end_date=form.cleaned_data['end_date'],
             cog_agency_prefix=form.cleaned_data['agency']
                 if form.cleaned_data['agency_cog_oversight'] else None,
-            findings_agency_name=form.cleaned_data['sub_agency']
+            sub_agency_name=form.cleaned_data['sub_agency']
                 if form.cleaned_data['agency_finding'] else None,
         )
         audits = audits.prefetch_related(

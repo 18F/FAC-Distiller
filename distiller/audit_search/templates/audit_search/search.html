@@ -41,11 +41,11 @@
               </div>
               <div class="usa-checkbox">
                 <input type="checkbox" name="agency_finding" class="usa-checkbox__input" id="id_agency_finding" {% if form.agency_finding.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_finding">Include audits with findings for specified agency</label>
+                <label class="usa-label usa-checkbox__label" for="id_agency_finding">Only show audits with findings for specified agency</label>
               </div>
               <div class="usa-checkbox">
                 <input type="checkbox" name="agency_cog_oversight" class="usa-checkbox__input" id="id_agency_cog_oversight" {% if form.agency_cog_oversight.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Include audits where parent agency is cognizant/oversight</label>
+                <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Only show audits where parent agency is cognizant/oversight</label>
               </div>
             </div>
             {{ form.page.as_hidden }}
@@ -143,7 +143,7 @@
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
-                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
+                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }}, '{{ result.auditee_name }}')">
                           {{ result.num_findings }}
                         </button>
                       {% else %}
@@ -165,7 +165,9 @@
                       {% endif %}
                     </td>
                     <td>
-                      ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
+                      {% if cfda_prefixes %}
+                        ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
+                      {% endif %}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
@@ -194,6 +196,27 @@
         </div>
       </div>
       <div class="findings-results-page">
+        <div class="grid-row padding-top-2">
+          <svg
+            width="2em"
+            height="2em"
+            fill="none"
+            stroke="#005288"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <use xlink:href="{% static 'img/feather-sprite.svg#list' %}"/>
+          </svg>
+          <span class="line-height-sans-6 padding-left-2">
+            <span id="finding-auditee-name">
+              Auditee Name Here
+            </span>
+            <div class="font-sans-3xs line-height-sans-3">
+              {{ form.cleaned_data.audit_year|default:'All' }} audit year
+            </div>
+          </span>
+        </div>
         <div class="grid-row">
           <div class="grid-col-12">
             <table class="findings-table usa-table font-serif-3xs">
@@ -282,11 +305,13 @@
         </div>
       </div>
     {% else %}
-      <div class="usa-alert usa-alert--info" >
-        <div class="usa-alert__body">
-          <p class="usa-alert__text">No agency findings within time period searched.</p>
+      {% if form.is_valid %}
+        <div class="usa-alert usa-alert--info" >
+          <div class="usa-alert__body">
+            <p class="usa-alert__text">No agency findings within time period searched.</p>
+          </div>
         </div>
-      </div>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -299,7 +324,7 @@
       this.form.submit();
     }, false);
 
-    function showFindings(dbkey, auditYear) {
+    function showFindings(dbkey, auditYear, auditeeName) {
       // Hide all rows in findings table
       var selector = '.findings-table > tbody > tr';
       Array.prototype.slice.call(
@@ -317,6 +342,7 @@
       });
 
       // Show the findings table section
+      document.getElementById('finding-auditee-name').innerHTML = auditeeName;
       document.getElementById('search-results').classList.toggle('show-findings');
     }
 
