@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block content %}
-  <div id="search-results" class="usa-section">
+  <div id="search-results">
     <div class="grid-container">
       <img class ="centered" src="{% static 'img/logo.png' %}" alt="Single Audit Search">
       <form class="centered search-form usa-form usa-form--large">
@@ -225,7 +225,7 @@
               <thead>
                 <tr>
                   <td colspan="4" style="border: none; background-color: transparent;">
-                    <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
+                    <button class="usa-button usa-button--unstyled" onclick="hideFindings()">
                       &lt; back to audit list
                     </button>
                   </td>
@@ -326,6 +326,8 @@
       this.form.submit();
     }, false);
 
+    var savedScrollY;
+
     function showFindings(dbkey, auditYear, auditeeName) {
       // Hide all rows in findings table
       var selector = '.findings-table > tbody > tr';
@@ -345,7 +347,13 @@
 
       // Show the findings table section
       document.getElementById('finding-auditee-name').innerHTML = auditeeName;
+      savedScrollY = window.scrollY;
       document.getElementById('search-results').classList.toggle('show-findings');
+    }
+
+    function hideFindings() {
+      document.getElementById('search-results').classList.toggle('show-findings');
+      window.scrollTo(0, savedScrollY);
     }
 
     function copyToClipboard(node, text) {
@@ -446,6 +454,10 @@
 
     .show-findings .findings-results-page {
       display: block;
+    }
+
+    .show-findings .search-form {
+      display: none;
     }
 
     .audit-results-page {
