@@ -26,7 +26,8 @@ def single_audit_search(request):
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
         ).prefetch_related(
-            'finding_texts', 'finding_texts__findings',
+            'finding_texts',
+            'finding_texts__findings',
             'finding_texts__findings__elec_audits',
             'finding_texts__cap_texts',
             'documents',

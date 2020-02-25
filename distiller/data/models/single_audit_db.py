@@ -582,6 +582,17 @@ class Audit(models.Model):
 
         return self._current_documents
 
+    @property
+    def has_repeat_finding(self):
+        # A repeat finding count has proven to be a very difficult annotation
+        # to add to the search results efficiently. So here, we provide a
+        # runtime check to indicate repeat findings on this audit.
+        for finding_text in self.finding_texts.all():
+            for finding in finding_text.findings.all():
+                if finding.repeat_finding:
+                    return True
+        return False
+
 
 class CFDAManager(models.Manager):
     def filter_prefix(self, prefix):

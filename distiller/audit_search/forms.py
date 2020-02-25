@@ -8,6 +8,7 @@ import it both here and in the file that's actually doing the filtering.
 from datetime import datetime
 
 from django import forms
+from django.utils.safestring import mark_safe
 
 from distiller.data import constants
 from distiller.data.etls.load_dumps import FAC_PRIOR_YEARS
@@ -29,7 +30,13 @@ AGENCY_CHOICES = (
 
 
 class AgencySelectionForm(forms.Form):
-    agency = forms.ChoiceField(choices=AGENCY_CHOICES)
+    agency = forms.ChoiceField(
+        choices=AGENCY_CHOICES,
+        label_suffix=None,
+        label=mark_safe(
+            'Parent agency <span class="required">(required)</span>:'
+        ),
+    )
     sub_agency = forms.ChoiceField(required=False)
     audit_year = forms.ChoiceField(
         choices=lambda: (('', ''),) + tuple(
@@ -56,11 +63,6 @@ class AgencySelectionForm(forms.Form):
     # Used when drilling-down search terms
     filtering = forms.IntegerField(required=False)
 
-    agency_finding = forms.BooleanField(
-        required=False,
-        initial=True,
-        label='Include audits with findings for specified agency'
-    )
     agency_cog_oversight = forms.BooleanField(
         required=False,
         initial=False,

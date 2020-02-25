@@ -14,34 +14,30 @@
 {% block content %}
   <div id="search-results" class="usa-section">
     <div class="grid-container">
-      <form class="usa-form usa-form--large">
+      <img class ="centered" src="{% static 'img/logo.png' %}" alt="Single Audit Search">
+      <form class="centered search-form usa-form usa-form--large">
         {{ form.non_field_errors }}
         <fieldset class="usa-fieldset">
-          <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
           <div class="grid-row grid-gap">
-            <div class="tablet:grid-col-8">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.agency type="select" field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-8">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.sub_agency field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-4">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.audit_year field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-6">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.start_date field_class="usa-input" input_type="date" %}
             </div>
-            <div class="tablet:grid-col-6">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.end_date field_class="usa-input" input_type="date" %}
             </div>
-            <div class="tablet:grid-col-12">
+            <div class="mobile:grid-col-12">
               <div class="usa-checkbox">
                 <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
                 <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
-              </div>
-              <div class="usa-checkbox">
-                <input type="checkbox" name="agency_finding" class="usa-checkbox__input" id="id_agency_finding" {% if form.agency_finding.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_finding">Only show audits with findings for specified agency</label>
               </div>
               <div class="usa-checkbox">
                 <input type="checkbox" name="agency_cog_oversight" class="usa-checkbox__input" id="id_agency_cog_oversight" {% if form.agency_cog_oversight.value %}checked{% endif %}>
@@ -122,13 +118,16 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='num_findings' column_title='Findings count' %}
                   </th>
                   <th scope="col">
-                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
+                    Repeat Finding(s)
                   </th>
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
                   </th>
                   <th scope="col">
-                    Amount expended by selected agency
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
+                  </th>
+                  <th scope="col">
+                    Amount expended by parent agency for fiscal year
                   </th>
                   <th scope="col">
                     Files
@@ -150,6 +149,16 @@
                         {{ result.num_findings }}
                       {% endif %}
                     </td>
+                    <td class="text-center">
+                      {% if result.has_repeat_finding %}
+                        <i class="fas fa-check"></i>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if result.qcosts %}
+                        <i class="fas fa-check"></i>
+                      {% endif %}
+                    </td>
                     <td class="">
                       {% if result.cog_over == 'C' %}
                         {{ result.cog_agency | agency_name }}
@@ -157,11 +166,6 @@
                       {% elif result.cog_over == 'O' %}
                         {{ result.oversight_agency | agency_name }}
                         <span class="text-gray-50 text-italic">Oversight</span>
-                      {% endif %}
-                    </td>
-                    <td class="text-center">
-                      {% if result.qcosts %}
-                        <i class="fas fa-check"></i>
                       {% endif %}
                     </td>
                     <td>
@@ -370,6 +374,11 @@
   </script>
 
   <style>
+    .centered {
+      display: block;
+      margin: 0 auto;
+    }
+
     .finding-min-width {
       min-width: 8em;
     }
@@ -450,6 +459,11 @@
 
     thead a {
       color: black;
+    }
+
+    .required {
+      color: gray;
+      font-style: italic;
     }
   </style>
 {% endblock %}
