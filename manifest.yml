@@ -6,8 +6,8 @@ applications:
   disk_quota: 1G
   env:
     DJANGO_SETTINGS_MODULE: distiller.settings.production
-  instances: 1
-  memory: 256M
+  instances: 2
+  memory: 1024M
   routes:
   - route: demo-fac-distiller.app.cloud.gov
   services:

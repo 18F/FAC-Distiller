@@ -12,40 +12,36 @@
 {% endblock %}
 
 {% block content %}
-  <div id="search-results" class="usa-section">
+  <div id="search-results">
     <div class="grid-container">
-      <form class="usa-form usa-form--large">
+      <img class ="centered" src="{% static 'img/logo.png' %}" alt="Single Audit Search">
+      <form class="centered search-form usa-form usa-form--large">
         {{ form.non_field_errors }}
         <fieldset class="usa-fieldset">
-          <img src="{% static 'img/logo.png' %}" alt="Single Audit Search">
           <div class="grid-row grid-gap">
-            <div class="tablet:grid-col-8">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.agency type="select" field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-8">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.sub_agency field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-4">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.audit_year field_class="usa-select" %}
             </div>
-            <div class="tablet:grid-col-6">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.start_date field_class="usa-input" input_type="date" %}
             </div>
-            <div class="tablet:grid-col-6">
+            <div class="mobile:grid-col-12">
               {% include 'audit_search/_field.html' with field=form.end_date field_class="usa-input" input_type="date" %}
             </div>
-            <div class="tablet:grid-col-12">
+            <div class="mobile:grid-col-12">
               <div class="usa-checkbox">
                 <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
                 <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
               </div>
               <div class="usa-checkbox">
-                <input type="checkbox" name="agency_finding" class="usa-checkbox__input" id="id_agency_finding" {% if form.agency_finding.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_finding">Include audits with findings for specified agency</label>
-              </div>
-              <div class="usa-checkbox">
                 <input type="checkbox" name="agency_cog_oversight" class="usa-checkbox__input" id="id_agency_cog_oversight" {% if form.agency_cog_oversight.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Include audits where parent agency is cognizant/oversight</label>
+                <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Only show audits where parent agency is cognizant/oversight</label>
               </div>
             </div>
             {{ form.page.as_hidden }}
@@ -122,13 +118,16 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='num_findings' column_title='Findings count' %}
                   </th>
                   <th scope="col">
-                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
+                    Repeat Finding(s)
                   </th>
                   <th scope="col">
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='qcosts' column_title='Questioned costs' %}
                   </th>
                   <th scope="col">
-                    Amount expended by selected agency
+                    {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
+                  </th>
+                  <th scope="col">
+                    Amount expended by parent agency for fiscal year
                   </th>
                   <th scope="col">
                     Files
@@ -143,11 +142,21 @@
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
                       {% if result.finding_texts.all %}
-                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }})">
+                        <button class="usa-button usa-button--unstyled" onclick="showFindings({{ result.dbkey }}, {{ result.audit_year }}, '{{ result.auditee_name }}')">
                           {{ result.num_findings }}
                         </button>
                       {% else %}
                         {{ result.num_findings }}
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if result.has_repeat_finding %}
+                        <i class="fas fa-check"></i>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      {% if result.qcosts %}
+                        <i class="fas fa-check"></i>
                       {% endif %}
                     </td>
                     <td class="">
@@ -159,13 +168,8 @@
                         <span class="text-gray-50 text-italic">Oversight</span>
                       {% endif %}
                     </td>
-                    <td class="text-center">
-                      {% if result.qcosts %}
-                        <i class="fas fa-check"></i>
-                      {% endif %}
-                    </td>
                     <td>
-                      ${{ result.cfdas.all | cfda_award_sum:cfda_search_prefixes | intcomma }}
+                      ${{ result.cfda_award_sum | intcomma }}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
@@ -194,13 +198,34 @@
         </div>
       </div>
       <div class="findings-results-page">
+        <div class="grid-row padding-top-2">
+          <svg
+            width="2em"
+            height="2em"
+            fill="none"
+            stroke="#005288"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <use xlink:href="{% static 'img/feather-sprite.svg#list' %}"/>
+          </svg>
+          <span class="line-height-sans-6 padding-left-2">
+            <span id="finding-auditee-name">
+              Auditee Name Here
+            </span>
+            <div class="font-sans-3xs line-height-sans-3">
+              {{ form.cleaned_data.audit_year|default:'All' }} audit year
+            </div>
+          </span>
+        </div>
         <div class="grid-row">
           <div class="grid-col-12">
             <table class="findings-table usa-table font-serif-3xs">
               <thead>
                 <tr>
                   <td colspan="4" style="border: none; background-color: transparent;">
-                    <button class="usa-button usa-button--unstyled" onclick="document.getElementById('search-results').classList.toggle('show-findings')">
+                    <button class="usa-button usa-button--unstyled" onclick="hideFindings()">
                       &lt; back to audit list
                     </button>
                   </td>
@@ -282,11 +307,13 @@
         </div>
       </div>
     {% else %}
-      <div class="usa-alert usa-alert--info" >
-        <div class="usa-alert__body">
-          <p class="usa-alert__text">No agency findings within time period searched.</p>
+      {% if form.is_valid %}
+        <div class="usa-alert usa-alert--info" >
+          <div class="usa-alert__body">
+            <p class="usa-alert__text">No agency findings within time period searched.</p>
+          </div>
         </div>
-      </div>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -299,7 +326,9 @@
       this.form.submit();
     }, false);
 
-    function showFindings(dbkey, auditYear) {
+    var savedScrollY;
+
+    function showFindings(dbkey, auditYear, auditeeName) {
       // Hide all rows in findings table
       var selector = '.findings-table > tbody > tr';
       Array.prototype.slice.call(
@@ -317,7 +346,14 @@
       });
 
       // Show the findings table section
+      document.getElementById('finding-auditee-name').innerHTML = auditeeName;
+      savedScrollY = window.scrollY;
       document.getElementById('search-results').classList.toggle('show-findings');
+    }
+
+    function hideFindings() {
+      document.getElementById('search-results').classList.toggle('show-findings');
+      window.scrollTo(0, savedScrollY);
     }
 
     function copyToClipboard(node, text) {
@@ -346,6 +382,11 @@
   </script>
 
   <style>
+    .centered {
+      display: block;
+      margin: 0 auto;
+    }
+
     .finding-min-width {
       min-width: 8em;
     }
@@ -415,6 +456,10 @@
       display: block;
     }
 
+    .show-findings .search-form {
+      display: none;
+    }
+
     .audit-results-page {
       overflow: scroll;
     }
@@ -426,6 +471,11 @@
 
     thead a {
       color: black;
+    }
+
+    .required {
+      color: gray;
+      font-style: italic;
     }
   </style>
 {% endblock %}

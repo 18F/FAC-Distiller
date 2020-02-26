@@ -21,30 +21,43 @@ def single_audit_search(request):
     page = None
     finding_texts = None
     if form.is_valid():
-        cfda_search_prefixes, audits = models.Audit.objects.search(
+        audits = models.Audit.objects.filter_dates(
             audit_year=form.cleaned_data['audit_year'],
             start_date=form.cleaned_data['start_date'],
             end_date=form.cleaned_data['end_date'],
-            cog_agency_prefix=form.cleaned_data['agency']
-                if form.cleaned_data['agency_cog_oversight'] else None,
-            findings_agency_name=form.cleaned_data['sub_agency']
-                if form.cleaned_data['agency_finding'] else None,
-        )
-        audits = audits.prefetch_related(
-            'finding_texts', 'finding_texts__findings',
+        ).prefetch_related(
+            'finding_texts',
+            'finding_texts__findings',
             'finding_texts__findings__elec_audits',
             'finding_texts__cap_texts',
             'documents',
         )
-        if not form.cleaned_data['sub_agency']:
-            cfda_search_prefixes = [form.cleaned_data['agency']]
+
+        # If specified, filter by sub-agency name. To do this, we need to query
+        # for matching CFDA numbers first.
+        if form.cleaned_data['sub_agency']:
+            cfdas = models.AssistanceListing.objects.get_cfda_nums_for_agency(
+                form.cleaned_data['sub_agency']
+            )
+            audits = audits.filter_cfda_list(cfdas)
+
+        # Otherwise, filter by parent agency prefix
+        else:
+            audits = audits.filter_cfda_prefix(form.cleaned_data['agency'])
+
+        # If specified, only include results where the parent agency is
+        # cognizant/oversight.
+        if form.cleaned_data['agency_cog_oversight']:
+            audits = audits.filter_cognizant_oversight_agency(
+                form.cleaned_data['agency']
+            )
 
         if form.cleaned_data['sort']:
             prefix = '-' if form.cleaned_data.get('order') == 'asc' else ''
             audits = audits.order_by(f'{prefix}{form.cleaned_data["sort"]}')
 
-        if form.cleaned_data['findings']:
-            audits = audits.filter(finding_texts__isnull=False).distinct()
+        audits = audits.filter_num_findings(require_findings=form.cleaned_data['findings'])
+
         page = Paginator(audits, 25).get_page(form.cleaned_data['page'] or 1)
 
         finding_texts_set = set()
@@ -60,7 +73,6 @@ def single_audit_search(request):
         'form': form,
         'page': page,
         'finding_texts': finding_texts,
-        'cfda_search_prefixes': cfda_search_prefixes,
     })
 
 
