@@ -1,32 +1,32 @@
 # Distiller
 
-Distiller, provides easier access to data, reducing a multi-day process to less than five minutes for grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency. 
+Distiller, provides easier access to data, reducing a multi-day process to less than five minutes for grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency.
 
 This codebase spun out of the [10x Federal Grant Reporting Project](https://github.com/18F/federal-grant-reporting/) that is exploring simpler, faster, easier, better resolution of single audit findings by agencies and grantees alike.
 
 **Features of the Distiller:**
-- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies 
+- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies
 - filter by agency/sub-agency, audits with findings, cognizent and oversight agencies and findings by agency filter
 - sort by grantee name, # of findings, Fiscal year end,	Audit accepted date, name of	Cognizant or Oversight agency and whether or not an audit has	Questioned costs
 - view only the findings for which your agency/sub-agency is Cognizant or Oversight for and responsible for resolving
 - copy findings text and corrective action plans directly from the Distiller
-- download a csv of your search results so you can process the data further or upload to an agency's case management system 
+- download a csv of your search results so you can process the data further or upload to an agency's case management system
 
 ### Single Audit PDF Extraction
 
-This is a proof-of-concept module that is a companion to the Distiller. Download any audit pdf from the distiller and run it though this module that reads Single Audit PDFs page by page and extracts findings text and corrective action plans which can be viewed as a csv. 
+This is a proof-of-concept module that is a companion to the Distiller. Download any audit pdf from the distiller and run it though this module that reads Single Audit PDFs page by page and extracts findings text and corrective action plans which can be viewed as a csv.
 
-**This saves time** for grants managers searching for audit findings prior to fiscal year 2019 (before this was available in the Federal Audit Clearinghouse's Data Collection Form) and anyone who wants to take findings and corrective action plans text and copy them into another place. 
+**This saves time** for grants managers searching for audit findings prior to fiscal year 2019 (before this was available in the Federal Audit Clearinghouse's Data Collection Form) and anyone who wants to take findings and corrective action plans text and copy them into another place.
 
-**This reduces errors** We've heard that copying and pasting from audit pdfs is unreliable due to pdf formatting so agency staff have resorted to _retyping_ this information into their grants management tracking systems (which vary from spreadsheets to more robust case management systems). Retyping is prone to error in addition to taking awy time from other tasks. Auditors and grantees who need to copy text of findings and corrective action plans into the Federal Audit Clearinghouse's Data Collection Form can more easily copy text from a csv instead of a poorly formatted or image pdf. 
+**This reduces errors** We've heard that copying and pasting from audit pdfs is unreliable due to pdf formatting so agency staff have resorted to _retyping_ this information into their grants management tracking systems (which vary from spreadsheets to more robust case management systems). Retyping is prone to error in addition to taking awy time from other tasks. Auditors and grantees who need to copy text of findings and corrective action plans into the Federal Audit Clearinghouse's Data Collection Form can more easily copy text from a csv instead of a poorly formatted or image pdf.
 
-Results will vary with this tool as the text in these pdfs are no where near standardized and some older pdfs contain images instead of readable text which will limit any efforts to extract text from these PDFs. **We recommend updates to the policy for single audit format requirements** to require findings to be written in a standardized  format to make it easier and more reliable for them to be read by natural language processing and compared across audits for risk management. 
+Results will vary with this tool as the text in these pdfs are no where near standardized and some older pdfs contain images instead of readable text which will limit any efforts to extract text from these PDFs. **We recommend updates to the policy for single audit format requirements** to require findings to be written in a standardized  format to make it easier and more reliable for them to be read by natural language processing and compared across audits for risk management.
 
 See the [corresponding module for more details](https://github.com/18F/FAC-Distiller/tree/master/distiller/extraction/ "pdf extraction module README").
 
 ## How you can help
 
-Visit the Distller on cloud.gov or test out the Single Audit PDF Extraction module and let us know if it useful or if something isn't working as expected. Email the team at federal-grant-reporting@gsa.gov or [File an issue](https://github.com/18F/FAC-Distiller/issues/new) and assign it to @bpdesigns. 
+Visit the Distller on cloud.gov or test out the Single Audit PDF Extraction module and let us know if it useful or if something isn't working as expected. Email the team at federal-grant-reporting@gsa.gov or [File an issue](https://github.com/18F/FAC-Distiller/issues/new) and assign it to @bpdesigns.
 
 ## Local development
 
@@ -118,9 +118,13 @@ pipenv run python manage.py load_table --finding
 pipenv run python manage.py load_table --findingtext
 ```
 
-### Cloud.gov table loads
+### Cloud.gov jobs
 
 In the deployed environment, `django-apscheduler` is used to refresh all tables daily at 12:00 AM EST.
+
+At 1:00 AM EST, a complete crawl of the 2019 documents are completed, and then refreshed in the database.
+
+NOTE: `django-apscheduler` is not an optimal choice for a cloud.gov deployment, because jobs are run in the same container as the web server. Usage of `cf run-task` would be preferred. Future work should involve scheduling tasks with `cf run-task` in an outside environment, such as a CircleCI periodic job.
 
 ### requirements.txt
 

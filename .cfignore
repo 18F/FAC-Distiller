@@ -5,6 +5,7 @@ node_modules
 
 .pytest_cache/
 db/
+files/
 fac-documents/
 imports/
 distiller/single_audit_data_dump/pdfs
