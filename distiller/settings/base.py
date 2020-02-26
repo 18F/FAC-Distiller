@@ -10,6 +10,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).parents[1]
 PROJECT_ROOT = BASE_DIR.parents[0]
+BIN_DIR = os.path.join(PROJECT_ROOT, 'bin')
 
 # Set this to the root path for downloading and loading tables to ETL
 # On local dev, this may be a filesystem path.
