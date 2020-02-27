@@ -87,6 +87,13 @@ class AgencySelectionForm(forms.Form):
             ('desc', 'desc'),
         )
     )
+    fmt = forms.ChoiceField(
+        initial='html',
+        choices=(
+            ('html', 'hmtl'),
+            ('csv', 'csv'),
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

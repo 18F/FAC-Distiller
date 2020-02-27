@@ -4,6 +4,7 @@
 {% load static %}
 {% load widget_tweaks %}
 
+{% load add_get_parameter %}
 {% load agency_name %}
 {% load cfda_award_sum %}
 
@@ -47,6 +48,7 @@
             {{ form.page.as_hidden }}
             {{ form.sort.as_hidden }}
             {{ form.order.as_hidden }}
+            {{ form.fmt.as_hidden }}
             <input type="hidden" name="filtering" id="id_filtering" value="">
           </div>
           <div class="grid-row">
@@ -59,7 +61,7 @@
       <hr>
       <div class="audit-results-page">
         <div class="grid-row padding-top-2">
-          <a href="#" alt="Download CSV">
+          <a href="{% add_get fmt='csv' %}" alt="Download CSV">
             <svg
               width="2em"
               height="2em"
