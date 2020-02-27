@@ -6,7 +6,7 @@ This codebase spun out of the [10x Federal Grant Reporting Project](https://gith
 
 **Features of the Distiller:**
 - quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies
-- filter by agency/sub-agency, audits with findings, cognizent and oversight agencies and findings by agency filter
+- filter by agency/sub-agency, audits with findings, cognizant and oversight agencies and findings by agency filter
 - sort by grantee name, # of findings, Fiscal year end,	Audit accepted date, name of	Cognizant or Oversight agency and whether or not an audit has	Questioned costs
 - view only the findings for which your agency/sub-agency is Cognizant or Oversight for and responsible for resolving
 - copy findings text and corrective action plans directly from the Distiller
