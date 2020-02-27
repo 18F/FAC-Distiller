@@ -2,10 +2,15 @@
 Views for audit clearinghouse search interface.
 """
 
+import csv
+import itertools
 from io import StringIO
 
 from django.core.paginator import Paginator
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import (
+    Http404, HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
+)
+
 from django.shortcuts import render
 import pandas as pd
 
@@ -13,6 +18,15 @@ from distiller.data.constants import AGENCIES_BY_PREFIX
 from distiller.data.etls import selenium_scraper
 from distiller.data import models
 from .forms import AgencySelectionForm
+
+
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
 
 
 def single_audit_search(request):
@@ -69,11 +83,93 @@ def single_audit_search(request):
             key=lambda f: (f.audit_year, f.dbkey, f.finding_ref_nums)
         )
 
+        if form.cleaned_data['fmt'] == 'csv':
+            writer = csv.writer(Echo())
+            rows = itertools.chain(
+                (EXPORT_COLUMNS,),
+                audits.values_list(*EXPORT_COLUMNS),
+            )
+            response = StreamingHttpResponse(
+                (writer.writerow(row) for row in rows),
+                content_type="text/csv"
+            )
+            response['Content-Disposition'] = 'attachment; filename="fac-distiller-search-results.csv"'
+            return response
+
     return render(request, 'audit_search/search.html', {
         'form': form,
         'page': page,
         'finding_texts': finding_texts,
     })
+
+EXPORT_COLUMNS = [
+    'audit_year',
+    'dbkey',
+    'type_of_entity',
+    'fy_end_date',
+    'audit_type',
+    'period_covered',
+    'number_months',
+    'ein',
+    'multiple_eins',
+    'ein_subcode',
+    'duns',
+    'multiple_duns',
+    'auditee_name',
+    'street1',
+    'street2',
+    'city',
+    'state',
+    'zipcode',
+    'auditee_contact',
+    'auditee_title',
+    'auditee_phone',
+    'auditee_fax',
+    'auditee_email',
+    'auditee_date_signed',
+    'auditee_name_title',
+    'cpa_firm_name',
+    'auditor_ein',
+    'cpa_street1',
+    'cpa_street2',
+    'cpa_city',
+    'cpa_state',
+    'cpa_zipcode',
+    'cpa_contact',
+    'cpa_title',
+    'cpa_phone',
+    'cpa_fax',
+    'cpa_email',
+    'cpa_date_signed',
+    'multiple_cpas',
+    'cog_over',
+    'cog_agency',
+    'oversight_agency',
+    'typereport_fs',
+    'sp_framework',
+    'sp_framework_required',
+    'typereport_sp_framework',
+    'going_concern',
+    'reportable_condition',
+    'material_weakness',
+    'material_noncompliance',
+    'typereport_mp',
+    'dup_reports',
+    'dollar_threshold',
+    'low_risk',
+    'reportable_condition_mp',
+    'material_weakness_mp',
+    'qcosts',
+    'cy_findings',
+    'py_schedule',
+    'tot_fed_expend',
+    'date_firewall',
+    'previous_date_firewall',
+    'report_required',
+    'fac_accepted_date',
+    'cpa_foreign',
+    'cpa_country',
+]
 
 
 def view_audit(request, audit_id):
