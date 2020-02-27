@@ -1,11 +1,11 @@
 # Distiller
 
-Distiller, provides easier access to data, reducing a multi-day process to less than five minutes for grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency.
+Distiller, provides easier access to audit data. What is a multi-day process for some agencies has been reduced to a few minutes by helping  grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency.
 
 This codebase spun out of the [10x Federal Grant Reporting Project](https://github.com/18F/federal-grant-reporting/) that is exploring simpler, faster, easier, better resolution of single audit findings by agencies and grantees alike.
 
 **Features of the Distiller:**
-- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies
+- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies 
 - filter by agency/sub-agency, audits with findings, cognizant and oversight agencies and findings by agency filter
 - sort by grantee name, # of findings, Fiscal year end,	Audit accepted date, name of	Cognizant or Oversight agency and whether or not an audit has	Questioned costs
 - view only the findings for which your agency/sub-agency is Cognizant or Oversight for and responsible for resolving
