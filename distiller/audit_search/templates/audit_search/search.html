@@ -137,7 +137,11 @@
               <tbody>
                 {% for result in page.object_list %}
                   <tr>
-                    <td>{{ result.auditee_name }}</td>
+                    <td>
+                      <button class="usa-button usa-button--unstyled" onclick="showAuditeeInfo({{ result.dbkey }}, {{ result.audit_year }})">
+                        {{ result.auditee_name }}
+                      </button>
+                    </td>
                     <td>{{ result.fy_end_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td>{{ result.fac_accepted_date|date:"SHORT_DATE_FORMAT"|default_if_none:"Unknown" }}</td>
                     <td class="text-center">
@@ -215,7 +219,7 @@
               Auditee Name Here
             </span>
             <div class="font-sans-3xs line-height-sans-3">
-              {{ form.cleaned_data.audit_year|default:'All' }} audit year
+              {{ result.audit_year }} audit year
             </div>
           </span>
         </div>
@@ -306,6 +310,174 @@
           </div>
         </div>
       </div>
+      {% for result in page.object_list %}
+        <div class="auditee-info-page" data-dbkey="{{ result.dbkey }}" data-audit-year="{{ result.audit_year }}">
+          <div class="grid-row padding-top-2">
+            <svg
+              width="2em"
+              height="2em"
+              fill="none"
+              stroke="#005288"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <use xlink:href="{% static 'img/feather-sprite.svg#list' %}"/>
+            </svg>
+            <span class="line-height-sans-6 padding-left-2">
+              <span id="auditee-info-auditee-name">
+                {{ result.auditee_name }}
+              </span>
+              <div class="font-sans-3xs line-height-sans-3">
+                {{ result.audit_year }} audit year
+              </div>
+            </span>
+          </div>
+          <div class="grid-row">
+            <div class="grid-col-12">
+              <table class="auditee-info-table usa-table font-serif-3xs">
+                <thead>
+                  <tr>
+                    <td colspan="4" style="border: none; background-color: transparent;">
+                      <button class="usa-button usa-button--unstyled" onclick="hideAuditeeInfo({{ result.dbkey }}, {{ result.audit_year }})">
+                        &lt; back to audit list
+                      </button>
+                    </td>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+          <div class="grid-row">
+            <div class="desktop:grid-col-6">
+              <table class="auditee-info-table usa-table font-serif-3xs">
+                <thead>
+                  <tr>
+                      <td colspan=2 class="section">Auditee Information</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                      <td>EIN</td>
+                      <td>{{ result.ein }}</td>
+                  </tr>
+                  <tr>
+                      <td>DUNS</td>
+                      <td>{{ result.duns }}</td>
+                  </tr>
+                  <tr>
+                      <td>Street 1</td>
+                      <td>{{ result.street1 }}</td>
+                  </tr>
+                  <tr>
+                      <td>Street 2</td>
+                      <td>{{ result.street2 }}</td>
+                  </tr>
+                  <tr>
+                      <td>City</td>
+                      <td>{{ result.city }}</td>
+                  </tr>
+                  <tr>
+                      <td>State</td>
+                      <td>{{ result.state }}</td>
+                  </tr>
+                  <tr>
+                      <td>Zipcode</td>
+                      <td>{{ result.zipcode }}</td>
+                  </tr>
+                  <tr>
+                      <td>Contact</td>
+                      <td>{{ result.auditee_contact }}</td>
+                  </tr>
+                  <tr>
+                      <td>Title</td>
+                      <td>{{ result.auditee_title }}</td>
+                  </tr>
+                  <tr>
+                      <td>Phone</td>
+                      <td>{{ result.auditee_phone }}</td>
+                  </tr>
+                  <tr>
+                      <td>Fax</td>
+                      <td>{{ result.auditee_fax }}</td>
+                  </tr>
+                  <tr>
+                      <td>Email</td>
+                      <td>{{ result.auditee_email }}</td>
+                  </tr>
+                  <tr>
+                      <td>Date signed</td>
+                      <td>{{ result.auditee_date_signed }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="desktop:grid-col-6">
+              <table class="auditee-info-table usa-table font-serif-3xs">
+                <thead>
+                  <tr>
+                      <td colspan=2 class="section">Auditor/CPA Information</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                      <td>Firm name</td>
+                      <td>{{ result.cpa_firm_name }}</td>
+                  </tr>
+                  <tr>
+                      <td>EIN</td>
+                      <td>{{ result.auditor_ein }}</td>
+                  </tr>
+                  <tr>
+                      <td>Street 1</td>
+                      <td>{{ result.cpastreet1 }}</td>
+                  </tr>
+                  <tr>
+                      <td>Street 2</td>
+                      <td>{{ result.cpa_street2 }}</td>
+                  </tr>
+                  <tr>
+                      <td>City</td>
+                      <td>{{ result.cpa_city }}</td>
+                  </tr>
+                  <tr>
+                      <td>State</td>
+                      <td>{{ result.cpa_state }}</td>
+                  </tr>
+                  <tr>
+                      <td>Zipcode</td>
+                      <td>{{ result.cpa_zipcode }}</td>
+                  </tr>
+                  <tr>
+                      <td>Contact</td>
+                      <td>{{ result.cpa_contact }}</td>
+                  </tr>
+                  <tr>
+                      <td>Title</td>
+                      <td>{{ result.cpa_title }}</td>
+                  </tr>
+                  <tr>
+                      <td>Phone</td>
+                      <td>{{ result.cpa_phone }}</td>
+                  </tr>
+                  <tr>
+                      <td>Fax</td>
+                      <td>{{ result.cpa_fax }}</td>
+                  </tr>
+                  <tr>
+                      <td>Email</td>
+                      <td>{{ result.cpa_email }}</td>
+                  </tr>
+                  <tr>
+                      <td>Date signed</td>
+                      <td>{{ result.cpa_date_signed }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     {% else %}
       {% if form.is_valid %}
         <div class="usa-alert usa-alert--info" >
@@ -353,6 +525,22 @@
 
     function hideFindings() {
       document.getElementById('search-results').classList.toggle('show-findings');
+      window.scrollTo(0, savedScrollY);
+    }
+
+    function showAuditeeInfo(dbkey, auditYear) {
+      // Show the findings table section
+      savedScrollY = window.scrollY;
+      document.getElementById('search-results').classList.toggle('show-auditee-info');
+
+      var selector = '.auditee-info-page[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
+      document.querySelector(selector).style.display = 'block';
+    }
+
+    function hideAuditeeInfo(dbkey, auditYear) {
+      document.getElementById('search-results').classList.toggle('show-auditee-info');
+      var selector = '.auditee-info-page[data-dbkey="' + dbkey + '"][data-audit-year="' + auditYear + '"]';
+      document.querySelector(selector).style.display = 'none';
       window.scrollTo(0, savedScrollY);
     }
 
@@ -444,11 +632,16 @@
       display: none;
     }
 
-    .show-findings .audit-results-page {
+    .show-findings .audit-results-page,
+    .show-auditee-info .audit-results-page {
       display: none;
     }
 
     .findings-results-page {
+      display: none;
+    }
+
+    .auditee-info-page {
       display: none;
     }
 
@@ -476,6 +669,10 @@
     .required {
       color: gray;
       font-style: italic;
+    }
+
+    .auditee-info-table .section {
+      font-weight: bold;
     }
   </style>
 {% endblock %}
