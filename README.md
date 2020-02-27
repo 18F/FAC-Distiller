@@ -12,13 +12,13 @@ This codebase spun out of the [10x Federal Grant Reporting Project](https://gith
 - copy findings text and corrective action plans directly from the Distiller
 - download a csv of your search results so you can process the data further or upload to an agency's case management system
 
-### Single Audit PDF Extraction
+### Audit PDF Extraction
 
 This is a proof-of-concept module that is a companion to the Distiller. Download any audit pdf from the distiller and run it though this module that reads Single Audit PDFs page by page and extracts findings text and corrective action plans which can be viewed as a csv.
 
 **This saves time** for grants managers searching for audit findings prior to fiscal year 2019 (before this was available in the Federal Audit Clearinghouse's Data Collection Form) and anyone who wants to take findings and corrective action plans text and copy them into another place.
 
-**This reduces errors** We've heard that copying and pasting from audit pdfs is unreliable due to pdf formatting so agency staff have resorted to _retyping_ this information into their grants management tracking systems (which vary from spreadsheets to more robust case management systems). Retyping is prone to error in addition to taking awy time from other tasks. Auditors and grantees who need to copy text of findings and corrective action plans into the Federal Audit Clearinghouse's Data Collection Form can more easily copy text from a csv instead of a poorly formatted or image pdf.
+**This reduces errors** We've heard that copying and pasting from audit pdfs is unreliable due to pdf formatting so agency staff have resorted to _retyping_ this information into their grants management tracking systems (which vary from spreadsheets to more robust case management systems). Retyping is prone to error in addition to taking away time from other tasks. Auditors and grantees who need to copy text of findings and corrective action plans into the Federal Audit Clearinghouse's Data Collection Form can more easily copy text from a csv instead of a poorly formatted or image pdf.
 
 Results will vary with this tool as the text in these pdfs are no where near standardized and some older pdfs contain images instead of readable text which will limit any efforts to extract text from these PDFs. **We recommend updates to the policy for single audit format requirements** to require findings to be written in a standardized  format to make it easier and more reliable for them to be read by natural language processing and compared across audits for risk management.
 
