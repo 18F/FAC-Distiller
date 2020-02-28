@@ -33,9 +33,11 @@ class Echo:
 
 def get_load_status():
     last_load_job = DjangoJobExecution.objects.filter(
+        status=DjangoJobExecution.SUCCESS,
         job__name='distiller.data.jobs.download_and_update_tables'
     ).first()
     last_crawl_job = DjangoJobExecution.objects.filter(
+        status=DjangoJobExecution.SUCCESS,
         job__name='distiller.fac_scraper.jobs.daily_document_crawl'
     ).first()
     return {
