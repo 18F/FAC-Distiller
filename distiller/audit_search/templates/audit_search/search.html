@@ -14,48 +14,64 @@
 
 {% block content %}
   <div id="search-results">
-    <div class="grid-container">
-      <img class ="centered" src="{% static 'img/logo.png' %}" alt="Single Audit Search">
-      <form class="centered search-form usa-form usa-form--large">
-        {{ form.non_field_errors }}
-        <fieldset class="usa-fieldset">
-          <div class="grid-row grid-gap">
-            <div class="mobile:grid-col-12">
-              {% include 'audit_search/_field.html' with field=form.agency type="select" field_class="usa-select" %}
+    <div class="search-container">
+    <div class="distiller-info">
+      <p><a href="https://github.com/18F/FAC-Distiller/" target="_blank">Distiller</a> combines data from <a href="https://beta.sam.gov/" target="_blank">beta.sam.gov</a> and the Federal Audit Clearinghouse to give you quick access to single audit information.</p>
+      <p>Distiller search currently contains only audit year 2019 and 2020. Please let us know if this tool is helpful and we'll work to add previous years.</p>
+        <p>Let us know <a href="mailto:federal-grant-reporting@gsa.gov">federal-grant-reporting@gsa.gov</a>.</p>
+      </div>
+      <div class="grid-container">
+        <form class="centered search-form usa-form usa-form--large">
+          <div class="data-status">
+            <div>
+              FAC search data updated: {{ last_load_job.run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
             </div>
-            <div class="mobile:grid-col-12">
-              {% include 'audit_search/_field.html' with field=form.sub_agency field_class="usa-select" %}
+            <div>
+              FAC documents updated: {{ last_crawl_job.run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
             </div>
-            <div class="mobile:grid-col-12">
-              {% include 'audit_search/_field.html' with field=form.audit_year field_class="usa-select" %}
-            </div>
-            <div class="mobile:grid-col-12">
-              {% include 'audit_search/_field.html' with field=form.start_date field_class="usa-input" input_type="date" %}
-            </div>
-            <div class="mobile:grid-col-12">
-              {% include 'audit_search/_field.html' with field=form.end_date field_class="usa-input" input_type="date" %}
-            </div>
-            <div class="mobile:grid-col-12">
-              <div class="usa-checkbox">
-                <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
-              </div>
-              <div class="usa-checkbox">
-                <input type="checkbox" name="agency_cog_oversight" class="usa-checkbox__input" id="id_agency_cog_oversight" {% if form.agency_cog_oversight.value %}checked{% endif %}>
-                <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Only show audits where parent agency is cognizant/oversight</label>
-              </div>
-            </div>
-            {{ form.page.as_hidden }}
-            {{ form.sort.as_hidden }}
-            {{ form.order.as_hidden }}
-            {{ form.fmt.as_hidden }}
-            <input type="hidden" name="filtering" id="id_filtering" value="">
           </div>
-          <div class="grid-row">
-            <input type="submit" value="Search single audits" class="usa-button" aria-label="Search for single audits">
-          </div>
-        </fieldset>
-      </form>
+          <img class="logo" src="{% static 'img/logo.png' %}" alt="Single Audit Search">
+          <div class="clearfix"></div>
+          {{ form.non_field_errors }}
+          <fieldset class="usa-fieldset">
+            <div class="grid-row grid-gap">
+              <div class="mobile:grid-col-12">
+                {% include 'audit_search/_field.html' with field=form.agency type="select" field_class="usa-select" %}
+              </div>
+              <div class="mobile:grid-col-12">
+                {% include 'audit_search/_field.html' with field=form.sub_agency field_class="usa-select" %}
+              </div>
+              <div class="mobile:grid-col-12">
+                {% include 'audit_search/_field.html' with field=form.audit_year field_class="usa-select" %}
+              </div>
+              <div class="mobile:grid-col-12">
+                {% include 'audit_search/_field.html' with field=form.start_date field_class="usa-input" input_type="date" %}
+              </div>
+              <div class="mobile:grid-col-12">
+                {% include 'audit_search/_field.html' with field=form.end_date field_class="usa-input" input_type="date" %}
+              </div>
+              <div class="mobile:grid-col-12">
+                <div class="usa-checkbox">
+                  <input type="checkbox" name="findings" class="usa-checkbox__input" id="id_findings" {% if form.findings.value %}checked{% endif %}>
+                  <label class="usa-label usa-checkbox__label" for="id_findings">Only show audits with findings</label>
+                </div>
+                <div class="usa-checkbox">
+                  <input type="checkbox" name="agency_cog_oversight" class="usa-checkbox__input" id="id_agency_cog_oversight" {% if form.agency_cog_oversight.value %}checked{% endif %}>
+                  <label class="usa-label usa-checkbox__label" for="id_agency_cog_oversight">Only show audits where parent agency is cognizant/oversight</label>
+                </div>
+              </div>
+              {{ form.page.as_hidden }}
+              {{ form.sort.as_hidden }}
+              {{ form.order.as_hidden }}
+              {{ form.fmt.as_hidden }}
+              <input type="hidden" name="filtering" id="id_filtering" value="">
+            </div>
+            <div class="grid-row">
+              <input type="submit" value="Search single audits" class="usa-button" aria-label="Search for single audits">
+            </div>
+          </fieldset>
+        </form>
+      </div>
     </div>
     {% if page.object_list %}
       <hr>
@@ -206,17 +222,6 @@
       </div>
       <div class="findings-results-page">
         <div class="grid-row padding-top-2">
-          <svg
-            width="2em"
-            height="2em"
-            fill="none"
-            stroke="#005288"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <use xlink:href="{% static 'img/feather-sprite.svg#list' %}"/>
-          </svg>
           <span class="line-height-sans-6 padding-left-2">
             <span id="finding-auditee-name">
               Auditee Name Here
@@ -316,17 +321,6 @@
       {% for result in page.object_list %}
         <div class="auditee-info-page" data-dbkey="{{ result.dbkey }}" data-audit-year="{{ result.audit_year }}">
           <div class="grid-row padding-top-2">
-            <svg
-              width="2em"
-              height="2em"
-              fill="none"
-              stroke="#005288"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <use xlink:href="{% static 'img/feather-sprite.svg#list' %}"/>
-            </svg>
             <span class="line-height-sans-6 padding-left-2">
               <span id="auditee-info-auditee-name">
                 {{ result.auditee_name }}
@@ -578,6 +572,51 @@
       margin: 0 auto;
     }
 
+    .search-container {
+      position: relative;
+      max-width: 72rem;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: block;
+      margin: 0 0 0 auto;
+    }
+    .data-status {
+      float: left;
+      font-size: .6rem;
+      color: gray;
+    }
+    .data-status .loading-error {
+      color: #b50909;
+    }
+
+    .distiller-info {
+      color: #399cbc;
+      margin: 0 auto;
+      max-width: 29em;
+    }
+    @media (min-width: 59rem) {
+      .distiller-info {
+        position: absolute;
+        right: 0;
+        margin: 0;
+        max-width: 13rem;
+      }
+    }
+    @media (min-width: 73rem) {
+      .distiller-info {
+        max-width: 20rem;
+      }
+    }
+    .distiller-info p {
+      margin: 0 0 1em 0;
+      line-height: 1.5em;
+    }
+    .distiller-info a {
+      color: black;
+    }
+
     .finding-min-width {
       min-width: 8em;
     }
@@ -652,7 +691,8 @@
       display: block;
     }
 
-    .show-findings .search-form {
+    .show-findings .search-form,
+    .show-findings .distiller-info {
       display: none;
     }
 

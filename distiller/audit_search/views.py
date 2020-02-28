@@ -4,6 +4,7 @@ Views for audit clearinghouse search interface.
 
 import csv
 import itertools
+from datetime import datetime
 from io import StringIO
 
 from django.core.paginator import Paginator
@@ -11,8 +12,9 @@ from django.http import (
     Http404, HttpResponse, HttpResponseBadRequest, StreamingHttpResponse
 )
 
-from django.shortcuts import render
 import pandas as pd
+from django_apscheduler.models import DjangoJobExecution
+from django.shortcuts import render
 
 from distiller.data.constants import AGENCIES_BY_PREFIX
 from distiller.data.etls import selenium_scraper
@@ -27,6 +29,19 @@ class Echo:
     def write(self, value):
         """Write the value by returning it, instead of storing in a buffer."""
         return value
+
+
+def get_load_status():
+    last_load_job = DjangoJobExecution.objects.filter(
+        job__name='distiller.data.jobs.download_and_update_tables'
+    ).first()
+    last_crawl_job = DjangoJobExecution.objects.filter(
+        job__name='distiller.fac_scraper.jobs.daily_document_crawl'
+    ).first()
+    return {
+        'last_load_job': last_load_job,
+        'last_crawl_job': last_crawl_job,
+    }
 
 
 def single_audit_search(request):
@@ -100,6 +115,9 @@ def single_audit_search(request):
         'form': form,
         'page': page,
         'finding_texts': finding_texts,
+        'table_last_updated': datetime.now(),
+        'table_loading_error': True,
+        **get_load_status(),
     })
 
 EXPORT_COLUMNS = [
