@@ -6,6 +6,11 @@ import json
 
 from .base import *
 
+ADMINS = [
+    ('federal-grant-reporting', 'federal-grant-reporting@gsa.gov'),
+    ('Daniel Naab', 'dnaab@flexion.us'),
+]
+
 SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = bool(os.environ.get('DEBUG'))
@@ -23,6 +28,11 @@ LOGGING = {
         },
     },
     'handlers': {
+        # 'mail_admins': {
+        #     'level': 'ERROR',
+        #     'filters': ['require_debug_false'],
+        #     'class': 'django.utils.log.AdminEmailHandler'
+        # },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',

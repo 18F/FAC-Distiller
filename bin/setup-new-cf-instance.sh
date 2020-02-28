@@ -44,7 +44,7 @@ cf bind-service $APP_NAME ${APP_NAME}-s3
 # note: DEBUG=1 is required to deploy static files
 cf set-env $APP_NAME DEBUG 1
 cf set-env $APP_NAME DISABLE_COLLECTSTATIC 1
-cf set-env $APP_NAME DJANGO_SETTINGS_MODULE: distiller.settings.production
+cf set-env $APP_NAME DJANGO_SETTINGS_MODULE distiller.settings.production
 read -p "Django admin: Enter your email: " email
 cf set-env $APP_NAME DJANGO_SUPERUSER_EMAIL $email
 read -p "Django admin: Enter your username: "  username
