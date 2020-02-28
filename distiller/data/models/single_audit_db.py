@@ -44,24 +44,26 @@ class AuditQuerySet(models.QuerySet):
     def filter_cfda_prefix(self, agency_prefix: str):
         return self.filter(
             cfdas__cfda__program_number__startswith=agency_prefix
-        ).annotate(
-            cfda_award_sum=models.Sum(
-                'cfdas__amount',
-                filter=models.Q(cfdas__cfda__program_number__startswith=agency_prefix),
-                distinct=True,
-            )
         )
+        # .annotate(
+        #     cfda_award_sum=models.Sum(
+        #         'cfdas__amount',
+        #         filter=models.Q(cfdas__cfda__program_number__startswith=agency_prefix),
+        #         distinct=True,
+        #     )
+        # )
 
     def filter_cfda_list(self, cfdas: List[str]):
         return self.filter(
             cfdas__cfda__program_number__in=cfdas
-        ).annotate(
-            cfda_award_sum=models.Sum(
-                'cfdas__amount',
-                filter=models.Q(cfdas__cfda__program_number__in=cfdas),
-                distinct=True,
-            )
         )
+        # .annotate(
+        #     cfda_award_sum=models.Sum(
+        #         'cfdas__amount',
+        #         filter=models.Q(cfdas__cfda__program_number__in=cfdas),
+        #         distinct=True,
+        #     )
+        # )
 
     def filter_cognizant_oversight_agency(self, cog_agency_prefix):
         # Only include results where the parent agency is cognizant.

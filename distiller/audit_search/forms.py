@@ -47,11 +47,11 @@ class AgencySelectionForm(forms.Form):
     )
     start_date = forms.DateField(
         required=False,
-        label='Audit accepted - From'
+        label='Audit accepted date - From'
     )
     end_date = forms.DateField(
         required=False,
-        label='Audit accepted - To'
+        label='Audit accepted date - To'
     )
     page = forms.IntegerField(initial=1, required=False)
     findings = forms.BooleanField(
