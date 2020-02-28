@@ -6,7 +6,6 @@
 
 {% load add_get_parameter %}
 {% load agency_name %}
-{% load cfda_award_sum %}
 
 {% block title %}
   Single Audit Search
@@ -146,7 +145,7 @@
                     {% include './_sorting.html' with current_sort=form.sort.value order=form.order.value column_name='cog_over' column_title='Cog/oversight agency' %}
                   </th>
                   <th scope="col">
-                    Amount expended by parent agency for fiscal year
+                    Total amount expended for fiscal year
                   </th>
                   <th scope="col">
                     Files
@@ -192,7 +191,7 @@
                       {% endif %}
                     </td>
                     <td>
-                      ${{ result.cfda_award_sum | intcomma }}
+                      ${{ result.tot_fed_expend | intcomma }}
                     </td>
                     <td>
                         {% if result.current_documents.form %}
@@ -596,7 +595,7 @@
       margin: 0 auto;
       max-width: 29em;
     }
-    @media (min-width: 59rem) {
+    @media (min-width: 60rem) {
       .distiller-info {
         position: absolute;
         right: 0;
