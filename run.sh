@@ -20,7 +20,7 @@ fi
 python manage.py createsuperuser --noinput || true
 
 # Collect static files
-#python manage.py collectstatic --settings=distiller.settings.production --noinput
+python manage.py collectstatic --settings=distiller.settings.production --noinput
 
 # Run gunicorn wsgi server
 gunicorn -k gevent -w 2 distiller.wsgi:application
