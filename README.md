@@ -1,6 +1,6 @@
 # Distiller
 
-Distiller, provides easier access to audit data. What is a multi-day process for some agencies has been reduced to a few minutes by helping  grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency.
+[Distiller](https://demo-fac-distiller.app.cloud.gov/), provides easier access to audit data. What is a multi-day process for some agencies has been reduced to a few minutes by helping  grant managers sorting through the Federal Audit Clearinghouse to identify the specific audits that they need to know have been completed and confirm if action needs to be taken by themselves or others. This tool is also helpful auditors, agency CFOs as well as grantees to be aware of audit activity happening by federal agency/sub agency.
 
 This codebase spun out of the [10x Federal Grant Reporting Project](https://github.com/18F/federal-grant-reporting/) that is exploring simpler, faster, easier, better resolution of single audit findings by agencies and grantees alike.
 
@@ -11,6 +11,8 @@ This codebase spun out of the [10x Federal Grant Reporting Project](https://gith
 - view only the findings for which your agency/sub-agency is Cognizant or Oversight for and responsible for resolving
 - copy findings text and corrective action plans directly from the Distiller
 - download a csv of your search results so you can process the data further or upload to an agency's case management system
+
+Visit the [Distiller prototype](https://demo-fac-distiller.app.cloud.gov/) 
 
 ### Audit PDF Extraction
 
@@ -26,7 +28,7 @@ See the [corresponding module for more details](https://github.com/18F/FAC-Disti
 
 ## How you can help
 
-Visit the Distller on cloud.gov or test out the Single Audit PDF Extraction module and let us know if it useful or if something isn't working as expected. Email the team at federal-grant-reporting@gsa.gov or [File an issue](https://github.com/18F/FAC-Distiller/issues/new) and assign it to @bpdesigns.
+Visit the [Distiller prototype](https://demo-fac-distiller.app.cloud.gov/) on cloud.gov or test out the Single Audit PDF Extraction module and let us know if it useful or if something isn't working as expected. Email the team at federal-grant-reporting@gsa.gov or [File an issue](https://github.com/18F/FAC-Distiller/issues/new) and assign it to @bpdesigns.
 
 ## Local development
 
