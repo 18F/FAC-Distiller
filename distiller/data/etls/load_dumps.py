@@ -28,6 +28,10 @@ FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
 FAC_PRIOR_YEARS = 1
 
 
+# Register a pipe-delimited CSV dialect.
+csv.register_dialect('piped', delimiter='|', quoting=csv.QUOTE_NONE)
+
+
 def download_table(
     table_name: str,
     target_dir: str,
@@ -180,10 +184,12 @@ def date_fmt(dt):
 
 
 def boolean(b):
+    if not b:
+        return None
     return {
         'Y': True,
         'N': False
-    }.get(b)
+    }.get(b.upper())
 
 
 def _strip_rows(rows):
@@ -193,70 +199,8 @@ def _strip_rows(rows):
         yield row.strip()
 
 
-def parse_fac_csv(csv_file):
-    """
-    Parse a FAC-sources CSV.
-    There are random empty lines in these files, so in addition to using the
-    built-in CSV module, ignore empty lines.
-    """
-    return csv.DictReader(_strip_rows(csv_file))
-
-
-def parse_text_tables_csv(csv_file) -> Generator[Dict[str, Any], None, None]:
-    """
-    The FAC findings and cap text tables includes unescaped, multi-line text
-    which a CSV parser is incapable of extracting. This function uses a regular
-    expression to grab the data, and yields dict-like rows.
-    """
-
-    # Verify the header contains the expected columns
-    first_line = next(csv_file)
-    assert first_line.rstrip() == 'SEQ_NUMBER|DBKEY|AUDITYEAR|FINDINGREFNUMS|TEXT|CHARTSTABLES'
-
-    # Iterate through the remainer of the file, collecting each row into a
-    # dictionary, and yielding them.
-    while True:
-        row = {}
-
-        # Get the first line - expected to look like:
-        #            21,        66846,2019,2019-001
-        try:
-            line = next(csv_file).strip()
-        except StopIteration:
-            break
-
-        # If the expected line isn't found, try going through the loop again.
-        parts = line.split(',')
-        if parts == ['']:
-            continue
-
-        assert len(parts) == 4, 'Unexpected field count'
-
-        row['SEQ_NUMBER'] = parts[0].strip()
-        row['DBKEY'] = parts[1].strip()
-        row['AUDITYEAR'] = parts[2].strip()
-        row['FINDINGREFNUMS'] = parts[3].strip()
-
-        # Accumulate TEXT column lines until the CHARTSTABLES field is found.
-        text_lines = []
-        while True:
-            line = next(csv_file).rstrip()
-
-            # We determine the end of a findings text row by the presence of
-            # the CHARTSTABLES value (Y/N) on its own line.
-            if line in ('N', 'Y'):
-                row['CHARTSTABLES'] = line
-
-                # There's always an empty line at the end of each row; skip it
-                # and process the next row.
-                next(csv_file)
-                break
-
-            text_lines.append(line)
-
-        row['TEXT'] = '\n'.join(text_lines)
-
-        yield row
+def parse_fac_pipe_delimited(in_file):
+    return csv.DictReader(in_file, dialect='piped')
 
 
 def _fac_urls(file_prefix: str):
@@ -335,7 +279,7 @@ FAC_TABLES = {
     'audit': {
         'source_urls': _fac_urls('gen'),
         'model': models.Audit,
-        'file_reader': parse_fac_csv,
+        'file_reader': parse_fac_pipe_delimited,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -434,7 +378,7 @@ FAC_TABLES = {
     'cfda': {
         'source_urls': _fac_urls('cfda'),
         'model': models.CFDA,
-        'file_reader': parse_fac_csv,
+        'file_reader': parse_fac_pipe_delimited,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -480,7 +424,7 @@ FAC_TABLES = {
     'finding': {
         'source_urls': _fac_urls('findings'),
         'model': models.Finding,
-        'file_reader': parse_fac_csv,
+        'file_reader': parse_fac_pipe_delimited,
         'field_mapping': {
             'DBKEY': 'dbkey',
             'AUDITYEAR': 'audit_year',
@@ -512,7 +456,7 @@ FAC_TABLES = {
     'findingtext': {
         'source_urls': _fac_urls('findingstext'),
         'model': models.FindingText,
-        'file_reader': parse_text_tables_csv,
+        'file_reader': parse_fac_pipe_delimited,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',
@@ -528,7 +472,7 @@ FAC_TABLES = {
     'captext': {
         'source_urls': _fac_urls('captext'),
         'model': models.CAPText,
-        'file_reader': parse_text_tables_csv,
+        'file_reader': parse_fac_pipe_delimited,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',
