@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7.5
+        environment:
+          TZ: America/New_York
+          PIPENV_VENV_IN_PROJECT: "TRUE"
+          DATABASE_URL: postgresql://postgres@localhost/distiller_test?sslmode=disable
+      - image: circleci/postgres:12
+        environment:
+          POSTGRES_DB: distiller_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v2-pipenv-{{ checksum "Pipfile.lock" }}
+            - v2-pipenv-
+      - run:
+          name: Setup environment
+          command: |
+            pip install pipenv
+            pipenv install --dev
+      - save_cache:
+          key: v2-pipenv-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ./.venv
+
+  test:
+    docker:
+      - image: circleci/python:3.7.5
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run: pipenv run python manage.py test
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build
+      - test:
+          requires: [build]
