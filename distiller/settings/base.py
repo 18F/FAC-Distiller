@@ -58,8 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.humanize',
 
-    'django_apscheduler',
-    'fontawesome_free',
+    'django_static_fontawesome',
     'localflavor',
     'widget_tweaks',
 

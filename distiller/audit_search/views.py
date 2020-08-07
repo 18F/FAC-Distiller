@@ -13,7 +13,6 @@ from django.http import (
 )
 
 import pandas as pd
-from django_apscheduler.models import DjangoJobExecution
 from django.shortcuts import render
 
 from distiller.data.constants import AGENCIES_BY_PREFIX
@@ -32,17 +31,19 @@ class Echo:
 
 
 def get_load_status():
-    last_load_job = DjangoJobExecution.objects.filter(
-        status=DjangoJobExecution.SUCCESS,
-        job__name='distiller.data.jobs.download_and_update_tables'
-    ).first()
-    last_crawl_job = DjangoJobExecution.objects.filter(
-        status=DjangoJobExecution.SUCCESS,
-        job__name='distiller.fac_scraper.jobs.daily_document_crawl'
-    ).first()
+    # last_load_job = DjangoJobExecution.objects.filter(
+    #     status=DjangoJobExecution.SUCCESS,
+    #     job__name='distiller.data.jobs.download_and_update_tables'
+    # ).first()
+    # last_crawl_job = DjangoJobExecution.objects.filter(
+    #     status=DjangoJobExecution.SUCCESS,
+    #     job__name='distiller.fac_scraper.jobs.daily_document_crawl'
+    # ).first()
+    last_load_job_run_time = None
+    last_crawl_job_run_time = None
     return {
-        'last_load_job': last_load_job,
-        'last_crawl_job': last_crawl_job,
+        'last_load_job_run_time': last_load_job_run_time,
+        'last_load_job_run_time': last_crawl_job_run_time,
     }
 
 

@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.7.5
+      - image: circleci/python:3.7
         environment:
           TZ: America/New_York
           PIPENV_VENV_IN_PROJECT: "TRUE"
@@ -30,12 +30,43 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.7.5
+      - image: circleci/python:3.7
     steps:
       - checkout
       - attach_workspace:
           at: ./
       - run: pipenv run python manage.py test
+
+  update_tables:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: install cf-cli
+          command: |
+            sudo apt-get update
+            sudo apt-get install wget gnupg2 apt-transport-https
+            wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+            echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+            sudo apt-get update
+            sudo apt-get install cf-cli
+      - run:
+          name: run daily update
+          no_output_timeout: 1h
+          command: |
+            if [ -z "$CF_SPACE" ] ; then
+              echo CF_SPACE not set, aborting
+              exit 1
+            fi
+            if [ -z "$CF_ORG" ] ; then
+              echo CF_ORG not set, aborting
+              exit 1
+            fi
+            cf api https://api.fr.cloud.gov
+            cf auth "$CF_USERNAME" "$CF_PASSWORD"
+            cf target -o "$CF_ORG" -s "$CF_SPACE"
+            cf run-task demo-fac-distiller "python manage.py download_table --all && python manage.py load_table --all"
 
 workflows:
   version: 2
@@ -44,3 +75,15 @@ workflows:
       - build
       - test:
           requires: [build]
+
+  nightly:
+    triggers:
+      - schedule:
+          # this should be in the middle of the night for most everybody in the US
+          cron: "45 2 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - update_tables
