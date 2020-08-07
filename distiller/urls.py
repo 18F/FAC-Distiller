@@ -1,11 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
 
-# Register apscheduler jobs
-import distiller.data.jobs
-import distiller.fac_scraper.jobs
-
-
 
 admin.site.site_header = "FAC Distiller Admin"
 admin.site.site_title = "FAC Distiller Admin Portal"

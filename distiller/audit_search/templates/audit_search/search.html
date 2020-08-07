@@ -23,10 +23,10 @@
         <form class="centered search-form usa-form usa-form--large">
           <div class="data-status">
             <div>
-              FAC search data updated: {{ last_load_job.run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
+              FAC search data updated: {{ last_load_job_run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
             </div>
             <div>
-              FAC documents updated: {{ last_crawl_job.run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
+              FAC documents updated: {{ last_crawl_job_run_time | date:"SHORT_DATE_FORMAT" | default:"n/a" }}
             </div>
           </div>
           <img class="logo" src="{% static 'img/logo.png' %}" alt="Single Audit Search">

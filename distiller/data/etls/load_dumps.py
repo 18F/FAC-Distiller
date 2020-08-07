@@ -12,7 +12,6 @@ import os
 import shutil
 import sys
 from datetime import datetime
-from typing import Any, Dict, Generator
 from zipfile import ZipFile
 
 from django.db import connection, transaction
@@ -25,7 +24,7 @@ FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
 
 # In addition to the current year, the number of years to load.
 # Note that 2018 has currently unparsable CFDA CSV.
-FAC_PRIOR_YEARS = 1
+FAC_PRIOR_YEARS = 2
 
 
 # Register a pipe-delimited CSV dialect.
@@ -71,11 +70,11 @@ def download_table(
         # If we can't open, the file probably doesn't exist. This will happen
         # with current audit year table dumps early in the year.
         except files.FileOpenFailure:
-            sys.stdout.write(f'Load failure, skipping...\n')
+            sys.stdout.write('Load failure, skipping...\n')
             sys.stdout.flush()
             continue
 
-        sys.stdout.write(f'Done!\n')
+        sys.stdout.write('Done!\n')
         sys.stdout.flush()
 
 
@@ -109,7 +108,7 @@ def update_table(
     dump_dirs = files.glob(f'{root_dir}/*/')
 
     if not dump_dirs:
-        sys.stdout.write(f'No table dump exists. Exiting...\n')
+        sys.stdout.write('No table dump exists. Exiting...\n')
         sys.stdout.flush()
         return
 
@@ -131,9 +130,10 @@ def update_table(
 def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):
     sanitized_row = {}
     for csv_column_name, model_field_name in field_mapping.items():
-        # These are fixedwidth CSVs, so strip off excess whitespace and handle
-        # NULL values.
-        value = row[csv_column_name].strip() or None
+        # Strip off excess whitespace and handle NULL values.
+        value = row.get(csv_column_name)
+        if value is not None:
+            value = value.strip() or None
         if csv_column_name in sanitizers:
             sanitized_row[model_field_name] = sanitizers[csv_column_name](value)
         else:
@@ -216,7 +216,7 @@ def _fac_urls(file_prefix: str):
 FAC_TABLES = {
     'assistancelisting': {
         'source_urls': [
-            'https://s3.amazonaws.com/falextracts/Assistance%20Listings/datagov/AssistanceListings_DataGov_PUBLIC_CURRENT.csv'
+            'https://s3.amazonaws.com/falextracts/Assistance%20Listings/datagov/AssistanceListings_DataGov_PUBLIC_CURRENT.csv'  # pylint: disable=C0301
         ],
         'model': models.AssistanceListing,
         'file_reader': csv.DictReader,

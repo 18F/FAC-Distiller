@@ -54,3 +54,10 @@ cf set-env $APP_NAME DJANGO_SUPERUSER_PASSWORD $password
 cf set-env $APP_NAME SECRET_KEY $SECRETKEY
 cf restage $APP_NAME
 cf start $APP_NAME
+if service_exists "${APP_NAME}-deployer" ; then
+  echo ${APP_NAME}-deployer already created
+else
+  cf create-service cloud-gov-service-account space-deployer ${APP_NAME}
+  cf create-service-key ${APP_NAME} deployer
+  echo "to get the CF_USERNAME and CF_PASSWORD, execute 'cf service-key ${APP_NAME} deployer'"
+fi

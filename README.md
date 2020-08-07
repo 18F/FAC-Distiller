@@ -5,14 +5,14 @@
 This codebase spun out of the [10x Federal Grant Reporting Project](https://github.com/18F/federal-grant-reporting/) that is exploring simpler, faster, easier, better resolution of single audit findings by agencies and grantees alike.
 
 **Features of the Distiller:**
-- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies 
+- quickly match Assistance Listings (CFDA#s) from beta.sam.gov to parent and sub-agencies
 - filter by agency/sub-agency, audits with findings, cognizant and oversight agencies and findings by agency filter
 - sort by grantee name, # of findings, Fiscal year end,	Audit accepted date, name of	Cognizant or Oversight agency and whether or not an audit has	Questioned costs
 - view only the findings for which your agency/sub-agency is Cognizant or Oversight for and responsible for resolving
 - copy findings text and corrective action plans directly from the Distiller
 - download a csv of your search results so you can process the data further or upload to an agency's case management system
 
-Visit the [Distiller prototype](https://demo-fac-distiller.app.cloud.gov/) 
+Visit the [Distiller prototype](https://demo-fac-distiller.app.cloud.gov/)
 
 ### Audit PDF Extraction
 
@@ -169,7 +169,7 @@ pipenv run scrapy crawl fac -a cfda=11.123 -t json -o test.json
 There is a script checked into the repository that will assist in refreshing a subset of CFDA prefices on a cloud.gov deployment. To run as a one-off task:
 
 ```
-cf run-task fac-distiller "/home/vcap/app/bin/crawl"
+cf run-task demo-fac-distiller "/home/vcap/app/bin/crawl"
 ```
 
 ## Deployment to cloud.gov
