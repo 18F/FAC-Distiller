@@ -72,6 +72,7 @@ workflows:
   commit:
     jobs:
       - build
+      - update_tables
 
   nightly:
     triggers:
