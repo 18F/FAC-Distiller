@@ -30,7 +30,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            pipenv run python manage.py test
+            pipenv run pytest
 
   update_tables:
     docker:
