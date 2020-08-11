@@ -3,9 +3,9 @@ asgiref==3.2.10
 attrs==19.3.0
 automat==20.2.0
 blis==0.4.1
-boto3==1.14.35
+boto3==1.14.37
 boto==2.49.0
-botocore==1.17.35
+botocore==1.17.37
 catalogue==1.0.0
 certifi==2020.6.20
 cffi==1.14.1
@@ -27,12 +27,12 @@ gevent==20.6.2
 greenlet==0.4.16 ; platform_python_implementation == 'CPython'
 gunicorn[gevent]==20.0.4
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz#egg=en-core-web-sm
-hyperlink==20.0.0
+hyperlink==20.0.1
 idna==2.10
 importlib-metadata==1.7.0 ; python_version < '3.8'
 incremental==17.5.0
 itemadapter==0.1.0
-itemloaders==1.0.1
+itemloaders==1.0.2
 jmespath==0.10.0
 lxml==4.5.2 ; platform_python_implementation == 'CPython'
 murmurhash==1.0.2
@@ -58,13 +58,13 @@ pytz==2020.1
 queuelib==1.5.0
 requests==2.24.0
 roman==3.3
-s3fs==0.4.2
+s3fs==0.4.0
 s3transfer==0.3.3
 scrapy==2.3.0
 selenium==3.141.0
 service-identity==18.1.0
 six==1.15.0
-smart-open==2.1.0
+smart-open==1.9.0
 sortedcontainers==2.2.2
 spacy-lookup==0.1.0
 spacy==2.3.2
@@ -73,7 +73,6 @@ srsly==1.0.2
 thinc==7.4.1
 tqdm==4.48.2
 twisted==20.3.0
-typing==3.7.4.3
 urllib3==1.25.10 ; python_version != '3.4'
 w3lib==1.22.0
 wasabi==0.7.1
