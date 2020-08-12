@@ -31,19 +31,11 @@ class Echo:
 
 
 def get_load_status():
-    # last_load_job = DjangoJobExecution.objects.filter(
-    #     status=DjangoJobExecution.SUCCESS,
-    #     job__name='distiller.data.jobs.download_and_update_tables'
-    # ).first()
-    # last_crawl_job = DjangoJobExecution.objects.filter(
-    #     status=DjangoJobExecution.SUCCESS,
-    #     job__name='distiller.fac_scraper.jobs.daily_document_crawl'
-    # ).first()
-    last_load_job_run_time = None
-    last_crawl_job_run_time = None
+    last_load = models.ETLLog.objects.get_most_recent_load_table()
+    last_crawl = models.ETLLog.objects.get_most_recent_document_crawl()
     return {
-        'last_load_job_run_time': last_load_job_run_time,
-        'last_load_job_run_time': last_crawl_job_run_time,
+        'last_load_job_run_time': last_load.created if last_load else None,
+        'last_crawl_job_run_time': last_crawl.created if last_crawl else None,
     }
 
 

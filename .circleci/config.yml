@@ -19,7 +19,7 @@ jobs:
             - v2-pipenv-{{ checksum "Pipfile.lock" }}
             - v2-pipenv-
       - run:
-          name: Setup environment
+          name: install dependencies
           command: |
             pip install pipenv
             pipenv install --dev
@@ -27,15 +27,10 @@ jobs:
           key: v2-pipenv-{{ checksum "Pipfile.lock" }}
           paths:
             - ./.venv
-
-  test:
-    docker:
-      - image: circleci/python:3.7
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run: pipenv run python manage.py test
+      - run:
+          name: run tests
+          command: |
+            pipenv run pytest
 
   update_tables:
     docker:
@@ -66,15 +61,17 @@ jobs:
             cf api https://api.fr.cloud.gov
             cf auth "$CF_USERNAME" "$CF_PASSWORD"
             cf target -o "$CF_ORG" -s "$CF_SPACE"
-            cf run-task demo-fac-distiller "python manage.py download_table --all && python manage.py load_table --all"
+            cf run-task demo-fac-distiller -m 2G "python manage.py download_table --all --log && python manage.py load_table --all --log"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
 
 workflows:
   version: 2
   commit:
     jobs:
       - build
-      - test:
-          requires: [build]
 
   nightly:
     triggers:
@@ -84,6 +81,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - update_tables

@@ -9,7 +9,6 @@ from typing import cast, Any, IO, List, Optional
 from urllib.parse import urlparse
 
 import boto3
-import requests
 import s3fs
 import smart_open
 from django.conf import settings

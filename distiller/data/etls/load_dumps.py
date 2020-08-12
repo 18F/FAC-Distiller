@@ -34,6 +34,7 @@ csv.register_dialect('piped', delimiter='|', quoting=csv.QUOTE_NONE)
 def download_table(
     table_name: str,
     target_dir: str,
+    log_to_db: bool = False,
 ) -> None:
     """
     Download given table to specified location. Target files will be in the
@@ -77,6 +78,8 @@ def download_table(
         sys.stdout.write('Done!\n')
         sys.stdout.flush()
 
+    if log_to_db:
+        models.ETLLog.objects.log_download_table(table_name)
 
 @transaction.atomic
 def update_table(
@@ -84,6 +87,7 @@ def update_table(
     source_dir: str,
     delete_existing: bool = True,
     batch_size: int = 1_000,
+    log_to_db: bool = False,
 ) -> None:
     """
     Get the Distiller's database in sync with the latest from the Single Audit
@@ -125,6 +129,9 @@ def update_table(
             )
 
     sys.stdout.write('Done!\n')
+
+    if log_to_db:
+        models.ETLLog.objects.log_load_table(table_name)
 
 
 def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):

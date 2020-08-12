@@ -1,7 +1,6 @@
 import json
 
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 
 from compositefk.fields import CompositeForeignKey
 
@@ -47,8 +46,8 @@ class PDFExtract(models.Model):
         max_length=100,
         help_text='Findings Reference Numbers'
     )
-    finding_text = JSONField(help_text='Extracted PDF finding')
-    cap_text = JSONField(help_text='Extracted PDF corrective action plan')
+    finding_text = models.JSONField(help_text='Extracted PDF finding')
+    cap_text = models.JSONField(help_text='Extracted PDF corrective action plan')
     last_updated = models.DateField(help_text='Last Updated')
 
     def __str__(self):
