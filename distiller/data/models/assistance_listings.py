@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 
 
 class AssistanceListingManager(models.Manager):
@@ -41,7 +40,7 @@ class AssistanceListing(models.Model):
         null=True,
     )
     federal_agency = models.TextField(help_text='Federal Agency (030)')
-    authorization = JSONField(help_text='Authorization (040)')
+    authorization = models.JSONField(help_text='Authorization (040)')
     objectives = models.TextField(help_text='Objectives (050)')
     assistance_types = models.TextField(
         help_text='Types of Assistance (060)'
@@ -55,32 +54,32 @@ class AssistanceListing(models.Model):
     beneficiary_eligibility = models.TextField(
         help_text='Beneficiary Eligibility (082)'
     )
-    credentials_documentation = JSONField(
+    credentials_documentation = models.JSONField(
         help_text='Credentials/Documentation (083)'
     )
-    preapplication_coordination = JSONField(
+    preapplication_coordination = models.JSONField(
         help_text='Preapplication Coordination (091)'
     )
-    application_procedures = JSONField(
+    application_procedures = models.JSONField(
         help_text='Application Procedures (092)'
     )
     award_procedure = models.TextField(
         help_text='Award Procedure (093)')
-    deadlines = JSONField(help_text='Deadlines (094)')
+    deadlines = models.JSONField(help_text='Deadlines (094)')
     approval_time = models.TextField(
         help_text='Range of Approval/Disapproval Time (095)'
     )
     appeals = models.TextField(help_text='Appeals (096)')
     renewals = models.TextField(help_text='Renewals (097)')
-    requirements = JSONField(
+    requirements = models.JSONField(
         help_text='Formula and Matching Requirements (101)'
     )
-    assistance_period = JSONField(
+    assistance_period = models.JSONField(
         help_text='Length and Time Phasing of Assistance (102)',
         null=True
     )
-    reports = JSONField(help_text='Reports (111)')
-    audits = JSONField(help_text='Audits (112)')
+    reports = models.JSONField(help_text='Reports (111)')
+    audits = models.JSONField(help_text='Audits (112)')
     records = models.TextField(
         help_text='Records (113)',
         blank=True,
@@ -95,13 +94,13 @@ class AssistanceListing(models.Model):
         blank=True,
         null=True,
     )
-    program_accomplishments = JSONField(
+    program_accomplishments = models.JSONField(
         help_text='Program Accomplishments (130)'
     )
     regulations = models.TextField(
         help_text='Regulations, Guidelines, and Literature (140)'
     )
-    regional_local_office = JSONField(
+    regional_local_office = models.JSONField(
         help_text='Regional or Local Office (151)'
     )
     headquarters_office = models.TextField(

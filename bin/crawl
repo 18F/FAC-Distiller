@@ -23,11 +23,13 @@ UTC_DATE_NOW=`TZ=UTC date`
 DIR_NAME=${1:-${UTC_DATE_NOW}}
 
 # Crawl documents for each CFDA agency prefix.
-# NOTE: Currently, this will limit the crawl to all 2019 documents.
+# NOTE: Currently, this will limit the crawl to all 2018-2020 documents.
 for AGENCY_PREFIX in `seq -w 1 0.1 99.9`
 do
     echo "Crawling CFDA prefix ${AGENCY_PREFIX}"
-    scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
+    #scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2018 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
+    #scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2019 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
+    scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2020 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
 done
 
 # Load crawled documents into the database

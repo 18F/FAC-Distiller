@@ -50,6 +50,11 @@ class PDFExtractAdmin(admin.ModelAdmin):
     )
 
 
+class ETLLogAdmin(admin.ModelAdmin):
+    list_display = (
+        'created', 'operation', 'target'
+    )
+
 
 admin.site.register(models.AssistanceListing, AssistanceListingAdmin)
 admin.site.register(models.Audit, AuditAdmin)
@@ -58,3 +63,4 @@ admin.site.register(models.Finding, FindingAdmin)
 admin.site.register(models.FindingText, FindingTextAdmin)
 admin.site.register(models.CAPText, CAPTextAdmin)
 admin.site.register(models.PDFExtract, PDFExtractAdmin)
+admin.site.register(models.ETLLog, ETLLogAdmin)

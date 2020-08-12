@@ -28,6 +28,11 @@ class Command(BaseCommand):
                 action='store_true',
                 help=f'Load {table} FAC table',
             )
+        parser.add_argument(
+            '--log',
+            action='store_true',
+            help='Log to database',
+        )
 
     def handle(self, *args, **options):
         for table in load_dumps.FAC_TABLES_NAMES:
@@ -37,4 +42,5 @@ class Command(BaseCommand):
                 load_dumps.update_table(
                     table,
                     source_dir=settings.LOAD_TABLE_ROOT,
+                    log_to_db=options['log'],
                 )

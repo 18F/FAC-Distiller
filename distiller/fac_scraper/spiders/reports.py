@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from datetime import datetime
 
 from django.conf import settings
 from scrapy import FormRequest, Spider
@@ -26,6 +27,7 @@ class FACSpider(Spider):
         self,
         *args,
         cfda=None,
+        audit_year=None,
         open_pages=False,
         **kwargs
     ):
@@ -52,6 +54,8 @@ class FACSpider(Spider):
 
         wild = not (ext and len(ext) == 3)
 
+        self.audit_year = audit_year or datetime.now().year
+
         self.cfda_options = [{
             # Treat all queries as wildcards, with
             "Prefix": prefix,
@@ -77,7 +81,7 @@ class FACSpider(Spider):
 
                 # Audit year(s):
                 #"ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$2": "2018",
-                "ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$1": "2019",
+                "ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$1": str(self.audit_year),
 
                 # Date range:
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$FromDate': '09/01/2019',
