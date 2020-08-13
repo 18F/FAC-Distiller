@@ -1,7 +1,7 @@
 """
-This module contains a Django management command to extract
-findings, corrective action plans, and keywords from uploaded PDFs in
-S3.
+This module contains a Django management command to print CFDA prefixes for FAC
+audits. This utility is intended to be used by the `/bin/crawl` script, so we
+can target Scrapy crawls to prefixes that have actual audits in the database.
 """
 
 import re
