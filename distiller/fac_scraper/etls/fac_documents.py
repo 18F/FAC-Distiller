@@ -8,6 +8,7 @@ from datetime import datetime
 
 from django.db import transaction
 
+from distiller.data.models import ETLLog
 from ...gateways import files
 from .. import models
 
@@ -39,7 +40,8 @@ def load_fac_csvs(
     # Clear the target table before loading
     reload: bool = False,
     # Number of rows to INSERT per batch
-    batch_size: int = 1_000
+    batch_size: int = 1_000,
+    log_to_db: bool = False,
 ):
     """
     Load all CSVs in `source_dir` to FacDocument.
@@ -55,3 +57,6 @@ def load_fac_csvs(
                 _yield_documents(csv.DictReader(csv_file)),
                 batch_size=batch_size
             )
+
+    if log_to_db:
+        ETLLog.objects.log_fac_document_crawl(source_dir)

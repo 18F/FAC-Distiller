@@ -120,7 +120,7 @@ def update_table(
 
     file_paths = files.glob(os.path.join(most_recent_dump_dir, '*'))
     for file_path in file_paths:
-        sys.stdout.write(f'\tImporting {file_path}...')
+        sys.stdout.write(f'\tImporting {file_path}...\n')
         sys.stdout.flush()
         with files.input_file(file_path, encoding='latin-1') as csv_file:
             table["model"].objects.bulk_create(
