@@ -46,11 +46,11 @@ class FACSpider(Spider):
 
         prefix = parts[0]
         if len(prefix) != 2:
-            raise ValueError('CFDA prefix should be two digits')
+            raise ValueError(f'CFDA "{cfda}" prefix "{prefix}" should be two digits')
 
         ext = parts[1] if len(parts) > 1 else None
         if ext and len(ext) > 3:
-            raise ValueError('CFDA suffix should be no more than three digits')
+            raise ValueError('CFDA "{cfda}" suffix "{ext}" should be no more than three digits')
 
         wild = not (ext and len(ext) == 3)
 

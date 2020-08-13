@@ -25,7 +25,9 @@ DIR_NAME=${1:-${UTC_DATE_NOW}}
 # Crawl documents for each CFDA agency prefix from $START_YEAR to the present.
 CUR_YEAR=`date +"%Y"`
 START_YEAR=2013
-for AGENCY_PREFIX in `seq -w 1 0.1 99.9`
+#AGENCY_PREFIXES=`seq -w 1 0.1 99.9`
+AGENCY_PREFIXES=`python manage.py print_agency_prefixes`
+for AGENCY_PREFIX in ${AGENCY_PREFIXES}
 do
     for YEAR in `seq ${START_YEAR} 1 ${CUR_YEAR}`
     do
