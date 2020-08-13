@@ -19,7 +19,7 @@ export AWS_DEFAULT_REGION=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.reg
 export S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
 
 # Put Scrapy metadata files in a timestamped directory.
-UTC_DATE_NOW=`TZ=UTC date`
+UTC_DATE_NOW=`TZ=UTC date +%FT%TZ`
 DIR_NAME=${1:-${UTC_DATE_NOW}}
 
 # Crawl documents for each CFDA agency prefix from $START_YEAR to the present.

@@ -14,7 +14,7 @@ from ..items import FacSearchResultDocument
 
 class FACSpider(Spider):
     name = 'fac'
-    start_urls = ['https://harvester.census.gov/facdissem/SearchA133.aspx']
+    start_urls = ['https://facdissem.census.gov/SearchA133.aspx']
 
     # Set `download_delay` to specify a period, in seconds, to wait between
     # HTTP request.
@@ -70,7 +70,9 @@ class FACSpider(Spider):
         }]
 
     def parse(self, response):
-        # TODO: Determine how to parametize audit year and date ranges.
+        year_input_name = response.css(
+            f'#MainContent_UcSearchFilters_FYear_CheckableItems input[value="{self.audit_year}"]'
+        ).xpath('@name').extract()[0]
         return FormRequest.from_response(
             response,
             formdata={
@@ -80,8 +82,8 @@ class FACSpider(Spider):
                 "ctl00$MainContent$UcSearchFilters$AuditorEINs": "",
 
                 # Audit year(s):
-                #"ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$2": "2018",
-                "ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$1": str(self.audit_year),
+                #"ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$2": "2020",
+                year_input_name: str(self.audit_year),
 
                 # Date range:
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$FromDate': '09/01/2019',
