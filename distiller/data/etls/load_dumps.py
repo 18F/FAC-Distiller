@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 import sys
+from collections import namedtuple
 from datetime import datetime
 from zipfile import ZipFile
 
@@ -21,15 +22,37 @@ from ...gateways import files
 
 
 FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
-
-# In addition to the current year, the number of years to load.
-# Note that 2018 has currently unparsable CFDA CSV.
-FAC_PRIOR_YEARS = 2
+FAC_START_YEAR = 2013
 
 
 # Register a pipe-delimited CSV dialect.
 csv.register_dialect('piped', delimiter='|', quoting=csv.QUOTE_NONE)
 
+
+def iterate_piped_csv(in_file):
+    """
+    Iterator for rows in a CSV, yielding dict-like subscriptable namedtuples.
+    """
+
+    reader = csv.reader(in_file, dialect='piped')
+    try:
+        header_row = next(reader)
+    except StopIteration:
+        return
+
+    Row = namedtuple('Row', header_row)
+
+    success_count = 0
+    ignore_count = 0
+    for data in reader:
+        try:
+            yield Row(*data)
+            success_count += 1
+        except TypeError:
+            #print('Ignoring row', data)
+            ignore_count += 1
+
+    print(f'Done iterating rows. Yielded {success_count}, ignored {ignore_count}')
 
 def download_table(
     table_name: str,
@@ -138,9 +161,16 @@ def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):
     sanitized_row = {}
     for csv_column_name, model_field_name in field_mapping.items():
         # Strip off excess whitespace and handle NULL values.
-        value = row.get(csv_column_name)
+
+        # Try attribute lookup first, then dict-like lookup
+        try:
+            value = getattr(row, csv_column_name)
+        except:
+            value = row.get(csv_column_name)
+
         if value is not None:
             value = value.strip() or None
+
         if csv_column_name in sanitizers:
             sanitized_row[model_field_name] = sanitizers[csv_column_name](value)
         else:
@@ -215,9 +245,8 @@ def _fac_urls(file_prefix: str):
     this_year = datetime.now().year
     return [
         os.path.join(FAC_ROOT_URL, f'{file_prefix}{year % 100:02d}.zip')
-        for year in range(this_year, this_year - FAC_PRIOR_YEARS - 1, -1)
+        for year in range(this_year, FAC_START_YEAR - 1, -1)
     ]
-
 
 
 FAC_TABLES = {
@@ -286,7 +315,7 @@ FAC_TABLES = {
     'audit': {
         'source_urls': _fac_urls('gen'),
         'model': models.Audit,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -385,7 +414,7 @@ FAC_TABLES = {
     'cfda': {
         'source_urls': _fac_urls('cfda'),
         'model': models.CFDA,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -431,7 +460,7 @@ FAC_TABLES = {
     'finding': {
         'source_urls': _fac_urls('findings'),
         'model': models.Finding,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'DBKEY': 'dbkey',
             'AUDITYEAR': 'audit_year',
@@ -463,7 +492,7 @@ FAC_TABLES = {
     'findingtext': {
         'source_urls': _fac_urls('findingstext'),
         'model': models.FindingText,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',
@@ -479,7 +508,7 @@ FAC_TABLES = {
     'captext': {
         'source_urls': _fac_urls('captext'),
         'model': models.CAPText,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',

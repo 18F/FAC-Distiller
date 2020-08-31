@@ -11,7 +11,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from distiller.data import constants
-from distiller.data.etls.load_dumps import FAC_PRIOR_YEARS
+from distiller.data.etls.load_dumps import FAC_START_YEAR
 from distiller.data.models import AssistanceListing
 
 
@@ -41,7 +41,7 @@ class AgencySelectionForm(forms.Form):
     audit_year = forms.ChoiceField(
         choices=lambda: (('', ''),) + tuple(
             (year, year)
-            for year in range(datetime.now().year, datetime.now().year - FAC_PRIOR_YEARS - 1, -1)
+            for year in range(datetime.now().year, FAC_START_YEAR, -1)
         ),
         required=False
     )
