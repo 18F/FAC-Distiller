@@ -11,6 +11,7 @@ import json
 import os
 import shutil
 import sys
+from collections import namedtuple
 from datetime import datetime
 from zipfile import ZipFile
 
@@ -21,15 +22,38 @@ from ...gateways import files
 
 
 FAC_ROOT_URL = 'https://www2.census.gov/pub/outgoing/govs/singleaudit'
-
-# In addition to the current year, the number of years to load.
-# Note that 2018 has currently unparsable CFDA CSV.
-FAC_PRIOR_YEARS = 2
+FAC_START_YEAR = 2013
 
 
 # Register a pipe-delimited CSV dialect.
-csv.register_dialect('piped', delimiter='|', quoting=csv.QUOTE_NONE)
+csv.register_dialect('piped', delimiter='|', quoting=csv.QUOTE_NONE, lineterminator='\r\n')
 
+
+def iterate_piped_csv(in_file):
+    """
+    Iterator for rows in a CSV, yielding dict-like subscriptable namedtuples.
+    """
+
+    reader = csv.reader(in_file, dialect='piped')
+
+    try:
+        header_row = next(reader)
+    except StopIteration:
+        return
+
+    Row = namedtuple('Row', header_row)
+
+    success_count = 0
+    ignore_count = 0
+    for data in reader:
+        try:
+            yield Row(*data)
+            success_count += 1
+        except TypeError:
+            print('Ignoring row', data)
+            ignore_count += 1
+
+    print(f'Done iterating rows. Yielded {success_count}, ignored {ignore_count}')
 
 def download_table(
     table_name: str,
@@ -120,9 +144,24 @@ def update_table(
 
     file_paths = files.glob(os.path.join(most_recent_dump_dir, '*'))
     for file_path in file_paths:
-        sys.stdout.write(f'\tImporting {file_path}...')
+        sys.stdout.write(f'\tImporting {file_path}...\n')
         sys.stdout.flush()
-        with files.input_file(file_path, encoding='latin-1') as csv_file:
+
+        with files.input_file(file_path, mode='r', encoding='latin-1') as csv_file:
+            # This is very much less than ideal, because it would be preferable
+            # to rely on smart_open's ability to stream a file object, as it's
+            # read, over the network.
+            #
+            # However, some files (CFDA tables) have unusual character encoding
+            # problems when streamed. As a result, we will load the entire file
+            # into memory, and then process it after.
+            #
+            # NOTE: This appears to be because the FAC files have characters in
+            # multiple character encodings, and smart_open doesn't handle such
+            # files correctly in some circumstances.
+            file_bytes = csv_file.read()
+            csv_file = io.StringIO(file_bytes)
+
             table["model"].objects.bulk_create(
                 _yield_model_instances(csv_file, **table),
                 batch_size=batch_size
@@ -138,9 +177,16 @@ def _sanitize_row(row, *, field_mapping, sanitizers, **_kwargs):
     sanitized_row = {}
     for csv_column_name, model_field_name in field_mapping.items():
         # Strip off excess whitespace and handle NULL values.
-        value = row.get(csv_column_name)
-        if value is not None:
+
+        # Try attribute lookup first, then dict-like lookup
+        try:
+            value = getattr(row, csv_column_name)
+        except:
+            value = row.get(csv_column_name)
+
+        if type(value) == str:
             value = value.strip() or None
+
         if csv_column_name in sanitizers:
             sanitized_row[model_field_name] = sanitizers[csv_column_name](value)
         else:
@@ -191,12 +237,11 @@ def date_fmt(dt):
 
 
 def boolean(b):
-    if not b:
-        return None
-    return {
-        'Y': True,
-        'N': False
-    }.get(b.upper())
+    if b in ('Y', 'y'):
+        return True
+    if b in ('N', 'n'):
+        return False
+    return None
 
 
 def _strip_rows(rows):
@@ -215,9 +260,8 @@ def _fac_urls(file_prefix: str):
     this_year = datetime.now().year
     return [
         os.path.join(FAC_ROOT_URL, f'{file_prefix}{year % 100:02d}.zip')
-        for year in range(this_year, this_year - FAC_PRIOR_YEARS - 1, -1)
+        for year in range(this_year, FAC_START_YEAR - 1, -1)
     ]
-
 
 
 FAC_TABLES = {
@@ -286,7 +330,7 @@ FAC_TABLES = {
     'audit': {
         'source_urls': _fac_urls('gen'),
         'model': models.Audit,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -385,7 +429,7 @@ FAC_TABLES = {
     'cfda': {
         'source_urls': _fac_urls('cfda'),
         'model': models.CFDA,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'AUDITYEAR': 'audit_year',
             'DBKEY': 'dbkey',
@@ -393,9 +437,6 @@ FAC_TABLES = {
             'CFDA': 'cfda_id',
             'AWARDIDENTIFICATION': 'award_identification',
             'RD': 'r_and_d',
-            'LOANS': 'loans',
-            'LOANBALANCE': 'loan_balance',
-            'ARRA': 'arra',
             'FEDERALPROGRAMNAME': 'federal_program_name',
             'AMOUNT': 'amount',
             'CLUSTERNAME': 'cluster_name',
@@ -407,16 +448,17 @@ FAC_TABLES = {
             'PASSTHROUGHAMOUNT': 'pass_through_amount',
             'MAJORPROGRAM': 'major_program',
             'TYPEREPORT_MP': 'type_report_mp',
+            'TYPEREQUIREMENT': 'type_requirement',
             'QCOSTS2': 'qcosts2',
             'FINDINGS': 'findings',
-            'TYPEREQUIREMENT': 'type_requirement',
             'FINDINGREFNUMS': 'finding_ref_nums',
+            'ARRA': 'arra',
+            'LOANS': 'loans',
+            'LOANBALANCE': 'loan_balance',
             'FINDINGSCOUNT': 'findings_count',
             'ELECAUDITSID': 'elec_audits_id',
-
-            # These columns are not in 2019 exports:
-            # 'OTHERCLUSTERNAME': 'other_cluster_name',
-            # 'CFDAPROGRAMNAME': 'cfda_program_name',
+            'OTHERCLUSTERNAME': 'other_cluster_name',
+            'CFDAPROGRAMNAME': 'cfda_program_name',
         },
         'sanitizers': {
             'RD': boolean,
@@ -431,7 +473,7 @@ FAC_TABLES = {
     'finding': {
         'source_urls': _fac_urls('findings'),
         'model': models.Finding,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'DBKEY': 'dbkey',
             'AUDITYEAR': 'audit_year',
@@ -463,7 +505,7 @@ FAC_TABLES = {
     'findingtext': {
         'source_urls': _fac_urls('findingstext'),
         'model': models.FindingText,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',
@@ -479,7 +521,7 @@ FAC_TABLES = {
     'captext': {
         'source_urls': _fac_urls('captext'),
         'model': models.CAPText,
-        'file_reader': parse_fac_pipe_delimited,
+        'file_reader': iterate_piped_csv,
         'field_mapping': {
             'SEQ_NUMBER': 'seq_number',
             'DBKEY': 'dbkey',

@@ -25,6 +25,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Clear table before loading',
         )
+        parser.add_argument(
+            '--log',
+            action='store_true',
+            help='Log to database',
+        )
 
     def handle(self, *args, **options):
         sys.stdout.write(f'Loading files from "{options["load_dir"]}"...\n')
@@ -32,4 +37,5 @@ class Command(BaseCommand):
         fac_documents.load_fac_csvs(
             source_dir=os.path.join(settings.FAC_CRAWL_ROOT, options['load_dir']),
             reload=options['reload'],
+            log_to_db=options['log'],
         )

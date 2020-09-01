@@ -14,7 +14,7 @@ from ..items import FacSearchResultDocument
 
 class FACSpider(Spider):
     name = 'fac'
-    start_urls = ['https://harvester.census.gov/facdissem/SearchA133.aspx']
+    start_urls = ['https://facdissem.census.gov/SearchA133.aspx']
 
     # Set `download_delay` to specify a period, in seconds, to wait between
     # HTTP request.
@@ -46,11 +46,11 @@ class FACSpider(Spider):
 
         prefix = parts[0]
         if len(prefix) != 2:
-            raise ValueError('CFDA prefix should be two digits')
+            raise ValueError(f'CFDA "{cfda}" prefix "{prefix}" should be two digits')
 
         ext = parts[1] if len(parts) > 1 else None
         if ext and len(ext) > 3:
-            raise ValueError('CFDA suffix should be no more than three digits')
+            raise ValueError('CFDA "{cfda}" suffix "{ext}" should be no more than three digits')
 
         wild = not (ext and len(ext) == 3)
 
@@ -70,7 +70,9 @@ class FACSpider(Spider):
         }]
 
     def parse(self, response):
-        # TODO: Determine how to parametize audit year and date ranges.
+        year_input_name = response.css(
+            f'#MainContent_UcSearchFilters_FYear_CheckableItems input[value="{self.audit_year}"]'
+        ).xpath('@name').extract()[0]
         return FormRequest.from_response(
             response,
             formdata={
@@ -80,8 +82,8 @@ class FACSpider(Spider):
                 "ctl00$MainContent$UcSearchFilters$AuditorEINs": "",
 
                 # Audit year(s):
-                #"ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$2": "2018",
-                "ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$1": str(self.audit_year),
+                #"ctl00$MainContent$UcSearchFilters$FYear$CheckableItems$2": "2020",
+                year_input_name: str(self.audit_year),
 
                 # Date range:
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$FromDate': '09/01/2019',

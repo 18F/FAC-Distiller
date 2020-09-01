@@ -28,7 +28,7 @@ def _get_boto3_session():
 
 
 def _open(
-    scheme: str, path: str, mode: str, encoding: Optional[str] = None
+    scheme: str, path: str, mode: str, encoding: Optional[str] = None, **kwargs
 ) -> IO[Any]:
     transport_params = None
 
@@ -43,11 +43,12 @@ def _open(
         mode,
         encoding=encoding,
         transport_params=transport_params,
+        **kwargs,
     ))
 
 
 def input_file(
-    path: str, mode: str = 'r', encoding: Optional[str] = None
+    path: str, mode: str = 'r', encoding: Optional[str] = None, **kwargs
 ) -> IO[Any]:
 
     """
@@ -58,7 +59,7 @@ def input_file(
     url = urlparse(path)
 
     try:
-        return _open(url.scheme, path, mode, encoding=encoding)
+        return _open(url.scheme, path, mode, encoding=encoding, **kwargs)
     except Exception as e:
         raise FileOpenFailure(f'Load failure: {path} with error {e}')
 

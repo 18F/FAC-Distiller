@@ -19,21 +19,25 @@ export AWS_DEFAULT_REGION=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.reg
 export S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
 
 # Put Scrapy metadata files in a timestamped directory.
-UTC_DATE_NOW=`TZ=UTC date`
+UTC_DATE_NOW=`TZ=UTC date +%FT%TZ`
 DIR_NAME=${1:-${UTC_DATE_NOW}}
 
-# Crawl documents for each CFDA agency prefix.
-# NOTE: Currently, this will limit the crawl to all 2018-2020 documents.
-for AGENCY_PREFIX in `seq -w 1 0.1 99.9`
+# Crawl documents for each CFDA agency prefix from $START_YEAR to the present.
+CUR_YEAR=`date +"%Y"`
+START_YEAR=2013
+#AGENCY_PREFIXES=`seq -w 1 0.1 99.9`
+AGENCY_PREFIXES=`python manage.py print_agency_prefixes`
+for AGENCY_PREFIX in ${AGENCY_PREFIXES}
 do
-    echo "Crawling CFDA prefix ${AGENCY_PREFIX}"
-    #scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2018 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
-    #scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2019 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
-    scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=2020 -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}.csv"
+    for YEAR in `seq ${START_YEAR} 1 ${CUR_YEAR}`
+    do
+        echo "Crawling CFDA prefix ${AGENCY_PREFIX} for year ${YEAR}"
+        scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv"
+    done
 done
 
 # Load crawled documents into the database
 echo "Loading crawled documents"
-python manage.py load_fac_documents --reload --load-dir "${DIR_NAME}"
+python manage.py load_fac_documents --reload --load-dir "${DIR_NAME}" --log
 
 echo "Done loading documents!"

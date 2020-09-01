@@ -8,7 +8,7 @@ SPIDER_MODULES = ['distiller.fac_scraper.spiders']
 NEWSPIDER_MODULE = 'distiller.fac_scraper.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Federal Grant Reporting Distiller'
+USER_AGENT = 'https://github.com/18F/FAC-Distiller'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
