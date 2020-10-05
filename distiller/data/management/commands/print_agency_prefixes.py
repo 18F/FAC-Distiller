@@ -13,7 +13,7 @@ from ...models import CFDA
 
 
 class Command(BaseCommand):
-    help = "Prints active CFDA prefixes of the form XX.X"
+    help = "Prints active CFDA prefixes of the form XX.XX"
 
     def handle(self, *args, **options):
         # Use a regex to match the parts, because the FAC has some CFDAs
@@ -24,7 +24,13 @@ class Command(BaseCommand):
         cfdas = CFDA.objects.all().values_list('cfda', flat=True)
         for cfda in cfdas:
             match = cfda_regex.match(cfda)
-            prefix = f'{match.group(1)}.{match.group(2)[0]}'
+
+            # There are a few CFDAs that don't match the pattern, but
+            # instead are just two-digit integers. Ignore these.
+            if not match or not match.group(1) or not match.group(2):
+                continue
+
+            prefix = f'{match.group(1)}.{match.group(2)[:2]}'
             prefixes.add(prefix)
 
         for prefix in sorted(prefixes):

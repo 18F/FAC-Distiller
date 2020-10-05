@@ -146,6 +146,11 @@ Scrapy is used to download documents from the Federal Audit Clearinghouse websit
 Here are some example crawls:
 
 ```shell
+# Crawl all documents processed by FAC beftween 9/2/19 and 9/5/19
+pipenv run scrapy crawl fac -a date_processed_from=09/01/2019 -a date_processed_to=09/5/2019
+```
+
+```shell
 # Crawl all documents from prior year with CFDA `11.*`
 pipenv run scrapy crawl fac -a cfda=11
 
@@ -166,10 +171,16 @@ In production usage, metadata on these documents should be output to file, so it
 pipenv run scrapy crawl fac -a cfda=11.123 -t json -o test.json
 ```
 
-There is a script checked into the repository that will assist in refreshing a subset of CFDA prefices on a cloud.gov deployment. To run as a one-off task:
+There are two scripts checked into the repository that will assist in refreshing a subset of CFDA prefices on a cloud.gov deployment. To recrawl the entire FAC:
 
 ```
-cf run-task demo-fac-distiller -m 2G "/home/vcap/app/bin/crawl"
+cf run-task demo-fac-distiller --command "/home/vcap/app/bin/crawl" -m 2G
+```
+
+To crawl all documents since the last FAC load, using the "date processed" FAC field:
+
+```
+cf run-task demo-fac-distiller --command "/home/vcap/app/bin/crawl_update" -m 2G
 ```
 
 ## Deployment to cloud.gov
