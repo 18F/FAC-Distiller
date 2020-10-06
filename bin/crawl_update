@@ -22,22 +22,11 @@ export S3_BUCKET=`echo ${VCAP_SERVICES} | jq -r ".s3[0].credentials.bucket"`
 UTC_DATE_NOW=`TZ=UTC date +%FT%TZ`
 DIR_NAME=${1:-${UTC_DATE_NOW}}
 
-# Crawl documents for each CFDA agency prefix from $START_YEAR to the present.
-CUR_YEAR=`date +"%Y"`
-START_YEAR=2013
-#AGENCY_PREFIXES=`seq -w 1 0.1 99.9`
-AGENCY_PREFIXES=`python manage.py print_agency_prefixes`
-for AGENCY_PREFIX in ${AGENCY_PREFIXES}
-do
-    for YEAR in `seq ${START_YEAR} 1 ${CUR_YEAR}`
-    do
-        echo "Crawling CFDA prefix ${AGENCY_PREFIX} for year ${YEAR}"
-        scrapy crawl fac --loglevel INFO -a "cfda=${AGENCY_PREFIX}" -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv"
-    done
-done
+PROCESSED_DATES=(`python manage.py print_unprocessed_dates`)
+scrapy crawl fac -a "date_processed_from=${PROCESSED_DATES[0]}" -a "date_processed_to=${PROCESSED_DATES[1]}" -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/updates.csv"
 
 # Load crawled documents into the database
 echo "Loading crawled documents"
-python manage.py load_fac_documents --reload --load-dir "${DIR_NAME}" --log
+python manage.py load_fac_documents --load-dir "${DIR_NAME}" --log
 
 echo "Done loading documents!"

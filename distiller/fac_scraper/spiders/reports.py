@@ -29,6 +29,8 @@ class FACSpider(Spider):
         cfda=None,
         audit_year=None,
         open_pages=False,
+        date_processed_from=None,
+        date_processed_to=None,
         **kwargs
     ):
         super(FACSpider, self).__init__(*args, **kwargs)
@@ -36,43 +38,63 @@ class FACSpider(Spider):
         # Set to open each search results page in a local browser, for
         # debugging purposes.
         self.open_pages = open_pages
+        self.date_processed_from = datetime.strptime(date_processed_from, '%m/%d/%Y') if date_processed_from else None
+        self.date_processed_to = datetime.strptime(date_processed_to, '%m/%d/%Y') if date_processed_to else None
 
-        if not cfda:
-            raise ValueError('A CFDA number/prefix is required')
+        if not cfda and not (self.date_processed_from and self.date_processed_to):
+            raise ValueError('A CFDA number/prefix or filing date range is required')
 
-        parts = cfda.split('.')
-        if len(parts) > 2:
-            raise ValueError('CFDA numbers are of the form XX.XXX')
+        #self.audit_year = audit_year or datetime.now().year
+        self.audit_year = audit_year or "All Years"
 
-        prefix = parts[0]
-        if len(prefix) != 2:
-            raise ValueError(f'CFDA "{cfda}" prefix "{prefix}" should be two digits')
+        self.cfda_options = None
+        if cfda:
+            parts = cfda.split('.')
+            if len(parts) < 2:
+                raise ValueError('CFDA numbers are of the form XX.XXX')
 
-        ext = parts[1] if len(parts) > 1 else None
-        if ext and len(ext) > 3:
-            raise ValueError('CFDA "{cfda}" suffix "{ext}" should be no more than three digits')
+            prefix = parts[0]
+            if len(prefix) < 2:
+                raise ValueError(f'CFDA "{cfda}" prefix "{prefix}" should be two digits')
 
-        wild = not (ext and len(ext) == 3)
+            ext = parts[1] if len(parts) > 1 else None
+            if ext and len(ext) > 3:
+                raise ValueError('CFDA "{cfda}" suffix "{ext}" should be no more than three digits')
 
-        self.audit_year = audit_year or datetime.now().year
+            wild = not (ext and len(ext) == 3)
 
-        self.cfda_options = [{
-            # Treat all queries as wildcards, with
-            "Prefix": prefix,
-            "Ext": ext,
-            "Wild": wild
+            self.cfda_options = [{
+                # Treat all queries as wildcards, with
+                "Prefix": prefix,
+                "Ext": ext,
+                "Wild": wild
 
-            # For reference, these attributes are also present on some
-            # requests. (They may only be for the front-end's usage)
-            # 'IsFullCFDAQuery': False,
-            # "IsPrefixOnlyQuery": Flas,
-            # 'IsExtensionOnlyQuery': False,
-        }]
+                # For reference, these attributes are also present on some
+                # requests. (They may only be for the front-end's usage)
+                # 'IsFullCFDAQuery': False,
+                # "IsPrefixOnlyQuery": Flas,
+                # 'IsExtensionOnlyQuery': False,
+            }]
 
     def parse(self, response):
+        ERROR_TEXT = 'The requested URL was rejected. Please consult with your administrator.'
+        if ERROR_TEXT in response.text:
+            raise CloseSpider('Server error: ' + response.text)
+
         year_input_name = response.css(
             f'#MainContent_UcSearchFilters_FYear_CheckableItems input[value="{self.audit_year}"]'
         ).xpath('@name').extract()[0]
+
+        filter_options = {}
+        if self.cfda_options:
+            filter_options["ctl00$MainContent$UcSearchFilters$CDFASelectionControl$txtCfdaData"] = json.dumps(
+                self.cfda_options
+            )
+
+        if self.date_processed_from and self.date_processed_to:
+            filter_options["ctl00$MainContent$UcSearchFilters$DateProcessedControl$FromDate"] = self.date_processed_from.strftime('%m/%d/%Y')
+            filter_options["ctl00$MainContent$UcSearchFilters$DateProcessedControl$ToDate"] = self.date_processed_to.strftime('%m/%d/%Y')
+
         return FormRequest.from_response(
             response,
             formdata={
@@ -89,10 +111,7 @@ class FACSpider(Spider):
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$FromDate': '09/01/2019',
                 #'ctl00$MainContent$UcSearchFilters$DateProcessedControl$ToDate': '09/05/2019',
 
-                # CFDA numbers:
-                "ctl00$MainContent$UcSearchFilters$CDFASelectionControl$txtCfdaData": json.dumps(
-                    self.cfda_options
-                )
+                **filter_options,
             },
             callback=self.parse_uniform_guidance_acknowledgement
         )
@@ -137,12 +156,15 @@ class FACSpider(Spider):
         # }
         for row in rows:
             row_data_common = {}
+            expected_fields = FacSearchResultDocument.fields.keys()
 
             # Extract values from input elements
             for elem in row.css('input'):
                 if 'value' not in elem.attrib:
                     continue
                 name = elem.attrib['name'].split('$')[-1]
+                if name not in expected_fields:
+                    continue
                 value = elem.attrib['value']
                 if value in ('True', 'False'):
                     value = value == 'True'
@@ -153,6 +175,8 @@ class FACSpider(Spider):
                 if 'id' not in elem.attrib:
                     continue
                 name = elem.attrib['id'].split('_')[-2]
+                if name not in expected_fields:
+                    continue
                 value = elem.css('::text').extract_first()
                 row_data_common[name] = value
 
