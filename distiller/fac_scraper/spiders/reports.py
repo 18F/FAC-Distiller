@@ -50,11 +50,11 @@ class FACSpider(Spider):
         self.cfda_options = None
         if cfda:
             parts = cfda.split('.')
-            if len(parts) > 2:
+            if len(parts) < 2:
                 raise ValueError('CFDA numbers are of the form XX.XXX')
 
             prefix = parts[0]
-            if len(prefix) != 2:
+            if len(prefix) < 2:
                 raise ValueError(f'CFDA "{cfda}" prefix "{prefix}" should be two digits')
 
             ext = parts[1] if len(parts) > 1 else None
@@ -77,6 +77,10 @@ class FACSpider(Spider):
             }]
 
     def parse(self, response):
+        ERROR_TEXT = 'The requested URL was rejected. Please consult with your administrator.'
+        if ERROR_TEXT in response.text:
+            raise CloseSpider('Server error: ' + response.text)
+
         year_input_name = response.css(
             f'#MainContent_UcSearchFilters_FYear_CheckableItems input[value="{self.audit_year}"]'
         ).xpath('@name').extract()[0]
@@ -152,12 +156,15 @@ class FACSpider(Spider):
         # }
         for row in rows:
             row_data_common = {}
+            expected_fields = FacSearchResultDocument.fields.keys()
 
             # Extract values from input elements
             for elem in row.css('input'):
                 if 'value' not in elem.attrib:
                     continue
                 name = elem.attrib['name'].split('$')[-1]
+                if name not in expected_fields:
+                    continue
                 value = elem.attrib['value']
                 if value in ('True', 'False'):
                     value = value == 'True'
@@ -168,6 +175,8 @@ class FACSpider(Spider):
                 if 'id' not in elem.attrib:
                     continue
                 name = elem.attrib['id'].split('_')[-2]
+                if name not in expected_fields:
+                    continue
                 value = elem.css('::text').extract_first()
                 row_data_common[name] = value
 

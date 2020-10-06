@@ -32,7 +32,7 @@ do
     for YEAR in `seq ${START_YEAR} 1 ${CUR_YEAR}`
     do
         echo "Crawling CFDA prefix ${AGENCY_PREFIX} for year ${YEAR}"
-        scrapy crawl fac --loglevel INFO -a cfda=${AGENCY_PREFIX} -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv"
+        scrapy crawl fac --loglevel INFO -a "cfda=${AGENCY_PREFIX}" -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv"
     done
 done
 
