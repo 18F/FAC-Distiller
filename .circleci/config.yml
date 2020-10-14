@@ -61,7 +61,7 @@ jobs:
             cf api https://api.fr.cloud.gov
             cf auth "$CF_USERNAME" "$CF_PASSWORD"
             cf target -o "$CF_ORG" -s "$CF_SPACE"
-            cf run-task demo-fac-distiller --command "python manage.py download_table --all --log && python manage.py load_table --all --log && /home/vcap/app/bin/crawl_update" -m 2G
+            cf run-task demo-fac-distiller -m 2G "python manage.py download_table --all --log && python manage.py load_table --all --log && /home/vcap/app/bin/crawl_update"
       - persist_to_workspace:
           root: .
           paths:

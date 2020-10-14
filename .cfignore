@@ -3,6 +3,7 @@ node_modules
 *.bak
 *.ipynb
 
+.mypy_cache/
 .pytest_cache/
 db/
 files/
