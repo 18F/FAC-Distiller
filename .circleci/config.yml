@@ -76,8 +76,8 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          # this should be in the middle of the night for most everybody in the US
-          cron: "45 2 * * *"
+          # Crawl at 2:00 UTC / 10:00 PM EST
+          cron: "0 2 * * *"
           filters:
             branches:
               only:
