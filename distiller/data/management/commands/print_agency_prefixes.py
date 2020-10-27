@@ -39,5 +39,4 @@ class Command(BaseCommand):
             prefixes.add(prefix)
 
         for prefix in sorted(prefixes):
-            if not prefix.startswith('0'):
-                print(prefix)
+            print(prefix)
