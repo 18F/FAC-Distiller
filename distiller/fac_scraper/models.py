@@ -19,7 +19,6 @@ class FacDocument(models.Model):
         ]
 
     version = models.IntegerField()
-    report_id = models.CharField(max_length=8)
     audit_year = models.DecimalField(
         max_digits=4,
         decimal_places=0,
@@ -29,13 +28,6 @@ class FacDocument(models.Model):
         max_length=6,
         help_text='Audit Year and DBKEY (database key) combined make up the primary key.'
     )
-    ein = models.CharField(
-        max_length=9,
-        help_text='Employer Identification Number'
-    )
-    fy_end_date = models.DateField()
-    fac_accepted_date = models.DateField()
-    date_received = models.DateField()
     file_type = models.CharField(
         max_length=8,
         choices=(
@@ -44,6 +36,20 @@ class FacDocument(models.Model):
         )
     )
     file_name = models.CharField(max_length=32)  # <dbkey><audit-year><version>.<pdf | xlsx>
+
+    #
+    # These fields are available in the Scrapy-crawled results, but not
+    # available if we refresh this table via an S3 ListBucket operation.
+    # To support ListBucket refreshes, omit these fields.
+    #
+    # report_id = models.CharField(max_length=8)
+    # ein = models.CharField(
+    #     max_length=9,
+    #     help_text='Employer Identification Number'
+    # )
+    # fy_end_date = models.DateField()
+    # fac_accepted_date = models.DateField()
+    # date_received = models.DateField()
 
     # Map to General/Audit
     audit = CompositeForeignKey(

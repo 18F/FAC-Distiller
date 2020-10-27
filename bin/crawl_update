@@ -27,6 +27,6 @@ scrapy crawl fac -a "date_processed_from=${PROCESSED_DATES[0]}" -a "date_process
 
 # Load crawled documents into the database
 echo "Loading crawled documents"
-python manage.py load_fac_documents --load-dir "${DIR_NAME}" --log
+python manage.py load_fac_documents_from_s3 --log --reload
 
 echo "Done loading documents!"

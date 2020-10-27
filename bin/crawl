@@ -32,12 +32,12 @@ do
     for YEAR in `seq ${START_YEAR} 1 ${CUR_YEAR}`
     do
         echo "Crawling CFDA prefix ${AGENCY_PREFIX} for year ${YEAR}"
-        scrapy crawl fac --loglevel INFO -a "cfda=${AGENCY_PREFIX}" -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv"
+        scrapy crawl fac --loglevel INFO -a "cfda=${AGENCY_PREFIX}" -a audit_year=${YEAR} -t csv -o "s3://${S3_BUCKET}/fac-crawls/${DIR_NAME}/${AGENCY_PREFIX}-${YEAR}.csv" || true
     done
 done
 
 # Load crawled documents into the database
 echo "Loading crawled documents"
-python manage.py load_fac_documents --reload --load-dir "${DIR_NAME}" --log
+python manage.py load_fac_documents_from_s3 --reload --log
 
 echo "Done loading documents!"
